@@ -62,6 +62,65 @@ vi gmaps-key.local.js        # KEY 값만 교체
 
 `gmaps-key.local.js` 는 `.gitignore` + `.dockerignore` 양쪽에 걸려 있어 깃헙에도, 이미지에도 들어가지 않습니다.
 
+### Cloudflare 터널로 서브도메인 붙이기 (권장)
+
+포트를 하나도 열지 않고 `https://tokyo.도메인` 으로 띄웁니다. HTTPS가 자동으로 붙어서 **모바일 크롬의 HTTPS 자동 업그레이드 문제도 같이 해결**됩니다.
+
+**1. Cloudflare Zero Trust 대시보드에서 터널 생성**
+
+`one.dash.cloudflare.com` → **Networks → Tunnels → Create a tunnel** → **Cloudflared** 선택 → 이름 입력(예: `tokyo-trip`)
+
+설치 방법 화면에 나오는 **토큰**(`eyJhIjoi...` 로 시작하는 긴 문자열)만 복사하세요. 거기 적힌 설치 명령은 실행하지 않아도 됩니다 — 아래에서 컨테이너로 띄웁니다.
+
+**2. 서버에 토큰 넣기**
+
+```bash
+cd /var/www/tokyo-trip
+git pull
+cp .env.example .env
+vi .env                       # TUNNEL_TOKEN= 뒤에 토큰 붙여넣기
+```
+
+**3. 터널 실행**
+
+```bash
+sudo docker compose --profile tunnel up -d
+sudo docker compose logs -f cloudflared     # "Registered tunnel connection" 나오면 성공
+```
+
+**4. 대시보드에서 공개 호스트명 연결**
+
+터널 설정 → **Public Hostname → Add a public hostname**
+
+| 항목 | 값 |
+|---|---|
+| Subdomain | `tokyo` |
+| Domain | `내도메인` |
+| Type | `HTTP` |
+| URL | `tokyo-trip:80` |
+
+`tokyo-trip` 은 같은 도커 네트워크에 있는 컨테이너 이름이라 그대로 쓰면 됩니다. DNS 레코드는 Cloudflare가 자동으로 만듭니다.
+
+→ `https://tokyo.내도메인`
+
+**5. 포트 닫기 (선택)**
+
+터널이 잘 뜨면 `docker-compose.yml` 의 `ports:` 두 줄을 지우고 `docker compose up -d`. 그러면 서버에 열린 포트가 0이 됩니다.
+
+**6. Maps 키 리퍼러 교체**
+
+```
+https://tokyo.내도메인
+```
+와일드카드(`/*`)나 끝의 `/` 없이 **출처만** 넣으세요. 호스트만 적으면 하위 경로가 자동으로 허용됩니다.
+
+> ⚠️ `.env` 의 터널 토큰은 자격증명입니다. `.gitignore` 에 걸어뒀으니 절대 커밋하지 마세요.
+
+**터널 끄기**
+```bash
+sudo docker compose --profile tunnel down
+```
+
 ### 리버스 프록시 뒤에 둘 경우
 
 80번 컨테이너가 traefik / nginx-proxy 같은 리버스 프록시라면, `docker-compose.yml` 의 포트를 `"127.0.0.1:8080:80"` 으로 바꿔 외부 노출을 막고 프록시에서 라우팅하세요. 그러면 방화벽도 열 필요 없고 HTTPS도 프록시가 처리합니다.

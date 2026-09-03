@@ -4,14 +4,19 @@ services:
     image: tokyo-trip:latest
     container_name: tokyo-trip
     restart: unless-stopped
+    networks: [tokyo-net]
+    expose:
+      - "80"
+
+    # ── 포트 직접 노출 ────────────────────────────────────────────────────
+    # Cloudflare 터널을 붙인 뒤에는 이 두 줄을 지워도 됩니다.
+    # (터널만 쓰면 서버에 포트를 하나도 열 필요가 없습니다)
     ports:
-      # 호스트 80번은 이미 다른 컨테이너가 쓰고 있으므로 8080 사용.
-      # 리버스 프록시 뒤에 둘 거면 "127.0.0.1:8080:80" 으로 바꿔 외부 노출을 막으세요.
       - "8080:80"
 
-    # ── 지도 키를 서버에 두고 싶을 때만 아래 주석 해제 ──────────────────
+    # ── 지도 키를 서버에 두고 싶을 때만 주석 해제 ────────────────────────
     # 키는 이미지에 굽지 않습니다(.dockerignore). 서버에서 직접 만드세요:
-    #   cp gmaps-key.local.js.example gmaps-key.local.js && vi gmaps-key.local.js
+    #   cp gmaps-key.local.js.example gmaps-key.local.js
     # CentOS 는 SELinux 때문에 :ro,Z 가 반드시 필요합니다.
     #
     # volumes:
@@ -23,3 +28,18 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+
+  # ── Cloudflare 터널 ───────────────────────────────────────────────────
+  # 기본으로는 안 뜹니다. 켜려면:  docker compose --profile tunnel up -d
+  # .env 에 TUNNEL_TOKEN 을 넣어야 합니다 (.env.example 참고)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: tokyo-trip-tunnel
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    networks: [tokyo-net]
+    depends_on: [tokyo-trip]
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+
+networks:
+  tokyo-net:

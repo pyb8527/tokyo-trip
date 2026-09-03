@@ -1,6 +1,9 @@
 # Google Maps API 키 — 절대 커밋 금지
 gmaps-key.local.js
 
+# Cloudflare 터널 토큰 — 절대 커밋 금지
+.env
+
 # OMC 작업 상태
 .omc/
 
