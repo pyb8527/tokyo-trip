@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>가계부 · 도쿄 3박 4일</title>
+<meta name="description" content="도쿄 여행 예산과 실제 지출 기록">
+<meta name="theme-color" content="#f2f5fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="가계부">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+:root{
+  --bg:#f2f5fa; --surface:#ffffff; --surface-2:#f7f9fc; --surface-3:#eaeff7;
+  --line:#e2e8f2; --line-soft:#edf1f7;
+  --text:#111827; --text-2:#5a6478; --text-3:#96a0b3;
+  --accent:#ff6b5b;
+  /* 차트 단일 계열 — dataviz 검증 통과(밝기밴드·채도·대비 PASS) */
+  --bar:#e14b3d;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --shadow-sm:0 1px 2px rgba(23,43,77,.05), 0 2px 6px rgba(23,43,77,.05);
+  --shadow-md:0 4px 14px rgba(23,43,77,.08), 0 1px 3px rgba(23,43,77,.05);
+  --radius:16px; --radius-sm:11px;
+  --ease:cubic-bezier(.2,.75,.3,1);
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --surface:#151a22; --surface-2:#1b212b; --surface-3:#222935;
+  --line:#2a323e; --line-soft:#222935;
+  --text:#eef2f8; --text-2:#a5afbf; --text-3:#6f7b8c;
+  --accent:#ff8577;
+  --bar:#e85a49;                       /* 다크 표면 기준으로 따로 고른 스텝 */
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 4px 14px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",
+              "Malgun Gothic","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%;
+  padding:0 0 60px;
+}
+button,input,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+a{color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+
+/* ---------- 헤더 ---------- */
+.top{
+  position:sticky;top:0;z-index:10;padding:16px 0 14px;margin-bottom:18px;
+  background:linear-gradient(var(--bg) 80%,transparent);
+}
+.top-in{display:flex;align-items:center;gap:12px}
+.back{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:11px;
+  background:var(--surface);border:1px solid var(--line);font-size:12.5px;font-weight:680;
+  text-decoration:none;box-shadow:var(--shadow-sm);transition:.18s var(--ease);
+}
+.back:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}
+.top p{margin:2px 0 0;font-size:12px;color:var(--text-3)}
+.icon-btn{margin-left:auto;width:38px;height:38px;display:grid;place-items:center;border-radius:11px;color:var(--text-2)}
+.icon-btn:hover{background:var(--surface-3);color:var(--text)}
+
+/* ---------- 카드 ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;margin-bottom:14px;box-shadow:var(--shadow-sm);
+}
+.card > h2{
+  margin:0 0 14px;font-size:13px;font-weight:800;letter-spacing:.2px;color:var(--text-2);
+  display:flex;align-items:center;gap:8px;
+}
+.card > h2 small{margin-left:auto;font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:0}
+
+/* ---------- 히어로 숫자 + 예산 게이지 ---------- */
+.hero{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.hero-main > b{
+  display:block;font-size:34px;font-weight:800;letter-spacing:-1.2px;line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.hero-main span{display:block;margin-top:4px;font-size:12px;color:var(--text-3)}
+.hero-main span b{font-size:12px;font-weight:750;color:var(--text-2);font-variant-numeric:tabular-nums}
+.hero-krw{
+  margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;
+}
+.hero-krw b{display:block;font-size:17px;font-weight:750;letter-spacing:-.4px}
+.hero-krw span{font-size:11px;color:var(--text-3)}
+
+.meter{margin-top:16px}
+.meter-bar{height:9px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.meter-bar i{display:block;height:100%;border-radius:99px;transition:width .45s var(--ease),background .3s}
+.meter-legend{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:12px;color:var(--text-2)}
+.meter-legend .dot{width:9px;height:9px;border-radius:99px;flex:0 0 auto}
+.meter-legend b{font-weight:750;font-variant-numeric:tabular-nums}
+.meter-legend .rest{margin-left:auto;color:var(--text-3);font-size:11.5px}
+
+/* ---------- 가로 막대 ---------- */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;min-width:0}
+.bar-label i{width:7px;height:7px;border-radius:99px;flex:0 0 auto}
+.bar-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:16px;border-radius:5px;background:var(--surface-3);position:relative;overflow:hidden}
+.bar-track i{
+  display:block;height:100%;background:var(--bar);
+  border-radius:0 4px 4px 0;                    /* 기준선에 붙고 데이터 끝만 둥글게 */
+  transition:width .45s var(--ease);
+}
+.bar-val{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--text-2);min-width:62px;text-align:right}
+.bar-plan{font-size:10.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.bar-row.over .bar-val{color:var(--crit)}
+
+/* ---------- 입력 폼 ---------- */
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.form .full{grid-column:1 / -1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.2px}
+.field input,.field select{
+  padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surface-2);font-size:13.5px;transition:.16s;
+}
+.field input:focus,.field select:focus{outline:0;border-color:var(--accent);background:var(--surface)}
+.submit{
+  grid-column:1 / -1;padding:12px;border-radius:11px;background:var(--text);color:var(--surface);
+  font-size:13.5px;font-weight:750;transition:.18s var(--ease);
+}
+.submit:hover{opacity:.87;transform:translateY(-1px)}
+.submit:active{transform:none}
+
+/* ---------- 목록 ---------- */
+.daygroup + .daygroup{margin-top:16px}
+.daygroup h3{
+  margin:0 0 8px;font-size:12px;font-weight:800;color:var(--text-2);
+  display:flex;align-items:center;gap:7px;
+}
+.daygroup h3 i{width:8px;height:8px;border-radius:99px;flex:0 0 auto}
+.daygroup h3 b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text-3);font-weight:700}
+.item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;
+  background:var(--surface-2);border:1px solid var(--line-soft);margin-bottom:6px;
+}
+.item-cat{
+  padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:750;flex:0 0 auto;
+  background:var(--surface-3);color:var(--text-2);
+}
+.item-name{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-pay{font-size:10.5px;color:var(--text-3);flex:0 0 auto}
+.item-amt{font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.item-del{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--text-3);flex:0 0 auto}
+.item-del:hover{background:var(--crit);color:#fff}
+.empty{padding:26px 0;text-align:center;color:var(--text-3);font-size:13px}
+
+/* ---------- 하단 도구 ---------- */
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tool{
+  padding:9px 13px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);
+  font-size:12.5px;font-weight:680;transition:.16s var(--ease);
+}
+.tool:hover{border-color:var(--text-3);transform:translateY(-1px)}
+.rate{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);flex-wrap:wrap}
+.rate input{width:82px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);text-align:right;font-variant-numeric:tabular-nums}
+
+@media (max-width:520px){
+  .wrap{padding:0 13px}
+  .form{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:66px 1fr auto}
+  .hero-main b{font-size:29px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-in">
+      <a class="back" href="index.html">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>
+        일정
+      </a>
+      <div>
+        <h1>가계부</h1>
+        <p>도쿄 3박 4일 · 10.08 – 10.11</p>
+      </div>
+      <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" aria-label="라이트/다크 전환">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 총액 + 예산 게이지 -->
+  <section class="card">
+    <h2>총 지출<small id="rateNote"></small></h2>
+    <div class="hero">
+      <div class="hero-main">
+        <b id="totalJpy">¥0</b>
+        <span>계획 예산 <b id="planJpy">¥47,500</b></span>
+      </div>
+      <div class="hero-krw">
+        <b id="totalKrw">₩0</b>
+        <span>원화 환산</span>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="meter-bar"><i id="meterFill" style="width:0%"></i></div>
+      <div class="meter-legend">
+        <span class="dot" id="meterDot"></span>
+        <span id="meterIcon" aria-hidden="true">✅</span>
+        <span id="meterLabel">예산 내</span>
+        <b id="meterPct">0%</b>
+        <span class="rest" id="meterRest"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 일자별 -->
+  <section class="card">
+    <h2>일자별 지출<small>계획 대비</small></h2>
+    <div class="bars" id="dayBars"></div>
+  </section>
+
+  <!-- 분류별 -->
+  <section class="card">
+    <h2>분류별 지출</h2>
+    <div class="bars" id="catBars"></div>
+  </section>
+
+  <!-- 입력 -->
+  <section class="card">
+    <h2>지출 추가</h2>
+    <form class="form" id="addForm">
+      <div class="field">
+        <label for="fDay">날짜</label>
+        <select id="fDay"></select>
+      </div>
+      <div class="field">
+        <label for="fCat">분류</label>
+        <select id="fCat"></select>
+      </div>
+      <div class="field full">
+        <label for="fName">내용</label>
+        <input id="fName" type="text" placeholder="예: 이치란 라멘" maxlength="60" required>
+      </div>
+      <div class="field">
+        <label for="fAmt">금액 (¥)</label>
+        <input id="fAmt" type="number" inputmode="numeric" min="0" step="10" placeholder="1190" required>
+      </div>
+      <div class="field">
+        <label for="fPay">결제수단</label>
+        <select id="fPay">
+          <option value="현금">현금</option>
+          <option value="카드">카드</option>
+          <option value="IC">IC (Suica)</option>
+        </select>
+      </div>
+      <button class="submit" type="submit">추가</button>
+    </form>
+  </section>
+
+  <!-- 내역 -->
+  <section class="card">
+    <h2>내역<small id="itemCount"></small></h2>
+    <div id="list"></div>
+  </section>
+
+  <!-- 설정 -->
+  <section class="card">
+    <h2>설정</h2>
+    <div class="rate">
+      <label for="fRate">환율 100엔 =</label>
+      <input id="fRate" type="number" min="0" step="1" value="930">원
+      <span style="color:var(--text-3);font-size:11.5px">오프라인에서도 쓰도록 직접 입력합니다</span>
+    </div>
+    <div class="tools" style="margin-top:14px">
+      <button class="tool" id="btnExport">JSON 내보내기</button>
+      <button class="tool" id="btnImport">가져오기</button>
+      <button class="tool" id="btnClear" style="color:var(--crit)">전체 삭제</button>
+      <input type="file" id="fileInput" accept="application/json" hidden>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================================
+   데이터
+   ========================================================================== */
+const DAYS = [
+  { label:"Day 1", date:"10.08 (목)", color:"#ff6b5b", plan:14000 },
+  { label:"Day 2", date:"10.09 (금)", color:"#f5a524", plan:14000 },
+  { label:"Day 3", date:"10.10 (토)", color:"#8b5cf6", plan:16000 },
+  { label:"Day 4", date:"10.11 (일)", color:"#14b8a6", plan:3500  },
+];
+const CATS = ["식비", "교통", "쇼핑", "입장·체험", "숙박", "기타"];
+
+const STORE = "tokyoTrip.expenses";
+const RATE_STORE = "tokyoTrip.rate";
+const THEME_STORE = "tokyoTrip.theme";     /* 일정 페이지와 같은 키를 써서 테마가 이어진다 */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const yen = n => "¥" + Math.round(n).toLocaleString("ko-KR");
+const won = n => "₩" + Math.round(n).toLocaleString("ko-KR");
+
+let items = [];
+try { items = JSON.parse(localStorage.getItem(STORE) || "[]"); } catch {}
+let rate = 930;
+try { rate = Number(localStorage.getItem(RATE_STORE)) || 930; } catch {}
+
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(items)); } catch {} };
+const PLAN_TOTAL = DAYS.reduce((a, d) => a + d.plan, 0);
+
+/* ============================================================================
+   렌더
+   ========================================================================== */
+function renderTotals() {
+  const total = items.reduce((a, i) => a + i.amt, 0);
+  const pct = PLAN_TOTAL ? total / PLAN_TOTAL * 100 : 0;
+
+  $("#totalJpy").textContent = yen(total);
+  $("#planJpy").textContent  = yen(PLAN_TOTAL);
+  $("#totalKrw").textContent = won(total * rate / 100);
+  $("#rateNote").textContent = `100엔 = ${rate.toLocaleString("ko-KR")}원`;
+
+  /* 상태색은 아이콘 + 라벨과 함께만 쓴다 — 색만으로 의미를 나르지 않는다 */
+  const st = pct > 100 ? { c:"var(--crit)", i:"⚠️", t:"예산 초과" }
+           : pct >= 80 ? { c:"var(--warn)", i:"⏳", t:"예산 임박" }
+           :             { c:"var(--good)", i:"✅", t:"예산 내"   };
+  $("#meterFill").style.width = Math.min(100, pct) + "%";
+  $("#meterFill").style.background = st.c;
+  $("#meterDot").style.background = st.c;
+  $("#meterIcon").textContent = st.i;
+  $("#meterLabel").textContent = st.t;
+  $("#meterPct").textContent = Math.round(pct) + "%";
+  const rest = PLAN_TOTAL - total;
+  $("#meterRest").textContent = rest >= 0 ? `${yen(rest)} 남음` : `${yen(-rest)} 초과`;
+}
+
+/* 단일 계열 가로 막대. 값이 적으므로 전 항목 직접 라벨. */
+function renderBars(el, rows, showPlan) {
+  const max = Math.max(1, ...rows.map(r => Math.max(r.value, showPlan ? r.plan : 0)));
+  el.innerHTML = rows.map(r => {
+    const over = showPlan && r.plan && r.value > r.plan;
+    return `<div class="bar-row${over ? " over" : ""}">
+      <span class="bar-label">${r.color ? `<i style="background:${r.color}"></i>` : ""}<span>${esc(r.label)}</span></span>
+      <span class="bar-track" title="${esc(r.label)} — ${yen(r.value)}${showPlan && r.plan ? ` (계획 ${yen(r.plan)})` : ""}">
+        <i style="width:${r.value / max * 100}%"></i>
+      </span>
+      <span class="bar-val">${yen(r.value)}${showPlan && r.plan ? `<br><span class="bar-plan">/ ${yen(r.plan)}</span>` : ""}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderCharts() {
+  renderBars($("#dayBars"), DAYS.map((d, i) => ({
+    label: d.label, color: d.color, plan: d.plan,
+    value: items.filter(x => x.day === i).reduce((a, x) => a + x.amt, 0)
+  })), true);
+
+  const catRows = CATS.map(c => ({
+    label: c,
+    value: items.filter(x => x.cat === c).reduce((a, x) => a + x.amt, 0)
+  })).filter(r => r.value > 0).sort((a, b) => b.value - a.value);
+
+  $("#catBars").innerHTML = "";
+  if (!catRows.length) $("#catBars").innerHTML = `<div class="empty">아직 기록이 없습니다</div>`;
+  else renderBars($("#catBars"), catRows, false);
+}
+
+function renderList() {
+  const el = $("#list");
+  $("#itemCount").textContent = items.length ? `${items.length}건` : "";
+  if (!items.length) { el.innerHTML = `<div class="empty">지출을 추가하면 여기 쌓입니다</div>`; return; }
+
+  el.innerHTML = DAYS.map((d, di) => {
+    const rows = items.map((x, idx) => ({ ...x, idx })).filter(x => x.day === di);
+    if (!rows.length) return "";
+    const sum = rows.reduce((a, x) => a + x.amt, 0);
+    return `<div class="daygroup">
+      <h3><i style="background:${d.color}"></i>${d.label} · ${d.date}<b>${yen(sum)}</b></h3>
+      ${rows.map(x => `<div class="item">
+        <span class="item-cat">${esc(x.cat)}</span>
+        <span class="item-name">${esc(x.name)}</span>
+        <span class="item-pay">${esc(x.pay)}</span>
+        <span class="item-amt">${yen(x.amt)}</span>
+        <button class="item-del" data-idx="${x.idx}" aria-label="${esc(x.name)} 삭제" title="삭제">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+
+  el.querySelectorAll(".item-del").forEach(b => b.onclick = () => {
+    items.splice(Number(b.dataset.idx), 1);
+    save(); renderAll();
+  });
+}
+
+const renderAll = () => { renderTotals(); renderCharts(); renderList(); };
+
+/* ============================================================================
+   입력 · 도구 · 테마
+   ========================================================================== */
+DAYS.forEach((d, i) => $("#fDay").add(new Option(`${d.label} · ${d.date}`, i)));
+CATS.forEach(c => $("#fCat").add(new Option(c, c)));
+
+/* 오늘이 여행 기간이면 그 날짜를 기본 선택 */
+(() => {
+  const iso = ["2026-10-08","2026-10-09","2026-10-10","2026-10-11"];
+  const n = new Date();
+  const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+  const i = iso.indexOf(today);
+  if (i >= 0) $("#fDay").value = String(i);
+})();
+
+$("#addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const amt = Number($("#fAmt").value);
+  const name = $("#fName").value.trim();
+  if (!name || !(amt >= 0)) return;
+  items.push({ day: Number($("#fDay").value), cat: $("#fCat").value, name, amt, pay: $("#fPay").value });
+  save(); renderAll();
+  $("#fName").value = ""; $("#fAmt").value = ""; $("#fName").focus();
+});
+
+$("#fRate").value = rate;
+$("#fRate").addEventListener("input", e => {
+  rate = Number(e.target.value) || 0;
+  try { localStorage.setItem(RATE_STORE, String(rate)); } catch {}
+  renderTotals();
+});
+
+$("#btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify({ rate, items }, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "tokyo-expenses.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$("#btnImport").onclick = () => $("#fileInput").click();
+$("#fileInput").addEventListener("change", async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (Array.isArray(data.items)) { items = data.items; save(); }
+    if (data.rate) { rate = Number(data.rate); $("#fRate").value = rate; localStorage.setItem(RATE_STORE, String(rate)); }
+    renderAll();
+  } catch { alert("읽을 수 없는 파일입니다."); }
+  e.target.value = "";
+});
+$("#btnClear").onclick = () => {
+  if (!items.length) return;
+  if (!confirm(`기록 ${items.length}건을 모두 지웁니다. 되돌릴 수 없습니다.`)) return;
+  items = []; save(); renderAll();
+};
+
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem(THEME_STORE, t); } catch {}
+}
+let savedTheme = null;
+try { savedTheme = localStorage.getItem(THEME_STORE); } catch {}
+setTheme(savedTheme === "dark" ? "dark" : "light");
+$("#themeBtn").onclick = () =>
+  setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+
+renderAll();
+
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

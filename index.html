@@ -3,6 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="도쿄 3박 4일 (2026.10.08–10.11) 일정표 — 이동수단·소요시간·금액 포함, 지도 연동">
+<meta name="theme-color" content="#f2f5fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="도쿄 3박 4일">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -148,6 +158,7 @@ a{color:inherit}
 .chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--surface)}
 .chip[aria-pressed="true"] .dot{background:#42d49a;box-shadow:0 0 0 3px rgba(66,212,154,.28)}
 .chip-action{margin-left:auto}
+a.chip{text-decoration:none}
 .chip-action:hover{background:var(--surface-3);color:var(--text)}
 
 /* ---------- Itinerary list ---------- */
@@ -365,6 +376,98 @@ body.gate-open .map-hud,body.gate-open .legend{display:none}
 /* ============================================================
    Panel collapse — 지도 넓게 보기
    ============================================================ */
+/* ============================================================
+   Bottom sheet · 지금 · 방문체크 · 내 위치
+   ============================================================ */
+.sheet{
+  position:absolute;left:16px;bottom:16px;z-index:6;width:min(340px,calc(100% - 32px));
+  padding:14px 15px 13px;border-radius:16px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--surface) 96%,transparent);backdrop-filter:blur(14px);
+  box-shadow:var(--shadow-lg);animation:sheetIn .26s var(--ease) both;
+}
+.sheet[hidden]{display:none}
+.sheet-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.sheet-num{
+  width:23px;height:23px;flex:0 0 auto;border-radius:8px;background:var(--s-c);color:#fff;
+  display:grid;place-items:center;font-size:11.5px;font-weight:800;
+}
+.sheet-day{font-size:10.5px;font-weight:800;letter-spacing:.4px;color:var(--s-c)}
+.sheet-close{
+  margin-left:auto;width:26px;height:26px;flex:0 0 auto;border-radius:8px;display:grid;place-items:center;
+  color:var(--text-3);background:var(--surface-3);transition:.16s var(--ease);
+}
+.sheet-close:hover{background:var(--line);color:var(--text)}
+.sheet-close:active{transform:scale(.9)}
+.sheet h4{margin:0;font-size:15px;font-weight:780;letter-spacing:-.3px;line-height:1.3}
+.sheet .sheet-en{margin:2px 0 0;font-size:10.5px;color:var(--text-3)}
+.sheet-meta{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;font-size:11.5px}
+.sheet p{margin:9px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.5}
+.sheet p b{color:var(--s-c);font-weight:750}
+.sheet-acts{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+@keyframes sheetIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+@media (max-width:860px){
+  .sheet{left:10px;right:10px;bottom:10px;width:auto;max-height:52vh;overflow-y:auto}
+}
+
+/* ---------- 지금 ---------- */
+.card.is-now{border-color:var(--d-c);box-shadow:0 0 0 2px color-mix(in srgb,var(--d-c) 26%,transparent)}
+.now-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;
+  font-size:10px;font-weight:800;letter-spacing:.3px;background:var(--d-c);color:#fff;
+}
+.now-pill::before{
+  content:"";width:5px;height:5px;border-radius:99px;background:#fff;
+  animation:nowPulse 1.6s ease-in-out infinite;
+}
+@keyframes nowPulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ---------- 방문 체크 ---------- */
+.card-wrap{position:relative}
+.card.is-visited{opacity:.5}
+.card.is-visited:hover{opacity:.85}
+.visit{
+  position:absolute;right:9px;top:9px;z-index:2;width:26px;height:26px;border-radius:99px;
+  display:grid;place-items:center;color:var(--text-3);
+  background:var(--surface-2);border:1px solid var(--line);transition:.16s var(--ease);
+}
+.visit:hover{border-color:var(--d-c);color:var(--d-c);transform:scale(1.08)}
+.visit[aria-pressed="true"]{background:#22c55e;border-color:#22c55e;color:#fff}
+.visit svg{opacity:.55;transition:opacity .16s}
+.visit[aria-pressed="true"] svg{opacity:1}
+
+/* ---------- 진행률 ---------- */
+.progress{margin-top:11px}
+.progress-bar{height:5px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.progress-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#42d49a,#22c55e);transition:width .4s var(--ease)}
+.progress-txt{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--text-3)}
+.progress-txt b{font-weight:750;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+/* ---------- 내 위치 ---------- */
+.hud-btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
+
+/* ---------- 모바일 지도 높이 조절 손잡이 ---------- */
+.grabber{display:none}
+@media (max-width:860px){
+  .grabber{
+    display:block;position:sticky;z-index:4;height:16px;flex:0 0 auto;
+    background:var(--surface);border-bottom:1px solid var(--line);cursor:ns-resize;touch-action:none;
+  }
+  .grabber::after{
+    content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:99px;background:var(--line);
+  }
+  .grabber:active::after{background:var(--text-3)}
+  body.panel-collapsed .grabber{display:none}
+}
+
+/* ---------- 작은 화면에서도 범례 유지 ---------- */
+@media (max-width:420px){
+  .legend{display:flex;right:8px;bottom:8px;padding:7px 9px;gap:4px}
+  .legend button{font-size:9.5px}
+  .legend i{width:7px;height:7px}
+}
+
 /* grid-template-columns / height 에 트랜지션을 걸면 값 자체가 적용되지 않는
    문제가 있어(브라우저가 보간을 포기하고 이전 값을 유지) 레이아웃은 즉시 전환하고
    패널만 페이드시킵니다. */
@@ -421,15 +524,23 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
         <div class="stat"><b id="statDist">—</b><span>총 동선</span></div>
       </div>
 
+      <div class="progress">
+        <div class="progress-bar"><i id="progFill" style="width:0%"></i></div>
+        <div class="progress-txt"><span id="progLabel">방문 전</span><b id="progCount">0 / 0</b></div>
+      </div>
+
       <div class="tabs" id="tabs" role="tablist"></div>
     </div>
 
     <div class="toggles">
       <button class="chip" id="tgCircle" aria-pressed="true"><span class="dot"></span>도보 반경</button>
       <button class="chip" id="tgRoute" aria-pressed="true"><span class="dot"></span>동선</button>
-      <button class="chip chip-action" id="tgFit">전체 일정 보기</button>
+      <button class="chip" id="tgFit">전체</button>
+      <button class="chip" id="tgNow" title="현재 시각 일정으로 이동">지금</button>
+      <a class="chip chip-action" id="tgExpense" href="expenses.html">가계부</a>
     </div>
 
+    <div class="grabber" id="grabber" title="드래그해서 지도 높이 조절"></div>
     <div class="list" id="list"></div>
   </aside>
 
@@ -451,7 +562,16 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
         </svg>
         <span id="panelBtnLabel">목록 접기</span>
       </button>
+
+      <button class="hud-btn" id="geoBtn" aria-pressed="false" title="내 위치 표시">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/>
+        </svg>
+        내 위치
+      </button>
     </div>
+
+    <div class="sheet" id="sheet" hidden></div>
 
     <div class="legend" id="legend"></div>
 
@@ -501,12 +621,12 @@ const TRIP_DATA = {
   title: "도쿄 3박 4일",
   days: [
     {
-      label: "Day 1", date: "10.08 (목)", theme: "도착 · 도쿄역 · 긴자",
+      label: "Day 1", iso: "2026-10-08", date: "10.08 (목)", theme: "도착 · 도쿄역 · 긴자",
       color: "#ff6b5b", budget: "1인 약 ¥14,000",
       flight: { from:"인천 ICN", to:"나리타 NRT", dep:"13:20", arr:"15:50" },
       places: [
         { name:"나리타 공항", en:"Narita Airport", lat:35.7653, lng:140.3856,
-          cat:"도착", time:"15:50", cost:"스카이라이너 ¥2,580", radius:900, fit:false,
+          url:"https://www.narita-airport.jp/kr/", cat:"도착", time:"15:50", cost:"스카이라이너 ¥2,580", radius:900, fit:false,
           note:"입국심사·수하물에 40~60분. 도착층에서 <b>Suica 충전</b>부터 하세요.",
           move:{mode:"train", min:60, via:"스카이라이너 → 닛포리 → JR 칸다", cost:"약 ¥2,750"} },
 
@@ -516,7 +636,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:12, via:"오테마치 지하도 → 도쿄역", cost:"무료"} },
 
         { name:"치이카와 랜드 도쿄역", en:"Chiikawa Land TOKYO", lat:35.6812, lng:139.7690,
-          cat:"굿즈", time:"18:00", cost:"입장 무료 · 굿즈 ¥600~",
+          url:"https://www.tokyoeki-1bangai.co.jp/", cat:"굿즈", time:"18:00", cost:"입장 무료 · 굿즈 ¥600~",
           note:"도쿄역 B1 캐릭터 스트리트. <b>20:30 마감</b>, 도쿄역 한정 상품 있음.",
           move:{mode:"walk", min:4, cost:"무료"} },
 
@@ -562,7 +682,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 2", date: "10.09 (금)", theme: "우에노 · 아사쿠사 · 이케부쿠로 · 신주쿠",
+      label: "Day 2", iso: "2026-10-09", date: "10.09 (금)", theme: "우에노 · 아사쿠사 · 이케부쿠로 · 신주쿠",
       color: "#f5a524", budget: "1인 약 ¥14,000",
       places: [
         { name:"우에노역 스타벅스", en:"Starbucks Ueno", lat:35.7079, lng:139.7766,
@@ -606,7 +726,7 @@ const TRIP_DATA = {
           move:{mode:"train", min:45, via:"긴자선 + JR 야마노테선 → 이케부쿠로", cost:"IC 약 ¥380"} },
 
         { name:"치이카와 파크", en:"Chiikawa Park", lat:35.7288, lng:139.7186,
-          cat:"예약필수", time:"17:00", cost:"성인 ¥3,500",
+          url:"https://chiikawapark-tokyo.jp/", cat:"예약필수", time:"17:00", cost:"성인 ¥3,500",
           note:"선샤인시티 애넥스. <b>완전예약제 · 현금 사용 불가.</b><br>18:40엔 나와야 신주쿠 일정이 됩니다.",
           move:{mode:"train", min:20, via:"JR 야마노테선 이케부쿠로 → 신주쿠", cost:"IC 약 ¥180"} },
 
@@ -632,7 +752,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 3", date: "10.10 (토)", theme: "시부야 코어 (+ 하라주쿠 · 오모테산도)",
+      label: "Day 3", iso: "2026-10-10", date: "10.10 (토)", theme: "시부야 코어 (+ 하라주쿠 · 오모테산도)",
       color: "#8b5cf6", budget: "1인 약 ¥14,000~18,000",
       places: [
         { name:"메이지 진구", en:"Meiji Jingu", lat:35.6764, lng:139.6993,
@@ -646,7 +766,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:8, cost:"무료"} },
 
         { name:"치이카와랜드 하라주쿠", en:"Chiikawa Land Harajuku", lat:35.6676, lng:139.7065,
-          cat:"굿즈", time:"11:40", cost:"입장 무료 · 굿즈 ¥600~",
+          url:"https://www.kiddyland.co.jp/harajuku/", cat:"굿즈", time:"11:40", cost:"입장 무료 · 굿즈 ¥600~",
           note:"키디랜드 1층. <b>도쿄역점보다 넓어</b> 종류가 가장 많습니다. 11시 오픈.",
           move:{mode:"walk", min:5, cost:"무료"} },
 
@@ -676,7 +796,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:10, cost:"무료"} },
 
         { name:"시부야 스카이", en:"SHIBUYA SKY", lat:35.6580, lng:139.7016,
-          cat:"일몰", time:"16:20", cost:"¥3,700",
+          url:"https://www.shibuya-scramble-square.com/sky/", cat:"일몰", time:"16:20", cost:"¥3,700",
           note:"<b>일몰 17:05 · 예약 필수.</b> 옥상은 가방·모자 반입 금지(무료 락커).<br>우천·강풍 시 옥상 폐쇄되고 환불 안 됩니다.",
           move:{mode:"walk", min:9, cost:"무료"} },
 
@@ -697,7 +817,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 4", date: "10.11 (일)", theme: "새벽 이동 → 09:10 출국",
+      label: "Day 4", iso: "2026-10-11", date: "10.11 (일)", theme: "새벽 이동 → 09:10 출국",
       color: "#14b8a6", budget: "1인 약 ¥3,500",
       flight: { from:"나리타 NRT", to:"인천 ICN", dep:"09:10", arr:"11:45" },
       places: [
@@ -717,7 +837,7 @@ const TRIP_DATA = {
           move:{mode:"train", min:9, via:"JR 야마노테선", cost:"IC 약 ¥170"} },
 
         { name:"닛포리역", en:"Nippori", lat:35.7280, lng:139.7710,
-          cat:"환승", time:"05:55", cost:"¥2,580",
+          url:"https://www.keisei.co.jp/keisei/tetudou/skyliner/kr/", cat:"환승", time:"05:55", cost:"¥2,580",
           note:"<b>06:06 스카이라이너 → 06:45 제1터미널.</b> 06:25가 마지노선입니다.<br>온라인 사전구매하면 약 ¥2,300, 새벽 매표 줄도 안 섭니다.",
           move:{mode:"train", min:40, via:"케이세이 스카이라이너", cost:"¥2,580"} },
 
@@ -778,11 +898,21 @@ const MAP_STYLE = {
 const KEY_STORE   = "tokyoTrip.gmapsKey";
 const THEME_STORE = "tokyoTrip.theme";
 const PANEL_STORE = "tokyoTrip.panelCollapsed";
+const VISIT_STORE = "tokyoTrip.visited";
+const MAPH_STORE  = "tokyoTrip.mapHeight";
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- 방문 기록 ---------- */
+let visited = new Set();
+try { visited = new Set(JSON.parse(localStorage.getItem(VISIT_STORE) || "[]")); } catch {}
+const saveVisited = () => {
+  try { localStorage.setItem(VISIT_STORE, JSON.stringify([...visited])); } catch {}
+};
 
 const state = { activeDay:"all", activeId:null, circles:true, routes:true, ready:false, gen:0 };
 
-let map, infoWindow;
+let map;
+let geoWatch = null, geoMarker = null, geoCircle = null;
 const layer  = [];   // [{ id, dayIdx, idx, place, day, marker, circle }]
 const routes = [];   // Polyline per day
 
@@ -820,7 +950,15 @@ const MOVE_LABEL = { walk:"도보", train:"전철", bus:"버스", car:"차량" }
 const PLANE_ICON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a.6.6 0 0 0-.6 1l5.2 3.4-2.4 2.4-2.3-.5a.6.6 0 0 0-.5 1l2.6 2.6 2.6 2.6a.6.6 0 0 0 1-.5l-.5-2.3 2.4-2.4 3.4 5.2a.6.6 0 0 0 1-.6z"/></svg>';
 
 const searchUrl = p => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + " " + (p.en || ""))}`;
-const routeUrl  = p => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+const TRAVEL_MODE = { walk:"walking", train:"transit", bus:"transit", car:"driving" };
+/* 이전 장소를 출발지로, 그 구간의 이동수단을 그대로 넘겨 구글 지도가
+   "현재 위치 → 자동차"가 아니라 실제 환승 경로를 바로 띄우게 한다. */
+const routeUrl = (p, prev) => {
+  const q = new URLSearchParams({ api:"1", destination:`${p.lat},${p.lng}` });
+  if (prev) q.set("origin", `${prev.lat},${prev.lng}`);
+  q.set("travelmode", TRAVEL_MODE[prev?.move?.mode] || "transit");
+  return `https://www.google.com/maps/dir/?${q}`;
+};
 
 /* ---------- pin icon (SVG data URI) ---------- */
 function pinIcon(color, n, active) {
@@ -877,6 +1015,7 @@ function renderTabs() {
   TRIP_DATA.days.forEach((d, i) => {
     const t = el("button", "tab", `<i>${esc(d.label)}</i><b>${esc(d.date)}</b>`);
     t.setAttribute("role", "tab");
+    t.setAttribute("aria-controls", `daypanel-${i}`);
     t.style.setProperty("--tab-c", d.color);
     t.dataset.day = i;
     t.onclick = () => setDay(i);
@@ -911,6 +1050,9 @@ function renderList() {
   TRIP_DATA.days.forEach((day, di) => {
     const block = el("section", "day-block");
     block.dataset.day = di;
+    block.id = `daypanel-${di}`;
+    block.setAttribute("role", "tabpanel");
+    block.setAttribute("aria-label", `${day.label} ${day.date}`);
     block.style.setProperty("--d-c", day.color);
 
     const head = el("div", "day-head");
@@ -925,6 +1067,8 @@ function renderList() {
 
     day.places.forEach((p, i) => {
       const id = pid(di, i);
+      const prev = day.places[i - 1];
+      const wrap = el("div", "card-wrap");
       const card = el("button", "card");
       card.dataset.id = id;
       card.style.setProperty("--i", i);
@@ -936,18 +1080,38 @@ function renderList() {
              <span class="time">${esc(p.time || "")}</span>
              ${p.cat ? `<span class="tag">${esc(p.cat)}</span>` : ""}
              ${p.cost ? `<span class="cost${/^(무료|¥0)/.test(p.cost) ? " free" : ""}">${esc(p.cost)}</span>` : ""}
+             <span class="now-slot"></span>
            </div>
            ${p.note ? `<p class="card-note">${rich(p.note)}</p>` : ""}
            <div class="card-links">
+             <a class="mini" href="${routeUrl(p, prev)}" target="_blank" rel="noopener">길찾기</a>
              <a class="mini" href="${searchUrl(p)}" target="_blank" rel="noopener">구글 지도</a>
-             <a class="mini" href="${routeUrl(p)}" target="_blank" rel="noopener">길찾기</a>
+             ${p.url ? `<a class="mini" href="${p.url}" target="_blank" rel="noopener">예약 · 공식</a>` : ""}
            </div>
          </div>`;
       card.querySelectorAll("a").forEach(a => a.addEventListener("click", e => e.stopPropagation()));
       card.addEventListener("click", () => focusPlace(id, true));
       card.addEventListener("mouseenter", () => hoverPin(id, true));
       card.addEventListener("mouseleave", () => hoverPin(id, false));
-      block.appendChild(card);
+
+      /* 방문 체크 — 카드(button) 안에 button 을 넣을 수 없어 형제로 얹는다 */
+      const vb = el("button", "visit",
+        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>`);
+      vb.title = "방문 완료 표시";
+      vb.setAttribute("aria-label", `${p.name} 방문 완료 표시`);
+      vb.setAttribute("aria-pressed", String(visited.has(id)));
+      card.classList.toggle("is-visited", visited.has(id));
+      vb.addEventListener("click", e => {
+        e.stopPropagation();
+        visited.has(id) ? visited.delete(id) : visited.add(id);
+        saveVisited();
+        vb.setAttribute("aria-pressed", String(visited.has(id)));
+        card.classList.toggle("is-visited", visited.has(id));
+        renderProgress();
+      });
+
+      wrap.append(card, vb);
+      block.appendChild(wrap);
 
       if (p.move && i < day.places.length - 1) {
         const m = p.move;
@@ -995,8 +1159,8 @@ function initMap() {
     maxZoom: 18
   });
 
-  infoWindow = new google.maps.InfoWindow({ headerDisabled: true, maxWidth: 268 });
-  google.maps.event.addListener(infoWindow, "closeclick", () => setActive(null));
+  /* 지도 빈 곳을 누르면 하단 카드를 닫는다 */
+  map.addListener("click", () => { hideSheet(); setActive(null); });
 
   TRIP_DATA.days.forEach((day, di) => {
     day.places.forEach((p, i) => {
@@ -1124,7 +1288,7 @@ document.addEventListener("visibilitychange", () => {
 function setDay(day) {
   state.activeDay = day;
   setActive(null);
-  if (infoWindow) infoWindow.close();
+  hideSheet();
   applyVisibility(true);
   restagger();
   if (matchMedia("(max-width:860px)").matches && day !== "all") {
@@ -1132,6 +1296,7 @@ function setDay(day) {
   } else {
     $("#list").scrollTo({ top: 0, behavior: "smooth" });
   }
+  setHash(null);
 }
 
 function setActive(id) {
@@ -1164,33 +1329,176 @@ function hoverPin(id, on) {
   it.marker.setZIndex(on ? 900 : 100 + it.idx);
 }
 
+function sheetActs(p, prev) {
+  return `<a class="mini" href="${routeUrl(p, prev)}" target="_blank" rel="noopener">길찾기</a>
+          <a class="mini" href="${searchUrl(p)}" target="_blank" rel="noopener">구글 지도</a>
+          ${p.url ? `<a class="mini" href="${p.url}" target="_blank" rel="noopener">예약 · 공식</a>` : ""}`;
+}
+
+/* 핀을 누르면 지도 하단에 작은 카드로 뜬다. 닫기 버튼 · Esc · 지도 빈 곳 클릭으로 닫힌다. */
+function showSheet(it) {
+  const p = it.place, prev = it.day.places[it.idx - 1];
+  const sheet = $("#sheet");
+  sheet.style.setProperty("--s-c", it.day.color);
+  sheet.innerHTML =
+    `<div class="sheet-top">
+       <span class="sheet-num">${it.idx + 1}</span>
+       <span class="sheet-day">${esc(it.day.label)} · ${esc(p.time || "")}</span>
+       <button class="sheet-close" id="sheetClose" aria-label="닫기" title="닫기 (Esc)">
+         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+       </button>
+     </div>
+     <h4>${esc(p.name)}</h4>
+     <div class="sheet-en">${esc(p.en || "")}</div>
+     <div class="sheet-meta">
+       ${p.cat ? `<span class="tag">${esc(p.cat)}</span>` : ""}
+       ${p.cost ? `<span class="cost${/^(무료|¥0)/.test(p.cost) ? " free" : ""}">${esc(p.cost)}</span>` : ""}
+       ${prev && prev.move ? `<span class="cost">${MOVE_LABEL[prev.move.mode] || "이동"} ${prev.move.min}분</span>` : ""}
+     </div>
+     <div class="sheet-acts">${sheetActs(p, prev)}</div>`;
+  sheet.hidden = false;
+  $("#sheetClose").onclick = () => { hideSheet(); setActive(null); };
+}
+function hideSheet() {
+  const sheet = $("#sheet");
+  if (sheet) { sheet.hidden = true; sheet.innerHTML = ""; }
+}
+
 function focusPlace(id, pan, fromMarker) {
   const it = layer.find(x => x.id === id);
   setActive(id);
 
   if (it && state.ready) {
-    const p = it.place;
-    infoWindow.setContent(
-      `<div class="iw" style="--iw-c:${it.day.color}">
-         <div class="iw-top">
-           <span class="iw-num">${it.idx + 1}</span>
-           <span class="iw-day">${esc(it.day.label)} · ${esc(p.time || "")}</span>
-         </div>
-         <h4>${esc(p.name)}</h4>
-         <div class="iw-en">${esc(p.en || "")}</div>
-         ${p.note ? `<p>${rich(p.note)}</p>` : ""}
-         <a href="${searchUrl(p)}" target="_blank" rel="noopener">구글 지도에서 열기</a>
-       </div>`);
-    if (it.marker.getMap()) infoWindow.open({ map, anchor: it.marker });
+    showSheet(it);
     if (pan) {
       map.panTo(it.marker.getPosition());
       if (map.getZoom() < 14) map.setZoom(15);
     }
   }
-
   if (fromMarker) {
     document.querySelector(`.card[data-id="${id}"]`)?.scrollIntoView({ behavior:"smooth", block:"center" });
   }
+  setHash(id);
+}
+
+/* ============================================================================
+   5-b. 진행률 · 지금 · 딥링크 · 내 위치
+   ============================================================================ */
+function renderProgress() {
+  const total = TRIP_DATA.days.reduce((a, d) => a + d.places.length, 0);
+  const done  = visited.size;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+  $("#progFill").style.width = pct + "%";
+  $("#progCount").textContent = `${done} / ${total}`;
+  $("#progLabel").textContent = done === 0 ? "방문 전" : done === total ? "전 일정 완주 🎉" : `${pct}% 진행`;
+}
+
+/* 오늘이 여행 기간이면 현재 시각에 해당하는 일정을 찾는다. (한국·일본 모두 UTC+9) */
+function nowInfo() {
+  const n = new Date();
+  const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  const di = TRIP_DATA.days.findIndex(d => d.iso === today);
+  if (di < 0) {
+    const first = TRIP_DATA.days[0].iso;
+    const diff = Math.round((new Date(first + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000);
+    return { onTrip: false, dDay: diff };
+  }
+  const mins = n.getHours() * 60 + n.getMinutes();
+  const places = TRIP_DATA.days[di].places;
+  let pi = 0;
+  places.forEach((p, i) => {
+    if (!p.time) return;
+    const [hh, mm] = p.time.split(":").map(Number);
+    if (hh * 60 + mm <= mins) pi = i;
+  });
+  return { onTrip: true, dayIdx: di, placeIdx: pi, id: pid(di, pi) };
+}
+
+let nowId = null;
+function renderNow() {
+  const info = nowInfo();
+  nowId = info.onTrip ? info.id : null;
+  document.querySelectorAll(".card").forEach(c => {
+    const on = c.dataset.id === nowId;
+    c.classList.toggle("is-now", on);
+    const slot = c.querySelector(".now-slot");
+    if (slot) slot.innerHTML = on ? `<span class="now-pill">지금</span>` : "";
+  });
+  const btn = $("#tgNow");
+  if (!btn) return;
+  btn.textContent = info.onTrip ? "지금" : (info.dDay > 0 ? `D-${info.dDay}` : "여행 종료");
+  btn.disabled = !info.onTrip;
+  btn.style.opacity = info.onTrip ? "" : ".55";
+}
+function goNow() {
+  if (!nowId) return;
+  const di = Number(nowId.split("-")[0].slice(1));
+  if (state.activeDay !== "all" && state.activeDay !== di) setDay(di);
+  focusPlace(nowId, true);
+  document.querySelector(`.card[data-id="${nowId}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ---------- 딥링크 (#all, #day2, #d1-p4) ---------- */
+function setHash(id) {
+  const h = id ? `#${id}` : (state.activeDay === "all" ? "#all" : `#day${state.activeDay}`);
+  if (location.hash !== h) history.replaceState(null, "", h);
+}
+function applyHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (!h) return false;
+  let m;
+  if (h === "all") { setDay("all"); return true; }
+  if ((m = h.match(/^day(\d+)$/))) { setDay(Number(m[1])); return true; }
+  if ((m = h.match(/^d(\d+)-p(\d+)$/))) {
+    const di = Number(m[1]), pi = Number(m[2]);
+    if (TRIP_DATA.days[di] && TRIP_DATA.days[di].places[pi]) {
+      setDay(di);
+      setTimeout(() => focusPlace(h, true), 260);
+      return true;
+    }
+  }
+  return false;
+}
+
+/* ---------- 내 위치 ---------- */
+function toggleGeo() {
+  const btn = $("#geoBtn");
+  if (geoWatch !== null) {
+    navigator.geolocation.clearWatch(geoWatch);
+    geoWatch = null;
+    if (geoMarker) geoMarker.setMap(null);
+    if (geoCircle) geoCircle.setMap(null);
+    geoMarker = geoCircle = null;
+    btn.setAttribute("aria-pressed", "false");
+    return;
+  }
+  if (!navigator.geolocation) { alert("이 브라우저는 위치 기능을 지원하지 않습니다."); return; }
+  if (!state.ready) return;
+  btn.setAttribute("aria-pressed", "true");
+  let first = true;
+  geoWatch = navigator.geolocation.watchPosition(pos => {
+    const at = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (!geoMarker) {
+      geoMarker = new google.maps.Marker({
+        map, position: at, zIndex: 2000, title: "내 위치",
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 7,
+                fillColor: "#1a73e8", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 }
+      });
+      geoCircle = new google.maps.Circle({
+        map, center: at, radius: pos.coords.accuracy, clickable: false,
+        strokeColor: "#1a73e8", strokeOpacity: .3, strokeWeight: 1,
+        fillColor: "#1a73e8", fillOpacity: .1
+      });
+    } else {
+      geoMarker.setPosition(at);
+      geoCircle.setCenter(at); geoCircle.setRadius(pos.coords.accuracy);
+    }
+    if (first) { map.panTo(at); first = false; }
+  }, err => {
+    btn.setAttribute("aria-pressed", "false");
+    geoWatch = null;
+    alert("위치를 가져오지 못했습니다: " + err.message);
+  }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 });
 }
 
 /* ============================================================================
@@ -1285,6 +1593,62 @@ $("#tgRoute").onclick = e => {
   applyVisibility(false);
 };
 $("#tgFit").onclick = () => setDay("all");
+$("#tgNow").onclick = goNow;
+$("#geoBtn").onclick = toggleGeo;
+
+/* ---------- Esc 로 하단 카드 닫기 ---------- */
+addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("#sheet").hidden) { hideSheet(); setActive(null); }
+});
+
+/* ---------- 모바일: 손잡이를 끌어 지도 높이 조절 ---------- */
+(() => {
+  const grab = $("#grabber"), stage = $(".stage");
+  if (!grab) return;
+  const apply = vh => {
+    stage.style.height = vh + "vh";
+    document.querySelectorAll(".day-head").forEach(h => h.style.top = `calc(${vh}vh - 1px)`);
+  };
+  let saved = null;
+  try { saved = localStorage.getItem(MAPH_STORE); } catch {}
+  if (saved && matchMedia("(max-width:860px)").matches) apply(Number(saved));
+
+  let dragging = false, startY = 0, startVh = 46;
+  const vhNow = () => (stage.getBoundingClientRect().height / innerHeight) * 100;
+  grab.addEventListener("pointerdown", e => {
+    if (!matchMedia("(max-width:860px)").matches) return;
+    dragging = true; startY = e.clientY; startVh = vhNow();
+    grab.setPointerCapture(e.pointerId);
+  });
+  grab.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const vh = Math.min(85, Math.max(22, startVh + ((e.clientY - startY) / innerHeight) * 100));
+    apply(Math.round(vh));
+  });
+  const stop = () => {
+    if (!dragging) return;
+    dragging = false;
+    try { localStorage.setItem(MAPH_STORE, String(Math.round(vhNow()))); } catch {}
+    if (map) google.maps.event.trigger(map, "resize");
+  };
+  grab.addEventListener("pointerup", stop);
+  grab.addEventListener("pointercancel", stop);
+})();
+
+/* ---------- 진행률 · 지금 ---------- */
+renderProgress();
+renderNow();
+setInterval(renderNow, 60000);
+
+/* ---------- 딥링크 ---------- */
+if (!applyHash()) setHash(null);
+addEventListener("hashchange", applyHash);
+
+/* ---------- 서비스 워커 (오프라인) ---------- */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
 
 $("#gateForm").addEventListener("submit", e => {
   e.preventDefault();

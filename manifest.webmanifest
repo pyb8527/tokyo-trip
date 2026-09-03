@@ -1,0 +1,23 @@
+{
+  "name": "도쿄 3박 4일",
+  "short_name": "도쿄여행",
+  "description": "2026.10.08–10.11 도쿄 일정표 — 이동수단·소요시간·금액 포함, 지도 연동",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f2f5fa",
+  "theme_color": "#f2f5fa",
+  "categories": ["travel", "navigation"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "일정", "short_name": "일정", "url": "./#all", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "가계부", "short_name": "가계부", "url": "./expenses.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
