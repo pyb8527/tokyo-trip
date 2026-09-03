@@ -1,0 +1,17 @@
+/* ============================================================================
+   Google Maps API 키 템플릿
+   ----------------------------------------------------------------------------
+   이 파일을 gmaps-key.local.js 로 복사한 뒤 KEY 값만 바꾸세요.
+
+       cp gmaps-key.local.js.example gmaps-key.local.js
+
+   gmaps-key.local.js 는 .gitignore / .dockerignore 에 걸려 있어
+   깃헙에도, 도커 이미지에도 들어가지 않습니다.
+   키를 서버에 두지 않으면 페이지 접속 시 입력창이 뜨고,
+   한 번 입력하면 브라우저 localStorage 에 저장됩니다.
+   ========================================================================== */
+
+const KEY = "PASTE_YOUR_KEY_HERE";
+
+/* 아직 안 바꿨으면 인증 실패 화면 대신 정상적인 키 입력창이 뜨도록 처리 */
+window.__GMAPS_KEY = KEY.startsWith("PASTE_") ? null : KEY;

@@ -11,6 +11,61 @@ python -m http.server 8000
 
 `file://` 로 더블클릭해서 열어도 일정 사이드바는 정상 동작합니다. 다만 지도 키에 리퍼러 제한을 걸면 `file://` 에서는 통하지 않으니, 지도까지 쓰려면 위 로컬 서버로 여세요.
 
+## 도커로 배포 (CentOS 서버 기준)
+
+호스트 80번을 다른 컨테이너가 쓰고 있어도 상관없습니다. 8080으로 띄웁니다.
+
+```bash
+sudo yum install -y git            # CentOS 8+ 면 dnf
+sudo mkdir -p /var/www && cd /var/www
+sudo git clone https://github.com/pyb8527/tokyo-trip.git
+cd tokyo-trip
+
+sudo docker compose up -d --build   # 구버전이면 docker-compose up -d --build
+
+sudo firewall-cmd --permanent --add-port=8080/tcp
+sudo firewall-cmd --reload
+
+curl -I http://127.0.0.1:8080/
+```
+
+→ `http://서버IP:8080/`
+
+**일정 수정 후 재배포**
+```bash
+cd /var/www/tokyo-trip
+sudo git pull
+sudo docker compose up -d --build
+```
+
+**로그 · 상태 · 중지**
+```bash
+sudo docker compose logs -f
+sudo docker compose ps
+sudo docker compose down
+```
+
+### 지도 키를 서버에 둘 경우 (선택)
+
+기본값은 "서버에 키를 두지 않음"입니다. 접속하면 키 입력창이 뜨고 한 번 넣으면 브라우저에 저장됩니다.
+
+서버에 두고 싶으면:
+
+```bash
+cp gmaps-key.local.js.example gmaps-key.local.js
+vi gmaps-key.local.js        # KEY 값만 교체
+```
+
+그리고 `docker-compose.yml` 의 `volumes:` 두 줄 주석을 해제한 뒤 `docker compose up -d`.
+
+> ⚠️ CentOS는 SELinux 때문에 볼륨 마운트에 **`:ro,Z`** 가 반드시 필요합니다. 빼면 컨테이너가 파일을 못 읽어 403이 납니다. compose 파일에 이미 들어가 있습니다.
+
+`gmaps-key.local.js` 는 `.gitignore` + `.dockerignore` 양쪽에 걸려 있어 깃헙에도, 이미지에도 들어가지 않습니다.
+
+### 리버스 프록시 뒤에 둘 경우
+
+80번 컨테이너가 traefik / nginx-proxy 같은 리버스 프록시라면, `docker-compose.yml` 의 포트를 `"127.0.0.1:8080:80"` 으로 바꿔 외부 노출을 막고 프록시에서 라우팅하세요. 그러면 방화벽도 열 필요 없고 HTTPS도 프록시가 처리합니다.
+
 ## 내 서버에 올리기
 
 정적 파일이라 빌드·백엔드가 필요 없습니다. 웹 루트에 아래 2개만 올리면 끝입니다.

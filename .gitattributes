@@ -1,0 +1,6 @@
+# 윈도우에서 작업해도 저장소·체크아웃 모두 LF 로 통일합니다.
+# (Dockerfile / nginx conf 가 CRLF 로 리눅스에 넘어가면 빌드가 깨집니다)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

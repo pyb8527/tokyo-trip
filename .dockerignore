@@ -1,0 +1,11 @@
+# API 키는 절대 이미지에 굽지 않습니다
+gmaps-key.local.js
+
+.git
+.gitignore
+.dockerignore
+.omc
+Dockerfile
+docker-compose.yml
+README.md
+*.md
