@@ -1,0 +1,12 @@
+# Google Maps API 키 — 절대 커밋 금지
+gmaps-key.local.js
+
+# OMC 작업 상태
+.omc/
+
+# OS / 편집기
+desktop.ini
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/

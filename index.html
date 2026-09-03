@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>도쿄 3박 4일 · 10.08 – 10.11</title>
+<style>
+/* ============================================================
+   TOKYO TRIP · bright theme tokens
+   ============================================================ */
+:root{
+  --bg:#f2f5fa;
+  --bg-tint-a:#ffd9d2;
+  --bg-tint-b:#dbe7ff;
+  --surface:#ffffff;
+  --surface-2:#f7f9fc;
+  --surface-3:#eaeff7;
+  --line:#e2e8f2;
+  --line-soft:#edf1f7;
+  --text:#111827;
+  --text-2:#5a6478;
+  --text-3:#96a0b3;
+  --accent:#ff6b5b;
+  --shadow-sm:0 1px 2px rgba(23,43,77,.05), 0 2px 6px rgba(23,43,77,.05);
+  --shadow-md:0 4px 14px rgba(23,43,77,.08), 0 1px 3px rgba(23,43,77,.05);
+  --shadow-lg:0 18px 44px rgba(23,43,77,.16), 0 4px 10px rgba(23,43,77,.06);
+  --radius:16px;
+  --radius-sm:11px;
+  --sidebar-w:410px;
+  --ease:cubic-bezier(.2,.75,.3,1);
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117;
+  --bg-tint-a:#3a1f1c;
+  --bg-tint-b:#16233d;
+  --surface:#151a22;
+  --surface-2:#1b212b;
+  --surface-3:#222935;
+  --line:#2a323e;
+  --line-soft:#222935;
+  --text:#eef2f8;
+  --text-2:#a5afbf;
+  --text-3:#6f7b8c;
+  --accent:#ff8577;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 4px 14px rgba(0,0,0,.45);
+  --shadow-lg:0 18px 44px rgba(0,0,0,.55);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",
+              "Malgun Gothic","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--text-3);background-clip:content-box;border:3px solid transparent}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;height:100dvh;overflow:hidden}
+.panel{
+  display:flex;flex-direction:column;min-height:0;z-index:2;
+  background:var(--surface);border-right:1px solid var(--line);
+}
+.stage{position:relative;min-width:0;background:var(--surface-3)}
+
+/* ---------- Header ---------- */
+.head{
+  position:relative;flex:0 0 auto;padding:22px 22px 0;overflow:hidden;
+  background:
+    radial-gradient(520px 190px at 6% -30%, var(--bg-tint-a), transparent 68%),
+    radial-gradient(520px 210px at 96% -34%, var(--bg-tint-b), transparent 68%),
+    var(--surface);
+}
+.head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{
+  width:42px;height:42px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#ff8a7a,#ff6b5b 52%,#e14b3d);color:#fff;font-size:20px;
+  box-shadow:0 6px 16px rgba(255,107,91,.4);
+  animation:markIn .6s var(--ease) both;
+}
+.brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.4px;line-height:1.2}
+.brand p{margin:3px 0 0;font-size:12.5px;color:var(--text-3);letter-spacing:.2px}
+.icon-btn{
+  width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;border-radius:11px;
+  color:var(--text-2);transition:background .18s,color .18s,transform .3s var(--ease);
+}
+.icon-btn:hover{background:var(--surface-3);color:var(--text)}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn svg{transition:transform .45s var(--ease)}
+:root[data-theme="dark"] .icon-btn svg{transform:rotate(150deg)}
+
+/* ---------- Stats ---------- */
+.stats{display:flex;gap:8px;margin-top:18px}
+.stat{
+  flex:1;min-width:0;padding:10px 12px;border-radius:var(--radius-sm);
+  background:color-mix(in srgb,var(--surface) 74%,transparent);
+  border:1px solid var(--line-soft);backdrop-filter:blur(6px);
+  animation:riseIn .5s var(--ease) both;
+}
+.stat:nth-child(2){animation-delay:.06s} .stat:nth-child(3){animation-delay:.12s}
+.stat b{display:block;font-size:18px;font-weight:800;letter-spacing:-.5px;line-height:1.25;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--text-3);letter-spacing:.2px}
+
+/* ---------- Day tabs ---------- */
+.tabs{
+  display:flex;gap:6px;margin:18px -22px 0;padding:0 22px 14px;
+  overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;display:flex;flex-direction:column;gap:1px;white-space:nowrap;
+  padding:8px 14px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-soft);
+  transition:background .2s,color .2s,box-shadow .25s,transform .18s var(--ease);
+  animation:riseIn .45s var(--ease) both;
+}
+.tab:nth-child(2){animation-delay:.05s}.tab:nth-child(3){animation-delay:.1s}
+.tab:nth-child(4){animation-delay:.15s}.tab:nth-child(5){animation-delay:.2s}
+.tab:hover{background:var(--surface-3);transform:translateY(-1px)}
+.tab:active{transform:scale(.96)}
+.tab i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--text-3);text-transform:uppercase}
+.tab b{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.tab[aria-selected="true"]{
+  background:var(--tab-c,var(--accent));border-color:transparent;color:#fff;
+  box-shadow:0 6px 16px color-mix(in srgb,var(--tab-c,var(--accent)) 40%,transparent);
+}
+.tab[aria-selected="true"] i{color:rgba(255,255,255,.78)}
+
+/* ---------- Toggles ---------- */
+.toggles{display:flex;align-items:center;gap:6px;padding:13px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;
+  font-size:12.5px;font-weight:650;background:var(--surface-2);border:1px solid var(--line);
+  color:var(--text-2);transition:.18s var(--ease);
+}
+.chip:hover{border-color:var(--text-3);transform:translateY(-1px)}
+.chip:active{transform:scale(.95)}
+.chip .dot{width:7px;height:7px;border-radius:99px;background:var(--text-3);transition:.2s}
+.chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--surface)}
+.chip[aria-pressed="true"] .dot{background:#42d49a;box-shadow:0 0 0 3px rgba(66,212,154,.28)}
+.chip-action{margin-left:auto}
+.chip-action:hover{background:var(--surface-3);color:var(--text)}
+
+/* ---------- Itinerary list ---------- */
+.list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 0 48px;scroll-behavior:smooth}
+.day-block{padding:0 22px}
+.day-head{
+  display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:3;
+  padding:18px 0 11px;background:linear-gradient(var(--surface) 76%,transparent);
+}
+.day-bar{width:4px;height:32px;border-radius:99px;background:var(--d-c);box-shadow:0 0 0 4px color-mix(in srgb,var(--d-c) 14%,transparent)}
+.day-head h2{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.35px}
+.day-head p{margin:0;font-size:11.5px;color:var(--text-3)}
+.day-meta{margin-left:auto;flex:0 0 auto;font-size:11px;color:var(--text-3);text-align:right;line-height:1.35}
+
+/* flight banner */
+.flight{
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:11px 14px;
+  border-radius:var(--radius);border:1px dashed color-mix(in srgb,var(--d-c) 45%,var(--line));
+  background:color-mix(in srgb,var(--d-c) 7%,var(--surface));
+  animation:riseIn .5s var(--ease) both;
+}
+.flight svg{flex:0 0 auto;color:var(--d-c)}
+.flight-leg{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:750;letter-spacing:-.2px}
+.flight-leg small{font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.3px;display:block}
+.flight-line{flex:1;height:1px;min-width:22px;background:repeating-linear-gradient(90deg,var(--text-3) 0 3px,transparent 3px 7px);opacity:.5}
+.flight-time{font-variant-numeric:tabular-nums}
+
+/* place card */
+.card{
+  position:relative;display:flex;gap:13px;width:100%;text-align:left;padding:13px;
+  border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--surface);
+  transition:border-color .2s,background .2s,box-shadow .25s,transform .2s var(--ease);
+  animation:cardIn .42s var(--ease) both;animation-delay:calc(var(--i,0) * 45ms);
+}
+.card:hover{border-color:color-mix(in srgb,var(--d-c) 55%,transparent);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.card:active{transform:translateY(0) scale(.995)}
+.card.is-active{
+  border-color:var(--d-c);background:color-mix(in srgb,var(--d-c) 5%,var(--surface));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--d-c) 18%,transparent),var(--shadow-md);
+}
+.card-num{
+  flex:0 0 auto;width:28px;height:28px;margin-top:1px;border-radius:10px;
+  background:var(--d-c);color:#fff;display:grid;place-items:center;
+  font-size:13px;font-weight:800;box-shadow:0 3px 9px color-mix(in srgb,var(--d-c) 40%,transparent);
+  transition:transform .25s var(--ease);
+}
+.card.is-active .card-num{transform:scale(1.12)}
+.card-body{min-width:0;flex:1}
+.card-title{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.card-title b{font-size:14.5px;font-weight:750;letter-spacing:-.3px}
+.card-title em{font-style:normal;font-size:10.5px;color:var(--text-3);letter-spacing:.2px}
+.card-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;font-size:11.5px;color:var(--text-3)}
+.tag{
+  padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:750;letter-spacing:.2px;
+  background:color-mix(in srgb,var(--d-c) 14%,transparent);color:var(--d-c);
+}
+.time{font-variant-numeric:tabular-nums;font-weight:750;color:var(--text-2)}
+.cost{
+  display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
+  font-size:10.5px;font-weight:750;letter-spacing:.1px;font-variant-numeric:tabular-nums;
+  background:var(--surface-3);color:var(--text-2);border:1px solid var(--line-soft);
+}
+.cost.free{background:color-mix(in srgb,#22c55e 13%,transparent);color:#15803d;border-color:transparent}
+:root[data-theme="dark"] .cost.free{background:rgba(34,197,94,.16);color:#5fd99a}
+.day-meta b{display:block;font-weight:750;color:var(--d-c);font-variant-numeric:tabular-nums}
+.leg .leg-cost{color:var(--text-2);font-weight:700}
+.card-note{margin:8px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.55}
+.card-note b{color:var(--d-c);font-weight:750}
+.card-links{display:flex;gap:6px;margin-top:10px}
+.mini{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:9px;
+  font-size:11.5px;font-weight:650;text-decoration:none;color:var(--text-2);
+  background:var(--surface-3);transition:.18s var(--ease);
+}
+.mini:hover{background:var(--d-c);color:#fff;transform:translateY(-1px)}
+
+/* leg between stops */
+.leg{display:flex;align-items:center;gap:10px;padding:5px 0 5px 14px;color:var(--text-3);font-size:11.5px}
+.leg-rail{width:2px;height:28px;border-radius:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+
+/* ============================================================
+   Map stage
+   ============================================================ */
+#map{position:absolute;inset:0}
+.map-hud{position:absolute;left:16px;top:16px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.hud-btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:11px;
+  background:var(--surface);color:var(--text);font-size:12.5px;font-weight:680;
+  box-shadow:var(--shadow-md);border:1px solid var(--line);transition:.2s var(--ease);
+}
+.hud-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.hud-btn:active{transform:translateY(0) scale(.97)}
+.legend{
+  position:absolute;right:16px;bottom:32px;z-index:5;display:flex;flex-direction:column;gap:8px;
+  padding:12px 14px;border-radius:14px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(12px);
+  box-shadow:var(--shadow-md);animation:riseIn .6s var(--ease) both;animation-delay:.3s;
+}
+.legend button{display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:650;color:var(--text-2);transition:color .18s}
+.legend button:hover{color:var(--text)}
+.legend i{width:10px;height:10px;border-radius:99px;flex:0 0 auto;transition:transform .2s var(--ease)}
+.legend button:hover i{transform:scale(1.35)}
+
+/* ---------- API key gate ---------- */
+.gate{
+  position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;
+  background:
+    radial-gradient(900px 460px at 20% -10%, var(--bg-tint-a), transparent 62%),
+    radial-gradient(900px 460px at 88% 8%, var(--bg-tint-b), transparent 62%),
+    var(--surface-3);
+}
+.gate[hidden]{display:none}
+body.gate-open .map-hud,body.gate-open .legend{display:none}
+.gate-card{
+  width:min(450px,100%);padding:28px;border-radius:20px;
+  background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-lg);
+  animation:riseIn .5s var(--ease) both;
+}
+.gate-card h3{margin:0 0 7px;font-size:17.5px;font-weight:800;letter-spacing:-.35px}
+.gate-card p{margin:0;font-size:13px;color:var(--text-2);line-height:1.6}
+.gate-form{display:flex;gap:8px;margin-top:18px}
+.gate-form input{
+  flex:1;min-width:0;padding:12px 14px;border-radius:11px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);font-size:13.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;transition:.18s;
+}
+.gate-form input:focus{outline:2px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:1px;border-color:transparent}
+.gate-form button{
+  flex:0 0 auto;padding:12px 19px;border-radius:11px;background:var(--text);color:var(--surface);
+  font-size:13.5px;font-weight:750;transition:.18s var(--ease);
+}
+.gate-form button:hover{opacity:.86;transform:translateY(-1px)}
+.gate-steps{margin-top:18px;padding:15px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line-soft)}
+.gate-steps ol{margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8}
+.gate-steps code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:var(--surface-3);padding:1px 5px;border-radius:5px}
+.gate-note{margin-top:13px;font-size:11.5px;color:var(--text-3);line-height:1.6}
+.gate-err{
+  margin-top:13px;padding:11px 13px;border-radius:11px;font-size:12.5px;
+  background:color-mix(in srgb,#e2483d 12%,transparent);color:#c93a30;
+  border:1px solid color-mix(in srgb,#e2483d 28%,transparent);animation:shake .4s var(--ease);
+}
+:root[data-theme="dark"] .gate-err{color:#ff8a80}
+
+/* ---------- Google InfoWindow restyle ---------- */
+.gm-style .gm-style-iw-c{padding:0!important;border-radius:16px!important;box-shadow:var(--shadow-lg)!important;background:var(--surface)!important}
+.gm-style .gm-style-iw-d{overflow:hidden!important;padding:0!important}
+.gm-style .gm-style-iw-tc::after{background:var(--surface)!important}
+.gm-style .gm-style-iw-chr{display:none}
+.iw{width:236px;padding:15px 16px 14px;color:var(--text);animation:iwIn .3s var(--ease) both}
+.iw-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.iw-num{width:21px;height:21px;flex:0 0 auto;border-radius:7px;background:var(--iw-c);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.iw-day{font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--iw-c)}
+.iw h4{margin:0;font-size:15px;font-weight:750;letter-spacing:-.3px}
+.iw .iw-en{margin:2px 0 0;font-size:10.5px;color:var(--text-3)}
+.iw p{margin:9px 0 0;font-size:12px;color:var(--text-2);line-height:1.55}
+.iw a{display:block;margin-top:12px;padding:9px;border-radius:10px;text-align:center;background:var(--iw-c);color:#fff;font-size:12px;font-weight:750;text-decoration:none}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes markIn{from{opacity:0;transform:scale(.5) rotate(-18deg)}to{opacity:1;transform:none}}
+@keyframes iwIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1100px){ :root{--sidebar-w:346px} }
+
+@media (max-width:860px){
+  /* flex column, not grid: sticky needs a containing block taller than itself,
+     which a grid row (sized to the item) never is. */
+  .app{display:flex;flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
+  .stage{
+    position:sticky;top:0;height:46vh;min-height:280px;flex:0 0 auto;order:-1;
+    border-bottom:1px solid var(--line);
+    z-index:3;                        /* must beat .panel's z-index:2 or the list scrolls over the map */
+  }
+  .panel{border-right:0;overflow:visible;flex:1 1 auto;min-height:0}
+  .list{flex:none;overflow:visible}
+  .day-head{top:calc(46vh - 1px)}
+  /* the key card is taller than 46vh — let the stage grow around it instead of overflowing */
+  body.gate-open .stage{position:relative;height:auto;min-height:0;z-index:auto}
+  body.gate-open #map{display:none}
+  body.gate-open .gate{position:relative;inset:auto;padding:22px 14px}
+  .head{padding-top:18px}
+  .legend{right:10px;bottom:10px;padding:10px 12px;gap:6px}
+  .legend button{font-size:10.5px}
+  .map-hud{left:10px;top:10px}
+  .stat{padding:9px 10px}
+  .stat b{font-size:16px}
+}
+
+@media (max-width:420px){
+  body{font-size:14.5px}
+  .head,.day-block,.toggles{padding-left:15px;padding-right:15px}
+  .tabs{margin-left:-15px;margin-right:-15px;padding-left:15px;padding-right:15px}
+  .stage{height:42vh}
+  .day-head{top:calc(42vh - 1px)}
+  .legend{display:none}
+  .card{padding:12px 11px;gap:11px}
+  .gate-card{padding:21px}
+  .gate-form{flex-direction:column}
+  .gate-form button{width:100%}
+  .stats{gap:6px}
+}
+
+@media (hover:none){
+  .card:hover{border-color:var(--line-soft);transform:none;box-shadow:none}
+  .tab:hover,.chip:hover,.hud-btn:hover,.mini:hover{transform:none}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ Sidebar ============ -->
+  <aside class="panel">
+    <div class="head">
+      <div class="head-top">
+        <div class="brand">
+          <div class="brand-mark">⛩</div>
+          <div>
+            <h1 id="tripTitle">도쿄 3박 4일</h1>
+            <p id="tripDates">—</p>
+          </div>
+        </div>
+        <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" aria-label="라이트/다크 전환">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="statDays">—</b><span>일정</span></div>
+        <div class="stat"><b id="statSpots">—</b><span>방문지</span></div>
+        <div class="stat"><b id="statDist">—</b><span>총 동선</span></div>
+      </div>
+
+      <div class="tabs" id="tabs" role="tablist"></div>
+    </div>
+
+    <div class="toggles">
+      <button class="chip" id="tgCircle" aria-pressed="true"><span class="dot"></span>도보 반경</button>
+      <button class="chip" id="tgRoute" aria-pressed="true"><span class="dot"></span>동선</button>
+      <button class="chip chip-action" id="tgFit">전체 일정 보기</button>
+    </div>
+
+    <div class="list" id="list"></div>
+  </aside>
+
+  <!-- ============ Map ============ -->
+  <main class="stage">
+    <div id="map"></div>
+
+    <div class="map-hud">
+      <button class="hud-btn" id="fitBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+        </svg>
+        범위 맞춤
+      </button>
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <!-- API key gate -->
+    <div class="gate" id="gate">
+      <div class="gate-card">
+        <h3>Google Maps API 키를 입력해 주세요</h3>
+        <p>이 페이지는 구글 지도 위에 핀·반경·동선을 직접 그립니다. 그러려면 Maps JavaScript API 키가 필요해요.
+           키는 브라우저에만 저장되고 어디로도 전송되지 않습니다.</p>
+
+        <form class="gate-form" id="gateForm">
+          <input type="text" id="keyInput" placeholder="AIza..." autocomplete="off" spellcheck="false" aria-label="Google Maps API 키">
+          <button type="submit">지도 열기</button>
+        </form>
+
+        <div id="gateErr"></div>
+
+        <div class="gate-steps">
+          <ol>
+            <li><a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a>에서 프로젝트 생성</li>
+            <li><code>Maps JavaScript API</code> 사용 설정</li>
+            <li>사용자 인증 정보 → API 키 만들기</li>
+            <li>키 제한: <code>HTTP 리퍼러</code> + <code>Maps JavaScript API</code> 전용</li>
+          </ol>
+        </div>
+        <p class="gate-note">※ 공유 PC에서는 사용 후 <button type="button" id="clearKey" style="text-decoration:underline;padding:0">저장된 키 삭제</button>를 눌러 주세요.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 선택 사항: 키를 담은 로컬 파일. 없으면 404가 나고 위의 키 입력 화면으로 넘어갑니다.
+     이 HTML 자체에는 키가 들어있지 않으므로 파일만 따로 공유해도 안전합니다. -->
+<script src="gmaps-key.local.js"></script>
+
+<script>
+/* ============================================================================
+   1. TRIP DATA  ─ 일정이 바뀌면 이 객체만 고치면 됩니다.
+   ----------------------------------------------------------------------------
+   place: { name, en, lat, lng, cat, time, note, radius, fit, move }
+     radius : 도보 반경 원 (m, 기본 300)
+     fit    : false 이면 "범위 맞춤" 계산에서 제외 (공항처럼 멀리 떨어진 곳)
+     move   : 다음 장소까지 이동 { mode:'walk'|'train'|'bus'|'car', min, via }
+   day.flight : 그 날의 항공편 배너
+   ============================================================================ */
+const TRIP_DATA = {
+  title: "도쿄 3박 4일",
+  days: [
+    /* ────────────────────────────────────────────────────────────────
+       DAY 1 · 10.08 (목)
+       [수정] 로쿠린샤 → 2일차 밤으로 이동 (첫날 저녁 두 번 방지)
+       [수정] 긴자식스를 20:30 마감 전으로 당김
+       [동선] 마루노우치 → 긴자 1초메 → 4초메 → 6초메 로 남하만 하도록 정렬
+       ──────────────────────────────────────────────────────────────── */
+    {
+      label: "Day 1", date: "10.08 (목)", theme: "도착 · 도쿄역 · 긴자",
+      color: "#ff6b5b", budget: "1인 약 ¥14,000",
+      flight: { from:"인천 ICN", to:"나리타 NRT", dep:"13:20", arr:"15:50" },
+      places: [
+        { name:"나리타 공항", en:"Narita Airport", lat:35.7653, lng:140.3856,
+          cat:"도착", time:"15:50", cost:"스카이라이너 ¥2,580", radius:900, fit:false,
+          note:"입국심사 + 수하물에 40~60분. 도착층에서 <b>스카이라이너</b>를 타면 닛포리까지 36~41분, 거기서 JR 야마노테선 한 번에 칸다역입니다.<br>· 스카이라이너 ¥2,580 (온라인 사전구매 시 약 ¥2,300)<br>· 닛포리 → 칸다 JR ¥170 안팎<br>· 대안: N'EX 도쿄역 직통 ¥3,070·60분 / 케이세이 액세스특급 ¥1,300·65분(환승·계단 많음)<br>· <b>공항에서 Suica/PASMO 먼저 충전</b> (1인 ¥3,000 권장)<br>🍡 <b>기내식이 부실했다면</b> 도착층 편의점에서 오니기리 하나(¥180). 오늘 제대로 된 밥은 21시입니다",
+          move:{mode:"train", min:60, via:"스카이라이너 → 닛포리 → JR 칸다", cost:"약 ¥2,750"} },
+
+        { name:"소테츠 프레사 인 칸다오테마치", en:"Sotetsu Fresa Inn Kanda-Otemachi", lat:35.6908, lng:139.7676,
+          cat:"숙소 체크인", time:"17:30", cost:"숙박비 별도", radius:400,
+          note:"우치칸다 2-8-4. JR 칸다역 서쪽 출구 도보 3분. 체크인 15:00~.<br>· <b>캐리어는 방에 두고 에코백만</b> 들고 나가세요 — 오늘 총 도보 4km입니다<br>· 여기서 도쿄역 야에스 지하까지 <b>도보 12분</b>. 비가 오면 오테마치역에서 지하도로 도쿄역까지 안 젖고 갈 수 있습니다",
+          move:{mode:"walk", min:12, via:"오테마치 → 도쿄역 야에스 지하", cost:"무료"} },
+
+        { name:"치이카와 랜드 도쿄역", en:"Chiikawa Land TOKYO Station", lat:35.6812, lng:139.7690,
+          cat:"굿즈", time:"18:00", cost:"입장 무료 · 굿즈 ¥600~",
+          note:"도쿄역 이치반가이 <b>B1 캐릭터 스트리트</b>(야에스 북쪽). <b>10:00~20:30</b>.<br>· 도쿄역 한정 상품이 따로 있고, 저녁이 낮보다 훨씬 한산합니다<br>· 굿즈 ¥600~3,000, 인형 ¥3,500~ / 면세 ¥5,500↑ + 여권<br>· 같은 통로에 산리오·리락쿠마·지브리·포켓몬 매장이 줄줄이 — 35~40분 잡으세요<br>· 로쿠린샤(라멘스트리트)는 바로 옆 통로지만 <b>2일차 밤</b>으로 옮겼습니다",
+          move:{mode:"walk", min:5, via:"B1 지하통로 → 마루노우치 방면", cost:"무료"} },
+
+        { name:"그란스타 도쿄 (도쿄역 B1)", en:"GRANSTA Tokyo", lat:35.6809, lng:139.7673,
+          cat:"간식 🍡", time:"18:40", cost:"¥500~1,200",
+          note:"➕ <b>새로 넣은 간식 구간입니다.</b> 저녁이 21시라 여기서 한 입 채우고 가야 합니다.<br>· 도쿄역 개찰 안팎 지하 식품가, <b>~22:00</b><br>🍡 <b>추천</b> — 슈크림·롤케이크 ¥350~600 / 다시 스탠드 국물 한 컵 ¥300 / 에키벤(먹지 말고 구경만) / <b>도쿄바나나·시로이 코이비토</b> 등 선물류는 마지막 날 공항이 더 편하니 지금은 참으세요<br>· ⚠️ <b>배는 채우지 마세요.</b> 21시에 야키니쿠가 기다립니다 — 딱 한 개만",
+          move:{mode:"walk", min:5, via:"마루노우치 중앙 출구로 나가기", cost:"무료"} },
+
+        { name:"도쿄역 마루노우치 역사", en:"Tokyo Station Marunouchi", lat:35.6812, lng:139.7671,
+          cat:"구경", time:"19:00", cost:"무료",
+          note:"1914년 붉은 벽돌 역사. <b>개찰 밖 마루노우치 광장</b>으로 나와야 전체가 보입니다.<br>· 북·남 <b>돔 천장</b>도 무료 (개찰 밖에서 올려다보면 됨)<br>· 야간 조명 ~21:30<br>· 광장 정면 <b>행복의 계단(마루빌딩 쪽)</b>에서 찍으면 역사 전체가 한 프레임에 들어옵니다",
+          move:{mode:"walk", min:5, cost:"무료"} },
+
+        { name:"KITTE 가든", en:"KITTE Garden", lat:35.6795, lng:139.7648,
+          cat:"전망", time:"19:15", cost:"무료",
+          note:"도쿄역 역사를 <b>위에서</b> 내려다보는 무료 옥상 정원. <b>6층</b>으로.<br>· 평일 ~22:00 (마지막 입장 21:30)<br>· 조명 켜진 역사 + 신마루빌딩 야경이 한 프레임. <b>15분</b>이면 충분합니다<br>· 바로 앞 계단으로 내려오면 마루노우치 나카도리 시작점",
+          move:{mode:"walk", min:4, cost:"무료"} },
+
+        { name:"마루노우치 나카도리", en:"Marunouchi Naka-dori", lat:35.6796, lng:139.7627,
+          cat:"산책", time:"19:30", cost:"무료",
+          note:"긴자로 내려가는 <b>길 그 자체</b>라 따로 시간이 들지 않습니다. 가로수 조명, 벤치, 브랜드 쇼윈도.<br>· 쭉 걸어 내려가면 <b>긴자 1초메</b>가 나오고, 거기서 주오도리를 따라 4초메 → 6초메로 <b>계속 남쪽으로만</b> 가면 됩니다 (되돌아오는 구간 없음)<br>· 도보 15분",
+          move:{mode:"walk", min:15, via:"나카도리 종주 → 긴자 주오도리", cost:"무료"} },
+
+        { name:"긴자 4초메 교차로 · 세이코 하우스", en:"Ginza 4-chome & Seiko House", lat:35.6717, lng:139.7659,
+          cat:"랜드마크 · 야경", time:"19:45", cost:"무료",
+          note:"⚠️ <b>'차없는 거리(보행자천국)'는 토·일·공휴일 12:00~17:00에만</b> 열립니다. 10월 8일은 목요일 밤이라 차가 다니는 일반 도로예요 — 야경 산책 자체는 그대로 좋습니다.<br>· <b>세이코 하우스(구 와코) 시계탑</b>이 4초메의 상징. <b>매시 정각에 종</b>이 울립니다<br>· 사진은 교차로 건너 <b>긴자 미쓰코시 앞</b>에서<br>🍡 <b>기무라야 총본점</b>(긴자 4-5-7, 교차로 바로 옆, 1층 베이커리 ~20:00) — 1874년부터 만든 <b>사케 안팡 ¥200</b>. 일본 단팥빵의 원조입니다. 한 개만 사서 걸으며 드세요<br>· 15분만 보고 긴자식스로 (남쪽으로 도보 5분)",
+          move:{mode:"walk", min:5, via:"주오도리 남쪽으로", cost:"무료"} },
+
+        { name:"긴자 식스", en:"GINZA SIX", lat:35.6696, lng:139.7639,
+          cat:"쇼핑", time:"20:00", cost:"무료 (쇼핑 별도)",
+          note:"✅ <b>원래 22:10이었는데 20:00으로 당겼습니다.</b> 영업 <b>10:30~20:30</b>이라 그 시간엔 닫혀 있었어요.<br>· 30분 코스: <b>중앙 아트리움 대형 설치미술</b> → B2 식품관 한 바퀴<br>🍡 <b>B2 식품관</b>이 진짜 볼거리입니다 — 화과자·초콜릿·디저트가 예술품 수준. 선물용 한 상자 사기 딱 좋아요<br>· <b>옥상 정원(6F)은 ~23:00</b>까지 무료 개방이라 폐점 후에도 올라갈 수 있습니다. 긴자 야경 무료 뷰포인트<br>· 면세 카운터 6층 (¥5,500↑ + 여권)<br>· 20:30 폐점 방송이 나오면 옥상만 잠깐 들렀다 야키니쿠집으로 (도보 5분)",
+          move:{mode:"walk", min:5, cost:"무료"} },
+
+        { name:"야키니쿠 나루오", en:"Yakiniku Naruo (Ginza)", lat:35.6707, lng:139.7625,
+          cat:"저녁 · 메인", time:"21:00", cost:"1인 ¥8,000~15,000",
+          note:"✅ <b>20:30 → 21:00으로 30분 미뤘습니다</b> (긴자식스를 앞에 넣기 위해).<br>⚠️ <b>이미 20:30으로 예약했다면</b> → 긴자식스를 빼고 원래대로 20:30에 가세요. 아직 예약 전이면 21:00으로.<br>· <b>예약 필수</b>급. 한국에서 미리 예약하세요 (타베로그·구르나비·전화)<br>· 코스 ¥10,000 전후 / 단품 위주 ¥8,000선. <b>자릿세(お通し)·서비스료</b>가 붙습니다<br>· 오늘 저녁은 <b>이 한 끼가 전부</b>라 마음 놓고 드셔도 됩니다 (츠케멘은 내일 밤으로)<br>· 지도 핀은 대략 위치이니 '구글 지도' 버튼으로 정확한 가게를 확인하세요",
+          move:{mode:"train", min:12, via:"긴자선 긴자(G09) → 칸다(G13)", cost:"IC ¥180"} },
+
+        { name:"소테츠 프레사 인 칸다오테마치", en:"Back to hotel", lat:35.6908, lng:139.7676,
+          cat:"숙소", time:"23:20", cost:"IC ¥180", radius:400,
+          note:"긴자역 → 긴자선 4정거장 6분 + 도보, 총 12분. <b>긴자선 막차는 24시 전후</b>라 여유 있습니다.<br>🍡 배가 아쉬우면 숙소 앞 <b>로손(24시간)</b>에서 푸딩·아이스 하나<br>· <b>자기 전 두 가지</b>: ①치이카와 파크 예약 확인 ②시부야 스카이 10/10 <b>16:20 슬롯</b> 예약" }
+      ]
+    },
+
+    /* ────────────────────────────────────────────────────────────────
+       DAY 2 · 10.09 (금)
+       [추가] 아메요코 · 아사쿠사 문화관광센터 전망대 · 아즈마바시 (14~17시 공백 해소)
+       [이동] 로쿠린샤 도쿄역점 — 1일차에서 옮겨 왔습니다
+       [동선] 우에노 공원 → 남쪽으로만 내려오도록 정렬 (아메요코가 이치란 가는 길목)
+       ──────────────────────────────────────────────────────────────── */
+    {
+      label: "Day 2", date: "10.09 (금)", theme: "우에노 · 아사쿠사 · 이케부쿠로 · 신주쿠",
+      color: "#f5a524", budget: "1인 약 ¥14,000",
+      places: [
+        { name:"우에노역 스타벅스", en:"Starbucks Ueno", lat:35.7079, lng:139.7766,
+          cat:"아침 · 카페", time:"10:00", cost:"¥500~900",
+          note:"숙소 도보 3분 → JR 칸다 → <b>야마노테선(우에노 방면) 3정거장 6분</b>, IC ¥170 안팎. 09:40에 나오면 됩니다.<br>· 역 안 <b>아트레 우에노</b> 매장이 가장 가깝고, <b>우에노 온시공원점</b>(공원 안, 도보 8분)이 훨씬 여유롭습니다 — 다음이 공원이니 <b>공원점 추천</b><br>· 라떼 ¥490~, 푸드 ¥300~500<br>🍡 테이크아웃해서 <b>공원 걸으며</b> 마시는 게 최고입니다",
+          move:{mode:"walk", min:8, cost:"무료"} },
+
+        { name:"우에노 공원", en:"Ueno Park", lat:35.7156, lng:139.7745,
+          cat:"공원", time:"10:30", cost:"무료",
+          note:"공원 자체는 <b>무료</b>. <b>시노바즈 연못 한 바퀴 + 우에노 도쇼구 참배길</b>이면 1시간 20분 딱 맞습니다.<br>· 10월 초라 연못에 연잎이 남아 있고, 아침 공기가 제일 좋습니다<br>· 동물원 ¥600 / 국립과학박물관 ¥630 / 서양미술관 ¥500 — 들어가면 각 1~2시간이라 오늘은 무리<br>· 11:50에 <b>공원 남쪽 계단</b>으로 내려오면 그대로 아메요코입니다 (되돌아오는 구간 없음)",
+          move:{mode:"walk", min:12, via:"공원 남쪽 계단 → 아메요코 북쪽 입구", cost:"무료"} },
+
+        { name:"아메요코 시장", en:"Ameyoko Market", lat:35.7089, lng:139.7748,
+          cat:"시장 · 간식 🍡", time:"11:50", cost:"간식 ¥300~800",
+          note:"➕ <b>새로 넣었습니다.</b> 우에노 공원 → 이치란 <b>가는 길목 그대로</b>라 이동 시간이 0입니다.<br>· 전후 암시장에서 시작된 400m 재래시장. 도쿄에서 몇 안 되는 <b>흥정되는 곳</b><br>🍡 <b>먹을 것</b> — 참치회 한 팩 ¥500~ / 꼬치구이 ¥300 / 과일 꼬치·생과일주스 ¥300~500 / 타코야키 ¥500<br>· <b>아메요코 센터 빌딩 B1</b>(아시아 식재료 시장)은 5분만 내려가 봐도 재밌습니다<br>· ⚠️ 점심 직전이니 <b>맛보기만</b>. 30분 컷",
+          move:{mode:"walk", min:3, cost:"무료"} },
+
+        { name:"이치란 우에노점", en:"Ichiran Ueno", lat:35.7076, lng:139.7737,
+          cat:"점심 · 라멘", time:"12:20", cost:"¥1,200~1,900",
+          note:"기본 라멘 ¥1,190 전후. 반숙란 ¥140 / 차슈 ¥250 / 카에다마(면추가) ¥210.<br>· <b>식권 자판기 + 1인 부스</b>, <b>한국어 주문표</b>가 있습니다<br>· 점심 피크라 20~30분 대기 — 아메요코를 먼저 돈 이유입니다<br>· 13:30에 나와서 <b>긴자선 우에노역</b>으로",
+          move:{mode:"train", min:12, via:"긴자선 우에노(G16) → 아사쿠사(G19)", cost:"IC ¥180"} },
+
+        { name:"나카미세도리 · 가미나리몬", en:"Nakamise-dori", lat:35.7118, lng:139.7966,
+          cat:"거리 · 간식 🍡", time:"13:45", cost:"간식 ¥300~1,000",
+          note:"아사쿠사역 <b>1번 출구</b>에서 가미나리몬 바로 앞. 3정거장 5분.<br>🍡 <b>여기가 오늘 최대 간식 구간</b>입니다<br>· <b>닌교야키</b> 8개 ¥700 (팥·커스터드)<br>· <b>튀김만주(아게만주)</b> ¥150~250 — 나카미세 중간, 갓 튀긴 것<br>· <b>멜론빵</b> ¥250 — 나카미세 뒤 골목 카게츠도, 갓 구운 것만<br>· <b>키비단고</b> 5꼬치 ¥400 + 냉녹차 — 나카미세 중간<br>· ⚠️ <b>걸어다니며 먹는 건 금지</b>. 가게 앞에서 먹고 이동하세요<br>· 대부분 <b>현금만</b> 받습니다",
+          move:{mode:"walk", min:5, cost:"무료"} },
+
+        { name:"센소지", en:"Senso-ji Temple", lat:35.7148, lng:139.7967,
+          cat:"사찰", time:"14:30", cost:"무료 (오미쿠지 ¥100)",
+          note:"경내 <b>무료</b>, 본당 06:00~17:00.<br>· 오미쿠지 ¥100 — <b>흉(凶)이 잘 나오기로 유명한 절</b>. 흉이면 옆 철사에 묶고 가면 됩니다<br>· 오마모리 ¥500~1,000<br>· 본당 왼쪽 <b>오층탑</b>, 뒤편 정원까지 45분<br>🍡 경내 서쪽 <b>덴보인도리</b>로 빠지면 관광객이 확 줄고 <b>아사쿠사 멘치카츠 ¥400</b>(호피도리 입구)가 있습니다 — 튀김 좋아하시면 필수",
+          move:{mode:"walk", min:6, cost:"무료"} },
+
+        { name:"아사쿠사 문화관광센터 (무료 전망대)", en:"Asakusa Culture Tourist Info Center", lat:35.7107, lng:139.7965,
+          cat:"전망 · 추가", time:"15:20", cost:"무료",
+          note:"➕ <b>새로 넣었습니다.</b> 원래 14:00 센소지 → 17:00 치이카와 파크 사이가 <b>3시간이나 비어</b> 있었어요.<br>· 가미나리몬 <b>바로 맞은편</b>, 쿠마 켄고 설계. <b>8층 전망 테라스가 완전 무료</b><br>· 09:00~20:00. 엘리베이터 대기 포함 <b>15분</b><br>· <b>나카미세 골목을 위에서 일직선으로 내려다보는</b> 사진은 여기서만 나옵니다. 스카이트리도 한 프레임<br>· 1층 무료 화장실·와이파이·짐 보관",
+          move:{mode:"walk", min:5, via:"아즈마바시 방향", cost:"무료"} },
+
+        { name:"아즈마바시 · 스미다 공원", en:"Azumabashi & Sumida Park", lat:35.7108, lng:139.7997,
+          cat:"산책 · 추가", time:"15:45", cost:"무료",
+          note:"➕ <b>새로 넣었습니다.</b> 아사쿠사역에서 강 쪽으로 도보 3분.<br>· <b>스카이트리 + 아사히 맥주 황금 오브제</b>가 한 화면에 들어오는 대표 사진 포인트<br>· 다리를 건너 <b>스미다 공원 강변길</b>을 10분만 걸으면 사람 없는 조용한 구간<br>🍡 아사쿠사역 지하 <b>에키미세</b>나 강변 자판기에서 음료 하나 (¥150) — 다음이 40분 이동입니다<br>· 무료, 25분. <b>16:20에 아사쿠사역</b>으로 돌아가세요",
+          move:{mode:"train", min:45, via:"긴자선 아사쿠사→우에노 · JR 야마노테선 우에노→이케부쿠로", cost:"IC 약 ¥380"} },
+
+        { name:"치이카와 파크", en:"Chiikawa Park", lat:35.7288, lng:139.7186,
+          cat:"체험 · 예약필수", time:"17:00", cost:"성인 ¥3,500",
+          note:"이케부쿠로 <b>선샤인시티 애넥스 B1·1F</b> (히가시이케부쿠로 3-3-5). 10:00~21:00, <b>최종 입장 19:00</b>.<br>· 입장료 <b>12세 이상 ¥3,500 / 4~11세 ¥1,800</b><br>· ⚠️ <b>전일 일시지정 완전예약제</b> — 반드시 미리 예매 (chiikawapark-tokyo.jp)<br>· ⚠️ 파크 안 <b>현금 사용 불가</b>. 카드·간편결제만<br>· 관람 60~90분 + 한정굿즈 줄 20분. <b>18:40에는 나와야</b> 신주쿠가 됩니다<br>🍡 선샤인시티 <b>알파(ALPA) B1 식품관</b>에 크레페·타이야키·베이커리가 있습니다 (~20:00)",
+          move:{mode:"train", min:20, via:"JR 야마노테선 이케부쿠로 → 신주쿠", cost:"IC 약 ¥180"} },
+
+        { name:"신주쿠 오모이데요코초", en:"Omoide Yokocho, Shinjuku", lat:35.6938, lng:139.6994,
+          cat:"저녁 · 야키토리", time:"19:00", cost:"1인 ¥2,500~4,000",
+          note:"신주쿠역 <b>서쪽 출구</b> 도보 2분. 원래 18:30이었는데 아사쿠사 일정이 늘어 19:00으로 맞췄습니다.<br>· 꼬치 1개 ¥150~300, 생맥주 ¥600~700, 자릿세(お通し) ¥300~500<br>· ⚠️ <b>현금만 받는 가게가 많습니다.</b> 1인 ¥5,000 현금 챙기세요<br>· 좁아서 3~4명이 한계, 회전이 빠릅니다<br>· 골든가이까지 <b>도보 10분</b>(가부키초 관통 — 밤 가부키초 구경이 덤으로 붙습니다)",
+          move:{mode:"walk", min:10, via:"가부키초 관통 → 골든가이", cost:"무료"} },
+
+        { name:"신주쿠 골든가이", en:"Shinjuku Golden Gai", lat:35.6939, lng:139.7043,
+          cat:"2차 · 바", time:"20:40", cost:"1인 ¥2,000~4,000",
+          note:"280여 개 미니 바 골목. 구조는 <b>자릿세 ¥500~1,500 + 술 1잔 ¥800~1,200</b>.<br>· 입구에 <b>'Tourist Welcome' / 영어 메뉴</b>가 붙은 집으로<br>· <b>자릿세는 문 앞 안내판에서 확인</b> — 안 붙어 있으면 지나치세요<br>· 한 집에 1시간, <b>21:40에는 나와야</b> 도쿄역 라멘을 맞춥니다<br>· 술이 부담되면 여기는 <b>골목 산책 20분</b>만 하고 바로 도쿄역으로 가도 좋습니다",
+          move:{mode:"train", min:18, via:"마루노우치선 신주쿠(M08) → 도쿄(M17)", cost:"IC ¥210"} },
+
+        { name:"로쿠린샤 도쿄역점", en:"Rokurinsha Tokyo", lat:35.6803, lng:139.7680,
+          cat:"야식 · 츠케멘", time:"22:00", cost:"¥1,200~1,800",
+          note:"✅ <b>1일차에서 여기로 옮겼습니다.</b> 첫날엔 야키니쿠와 겹쳐 두 끼가 됐거든요.<br>· 도쿄역 이치반가이 <b>B1 도쿄 라멘스트리트</b>, 야에스 지하 중앙출구 쪽<br>· <b>~23:00 (라스트오더 22:30)</b>. 22:00은 <b>줄이 거의 없는 시간</b>이라 오히려 첫날 18:00(대기 30~60분)보다 낫습니다<br>· 츠케멘 보통 ¥1,150~1,300, 곱빼기·차슈 ¥1,800선. <b>식권 자판기</b><br>· 술 뒤의 <b>시메 라멘</b>은 일본식 정석입니다<br>· 만석이면 같은 층 다른 집으로 갈아타세요 (전국 유명 라멘집 8곳)",
+          move:{mode:"walk", min:12, via:"도쿄역 → 오테마치 방면", cost:"무료"} },
+
+        { name:"소테츠 프레사 인 칸다오테마치", en:"Back to hotel", lat:35.6908, lng:139.7676,
+          cat:"숙소", time:"23:00", cost:"무료", radius:400,
+          note:"도쿄역에서 <b>도보 12분</b>이라 전철 안 타도 됩니다.<br>· 내일이 시부야 풀코스(총 도보 6km)라 체력전입니다<br>· <b>오늘 밤 필수</b>: 시부야 스카이 10/10 <b>16:20 슬롯</b> 예약 상태 확인 — 토요일 일몰 슬롯은 며칠 전에 매진됩니다" }
+      ]
+    },
+
+    /* ────────────────────────────────────────────────────────────────
+       DAY 3 · 10.10 (토) — 시부야 코어
+       [동선] 하라주쿠(북) → 캣스트리트 → 시부야(남) 로 내리막 한 방향.
+              스크램블·하치코를 점심 앞으로 옮겨 도겐자카 왕복을 없앴습니다.
+              109 → 센터가이 → 파르코 → 스크램블스퀘어 로 시계방향 한 바퀴.
+       ──────────────────────────────────────────────────────────────── */
+    {
+      label: "Day 3", date: "10.10 (토)", theme: "시부야 코어 (+ 하라주쿠 · 오모테산도)",
+      color: "#8b5cf6", budget: "1인 약 ¥14,000~18,000",
+      places: [
+        { name:"메이지 진구", en:"Meiji Jingu", lat:35.6764, lng:139.6993,
+          cat:"신사 · 숲길", time:"10:00", cost:"무료",
+          note:"<b>이동</b> 숙소 도보 3분 → JR 칸다 → 주오선 쾌속 신주쿠(13분) → 야마노테선 하라주쿠(4분). <b>25~30분 / IC 약 ¥230</b>. 09:20에 나오세요.<br>· 경내 <b>무료</b>, 10월 개문 05:40 ~ 폐문 17:20<br>· 본체는 참배가 아니라 <b>남참도 숲길</b>입니다. 도심 한복판 10만 그루 인공림, 왕복 40~50분<br>· 교엔(정원) ¥500 · 보물전 ¥1,000 — 오늘은 스킵 권장<br>· <b>토요일 오전엔 전통 혼례 행렬</b>을 볼 확률이 높습니다 (10~11시대)<br>🍡 하라주쿠역 앞 <b>이즈미 가든 카페</b>나 편의점 커피로 시작하면 좋습니다",
+          move:{mode:"walk", min:10, via:"하라주쿠역 → 다케시타 출구", cost:"무료"} },
+
+        { name:"다케시타도리", en:"Takeshita Street", lat:35.6716, lng:139.7031,
+          cat:"거리 · 간식 🍡", time:"11:05", cost:"¥600~1,500",
+          note:"하라주쿠역 다케시타 출구 바로 앞, 350m 골목.<br>🍡 <b>여기가 오늘 첫 간식 구간</b><br>· <b>마리온 크레페 ¥600~900</b> — 다케시타 크레페의 원조<br>· <b>자쿠자쿠(ZAKUZAKU) 크로캉슈 ¥300</b> — 갓 짜주는 커스터드, 줄이 빨리 빠집니다<br>· <b>레인보우 솜사탕 ¥800~1,000</b> (토티 캔디 팩토리) — 사진용<br>· <b>롱 감자튀김·치즈핫도그 ¥500</b><br>· ⚠️ <b>토요일 11시부터 발 디딜 틈이 없습니다.</b> 하나 물고 <b>25분 안에 통과</b>가 정답<br>· 인파가 심하면 한 블록 옆 <b>우라하라주쿠 뒷골목</b>으로 빠지세요",
+          move:{mode:"walk", min:8, via:"메이지도리 → 진구마에 교차로", cost:"무료"} },
+
+        { name:"치이카와랜드 하라주쿠 (키디랜드 1F)", en:"Chiikawa Land Harajuku", lat:35.6676, lng:139.7065,
+          cat:"굿즈", time:"11:40", cost:"입장 무료 · 굿즈 ¥600~",
+          note:"진구마에 6-1-9, <b>키디랜드 하라주쿠 1층</b>. <b>11:00~20:00</b>.<br>· 도쿄역 지점보다 넓고 <b>확장 리뉴얼</b>되어 종류가 가장 많습니다 — 3일차에 배치한 이유<br>· ⚠️ <b>신상 발매일엔 입점 예약제</b>로 바뀝니다. 전날 공식 X(@chiikawa_land) 확인 필수<br>· 2~4층은 스누피·리락쿠마·산리오 — 시간 되면 같이<br>· 면세 카운터 있음 (¥5,500↑ + 여권)<br>· 여기 <b>바로 뒤가 캣스트리트 입구</b>입니다 (도보 3분)",
+          move:{mode:"walk", min:5, via:"오모테산도 → 캣스트리트 북쪽 입구", cost:"무료"} },
+
+        { name:"캣스트리트 (규 시부야강 산책로)", en:"Cat Street", lat:35.6668, lng:139.7060,
+          cat:"산책 · 간식 🍡", time:"12:25", cost:"카페 ¥600~1,000",
+          note:"오모테산도에서 시부야까지 이어지는 <b>차 없는 뒷골목</b>. <b>오늘 동선의 핵심</b>입니다 — 전철 한 번도 안 타고 하라주쿠 → 시부야로 내려갑니다.<br>· 순수 도보 20~25분, 구경하며 가면 40분. <b>내리막이라 체력 부담이 적습니다</b><br>· 빈티지숍·스니커즈·편집숍이 촘촘 (Bape / Kith / Ader Error 등)<br>🍡 <b>중간에 한 번 쉬세요</b> — 블루보틀·스트리머 커피·산책길 아이스크림 ¥600~1,000. 오늘 총 도보 6km라 여기서 카페인 충전이 필요합니다<br>· 끝나면 자연스럽게 <b>미야시타 파크 북쪽</b>과 만납니다 (저녁에 다시 올 곳)",
+          move:{mode:"walk", min:12, via:"미야시타 파크 옆 → 시부야역", cost:"무료"} },
+
+        { name:"시부야 스크램블 교차로 · 하치코", en:"Shibuya Scramble & Hachiko", lat:35.6595, lng:139.7005,
+          cat:"랜드마크", time:"13:10", cost:"무료",
+          note:"✅ <b>원래 점심 뒤였는데 앞으로 당겼습니다.</b> 캣스트리트에서 내려오면 여기를 지나 도겐자카(점심)로 가는 게 자연스러워서, <b>왕복 왔다갔다가 사라집니다.</b><br>· 한 번 신호에 최대 3,000명<br><b>사진 포인트 3곳</b><br>· <b>스크램블 스퀘어 앞 육교</b> — 무료, 정면 부감 (가장 쉬움)<br>· 스타벅스 츠타야점 <b>2층 창가</b> — 음료값만, 자리 경쟁 치열<br>· <b>MAG'S PARK</b>(마그넷 바이 시부야109 옥상) <b>¥600</b> — 교차로 바로 위, 가장 확실한 앵글<br>· 하치코 동상은 하치코 출구 앞. 토요일 낮엔 줄 서서 찍습니다<br>· <b>밤 사진</b>은 저녁에 여기를 다시 지나가니 그때 찍으세요",
+          move:{mode:"walk", min:8, via:"센터가이 관통 → 도겐자카", cost:"무료"} },
+
+        { name:"규카츠 모토무라 시부야 도겐자카점", en:"Gyukatsu Motomura Shibuya", lat:35.6588, lng:139.6975,
+          cat:"점심 · 규카츠", time:"13:30", cost:"¥1,700~2,400",
+          note:"규카츠(소고기 커틀릿) 정식 ¥1,630~1,900, 곱빼기·치즈 추가 ¥2,400선. 자리마다 <b>1인용 돌판</b>이 나와 직접 구워 먹습니다.<br>· 1·2일차가 라멘·야키토리였으니 <b>결이 다른 메뉴</b>로 잡았습니다<br>· 토요일 점심 대기 20~40분. 지하 좁은 계단이라 줄이 밖까지 나옵니다<br>· <b>대안</b> — 우오베이 시부야 도겐자카점(회전초밥 1접시 ¥130~, 1인 ¥1,500·대기 짧음) / 시부야 논베이 라멘 / 미야시타 파크 푸드코트<br>· 여기서 <b>109가 도보 3분</b>이라 나오면 바로 이어집니다",
+          move:{mode:"walk", min:4, cost:"무료"} },
+
+        { name:"시부야 109", en:"SHIBUYA109", lat:35.6595, lng:139.6987,
+          cat:"쇼핑 · 간식 🍡", time:"14:45", cost:"무료 (쇼핑 별도)",
+          note:"도겐자카 입구의 원통형 랜드마크. <b>10:00~21:00</b>, 8개 층 여성 패션.<br>🍡 <b>B2 MOG MOG STAND 푸드홀</b>이 의외의 복병입니다 — 타피오카·크레페·소프트아이스크림 ¥400~700. 밥 먹고 바로라 <b>디저트 한 개</b>만<br>· 옷에 관심 없으면 <b>1층과 B2만</b> 보고 20분 컷<br>· 밖으로 나오면 바로 <b>센터가이</b> 입구라 그대로 북쪽으로 걸어 올라가면 됩니다",
+          move:{mode:"walk", min:8, via:"센터가이 → 우다가와초 → 파르코", cost:"무료"} },
+
+        { name:"시부야 파르코 6F (닌텐도·포켓몬·점프숍)", en:"SHIBUYA PARCO 6F", lat:35.6626, lng:139.6981,
+          cat:"굿즈 · 게임", time:"15:15", cost:"입장 무료",
+          note:"파르코 <b>10:00~21:00</b>. 6층 한 층에 <b>닌텐도 도쿄 · 포켓몬센터 시부야 · 점프숍 · 캡콤 스토어</b>가 몰려 있어 <b>40분</b>이면 다 봅니다.<br>· 입장 무료. 혼잡하면 6층 계단 줄로 통제합니다<br>· 포켓몬센터 입구의 <b>애니매트로닉스 뮤츠</b>가 명물<br>· <b>옥상(10F) 무료 전망 테라스</b>도 있습니다 — 시부야 서쪽이 보입니다<br>· 관심 없으면 <b>통째로 스킵하고</b> 시부야 스카이를 14:59 이전 슬롯으로 당기세요 (¥3,000, ¥700 절약)<br>· 여기서 스크램블 스퀘어까지 <b>도보 10분 내리막</b>",
+          move:{mode:"walk", min:10, via:"우다가와초 → 시부야역 스크램블 스퀘어", cost:"무료"} },
+
+        { name:"시부야 스카이", en:"SHIBUYA SKY", lat:35.6580, lng:139.7016,
+          cat:"일몰 · 전망", time:"16:20", cost:"¥3,700 (15시 이후 입장)",
+          note:"시부야 스크램블 스퀘어 <b>14·45·46층 + 옥상</b>. 오늘의 하이라이트입니다.<br>· <b>요금 — 14:59까지 입장 ¥3,000 / 15:00 이후 ¥3,700</b> (웹 사전구매, 만 5세 이하 무료)<br>· 영업 10:00~22:30, <b>최종 입장 21:20</b><br>· <b>10/10 도쿄 일몰 약 17:05.</b> 일몰 1시간 전인 <b>16:20 슬롯</b>이 낮→골든아워→야경을 한 번에 잡는 최적이자 가장 먼저 매진되는 슬롯입니다<br>· 옥상은 <b>우천·강풍 시 폐쇄</b>, 환불 불가. 당일 아침 공식 SNS 확인<br>· 옥상엔 <b>가방·모자·삼각대 반입 금지</b>(무료 락커), 스마트폰 스트랩 필수<br>🍡 <b>올라가기 전 같은 건물 B2 '도큐 푸드쇼'</b>에서 간식 한 개 (디저트·베이커리 ¥400~800). 저녁이 18:20이라 딱 좋습니다<br>· 체류 80분",
+          move:{mode:"walk", min:9, via:"시부야 스트림 앞 → 미야시타 파크", cost:"무료"} },
+
+        { name:"미야시타 파크 · 시부야 요코초", en:"MIYASHITA PARK & Shibuya Yokocho", lat:35.6620, lng:139.7036,
+          cat:"저녁 · 술", time:"18:20", cost:"1인 ¥3,000~5,000",
+          note:"옥상 공원 아래 <b>1층 전체가 시부야 요코초</b> — 홋카이도부터 오키나와까지 일본 각 지방 향토요리 포장마차가 늘어서 있습니다. <b>~새벽 5시</b>.<br>· 1인 ¥3,000~5,000, <b>카드 됩니다</b> (어제 골든가이와 달리 현금 걱정 없음)<br>· 여러 가게 음식을 한 테이블에서 시켜 먹을 수 있어 <b>마지막 밤에 가장 무난</b><br>· <b>옥상 미야시타 파크</b>(~23:00, 무료)에 잠깐 올라가면 시부야 야경이 공짜로 보입니다<br>· <b>대안</b> — 논베이요코초(하치코 옆, 쇼와 시대 초미니 술집 골목. 자리 잡기 어렵고 현금 위주지만 분위기 최고)<br>· 20:00에 나오세요",
+          move:{mode:"walk", min:8, via:"시부야역 앞 → 센터가이 안쪽", cost:"무료"} },
+
+        { name:"메가 돈키호테 시부야 본점", en:"MEGA Don Quijote Shibuya", lat:35.6606, lng:139.6998,
+          cat:"쇼핑 · 면세", time:"20:00", cost:"쇼핑 예산 ¥5,000~",
+          note:"<b>24시간</b>. 귀국 전날 밤 = 마지막 쇼핑 타이밍이라 여기 배치했습니다.<br>· 약·과자·화장품·기념품 한 번에 (킷캣·로이스·동전파스·카베진·휴족시간)<br>· <b>면세 카운터</b> — ¥5,500↑ + <b>여권 실물</b> 필수. 밤엔 면세 줄 20~30분<br>· ⚠️ 내일 <b>기내 반입 규정</b>: 액체류 100ml 초과는 위탁수하물로. 캐리어 무게도 계산하세요<br>🍡 여기서 <b>스카이라이너 안에서 먹을 내일 아침</b>을 미리 사도 좋습니다 (빵·과자)<br>· <b>45분 안에</b> 끝내고 나오세요",
+          move:{mode:"train", min:27, via:"긴자선 시부야(G01) → 칸다(G13) 직통", cost:"IC ¥210"} },
+
+        { name:"소테츠 프레사 인 칸다오테마치", en:"Back to hotel", lat:35.6908, lng:139.7676,
+          cat:"숙소 · 짐싸기", time:"21:30", cost:"IC ¥210", radius:400,
+          note:"긴자선 시부야 → 칸다는 <b>환승 없이 한 번에</b> 갑니다(13정거장 약 27분). JR 야마노테선(시나가와 경유)은 훨씬 오래 걸리니 <b>긴자선</b>을 타세요.<br>· <b>오늘 밤에 짐을 다 싸 두세요.</b> 내일은 05:00 기상입니다<br>· 프런트에 <b>이른 체크아웃(05:20)</b> 가능한지 오늘 밤 미리 말해 두세요<br>· <b>22:30 취침 권장</b> — 수면 6시간 반" }
+      ]
+    },
+
+    /* ────────────────────────────────────────────────────────────────
+       DAY 4 · 10.11 (일) — 09:10 나리타 출발. 관광 없음, 이동 전용.
+       ──────────────────────────────────────────────────────────────── */
+    {
+      label: "Day 4", date: "10.11 (일)", theme: "새벽 이동 → 09:10 출국",
+      color: "#14b8a6", budget: "1인 약 ¥3,500",
+      flight: { from:"나리타 NRT", to:"인천 ICN", dep:"09:10", arr:"11:45" },
+      places: [
+        { name:"소테츠 프레사 인 칸다오테마치", en:"Wake up & Check-out", lat:35.6908, lng:139.7676,
+          cat:"기상 · 체크아웃", time:"05:00", cost:"무료", radius:400,
+          note:"⚠️ <b>09:10 출발은 관광이 0인 일정입니다.</b> 역산하면 이렇게 됩니다.<br>· <b>05:00 기상 → 05:20 체크아웃 → 05:45 칸다역 → 06:06 스카이라이너 → 06:45 나리타</b><br>· 소테츠 프레사 인은 프런트 24시간 + 자동 체크아웃기라 새벽 체크아웃이 됩니다 (전날 밤 확인)<br>· <b>짐은 전날 밤에 완전히 싸 두세요.</b> 아침에 쌀 시간 없습니다<br>· 알람은 <b>04:50 / 05:00</b> 두 개로",
+          move:{mode:"walk", min:2, cost:"무료"} },
+
+        { name:"로손 우치칸다 2초메점", en:"Lawson Uchikanda 2-chome", lat:35.6907, lng:139.7679,
+          cat:"아침거리 🍡", time:"05:20", cost:"¥500~800",
+          note:"숙소 바로 앞, <b>24시간</b>.<br>🍡 <b>사야 할 것</b> — 오니기리 ¥150~250 / 샌드위치 ¥300~450 / 캔커피·라떼 ¥120~180 / 물 ¥110<br>· <b>스카이라이너 안에서 먹는 게 오늘 유일한 아침</b>입니다. 나리타에선 먹을 시간이 빠듯해요<br>· 냄새 강한 음식(어묵·중화만두)은 열차 안에서 곤란하니 피하세요<br>· 남은 잔돈은 여기서 털면 됩니다. <b>Suica 잔액</b>도 확인 (닛포리까지 ¥170)",
+          move:{mode:"walk", min:4, cost:"무료"} },
+
+        { name:"JR 칸다역", en:"JR Kanda Station", lat:35.6918, lng:139.7708,
+          cat:"환승", time:"05:45", cost:"IC 약 ¥170",
+          note:"서쪽 출구로 들어가 <b>야마노테선 3·4번 승강장(우에노·이케부쿠로 방면)</b>.<br>· 칸다 → 닛포리 <b>4정거장 8~9분</b> (아키하바라·오카치마치·우에노·우구이스다니)<br>· 일요일 첫차는 05시 전, <b>6~8분 간격</b>이라 05:45~05:52 사이 아무거나 타면 06:06 라이너에 여유롭게 맞습니다<br>· ⚠️ JR 운임은 <b>2026년 3월 14일 개정</b>되었습니다 (IC 기본운임 ¥155). 실제 금액은 앱/자동판매기에서 확인하세요<br>· 캐리어는 <b>맨 앞·맨 뒤 칸</b>이 여유롭습니다",
+          move:{mode:"train", min:9, via:"JR 야마노테선 (우에노 방면)", cost:"IC 약 ¥170"} },
+
+        { name:"닛포리역", en:"Nippori Station", lat:35.7280, lng:139.7710,
+          cat:"스카이라이너 환승", time:"05:55", cost:"¥2,580",
+          note:"JR 개찰을 나와 <b>케이세이 스카이라이너 전용 개찰</b>로. 같은 건물이라 환승 3~5분.<br><b>일요일(휴일) 다이아 · 닛포리 발 → 나리타 도착</b><br>· 05:46 → 제2터미널 06:22 / <b>제1터미널 06:26</b> ← 여유파<br>· <b>06:06 → 제2터미널 06:42 / 제1터미널 06:45</b> ← <b>이걸 타세요 (출발 2시간 25분 전)</b><br>· 06:25 → 제2터미널 07:03 / 제1터미널 07:07 ← 마지노선<br>· 요금 <b>¥2,580</b> (운임 ¥1,300 + 라이너권 ¥1,280). <b>온라인 사전구매 약 ¥2,300</b> — 미리 사두면 새벽 매표 줄을 안 섭니다<br>· <b>전 좌석 지정</b>, 캐리어 선반 넉넉<br>🍡 여기서 <b>로손 아침을 꺼내 드세요</b>. 40분 동안 먹고 자면 딱입니다<br>· 저렴한 대안: 케이세이 <b>액세스 특급 ¥1,300</b>(약 65분) — 오늘은 시간이 없어 비추천",
+          move:{mode:"train", min:40, via:"케이세이 스카이라이너 (전좌석 지정)", cost:"¥2,580"} },
+
+        { name:"나리타 공항", en:"Narita Airport", lat:35.7653, lng:140.3856,
+          cat:"출국", time:"06:45", cost:"¥0", radius:900, fit:false,
+          note:"<b>⚠️ 내리기 전에 내 터미널을 반드시 확인하세요.</b><br>· <b>제1터미널</b> — 대한항공·아시아나·피치 등 (스카이라이너 종점)<br>· <b>제2터미널</b> — 전일본공수 등<br>· <b>제3터미널(LCC)</b> — 제주항공·티웨이·진에어·에어서울 등. <b>제2터미널에서 내려 도보 약 15분(630m)</b> 또는 무료 셔틀. <b>제3터미널이면 05:46 라이너를 타세요</b><br><br><b>09:10 출발 타임라인</b><br>· 06:50 체크인·수하물 위탁 (LCC 카운터는 보통 출발 2시간 전 오픈)<br>· 07:30 보안검색 → 출국심사<br>· 08:00 면세구역 — 마지막 쇼핑<br>· 08:40 탑승 게이트 / 09:10 이륙<br><br>🍡 <b>면세구역에서 살 것</b> — 로이스 생초콜릿 / 도쿄바나나 / 킷캣 말차 / 시로이 코이비토. 남은 엔화는 여기서 다 터세요<br>· 랜드사이드 '에도코지'는 볼 시간이 없습니다 — <b>보안검색 안쪽</b>에서 해결<br>· <b>Suica 잔액</b>은 남겨도 됩니다 (다음 방문 때 그대로 사용, 카드 환불은 수수료 ¥220)" }
+      ]
+    }
+  ]
+};
+
+/* ============================================================================
+   2. MAP STYLES
+   ============================================================================ */
+const MAP_STYLE = {
+  light: [
+    {elementType:"geometry",stylers:[{color:"#f7f7f4"}]},
+    {elementType:"labels.icon",stylers:[{visibility:"off"}]},
+    {elementType:"labels.text.fill",stylers:[{color:"#6b7280"}]},
+    {elementType:"labels.text.stroke",stylers:[{color:"#ffffff"},{weight:3}]},
+    {featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#e0e4ea"}]},
+    {featureType:"landscape.man_made",elementType:"geometry",stylers:[{color:"#f1f0ec"}]},
+    {featureType:"poi",elementType:"labels.text",stylers:[{visibility:"off"}]},
+    {featureType:"poi.park",elementType:"geometry",stylers:[{color:"#dcece0"}]},
+    {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+    {featureType:"road.arterial",elementType:"geometry",stylers:[{color:"#fdfdfc"}]},
+    {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#fbe6c8"}]},
+    {featureType:"road.highway",elementType:"geometry.stroke",stylers:[{color:"#f2d9b5"}]},
+    {featureType:"road",elementType:"labels",stylers:[{visibility:"simplified"}]},
+    {featureType:"transit",elementType:"labels.text",stylers:[{visibility:"off"}]},
+    {featureType:"transit.line",elementType:"geometry",stylers:[{color:"#e7e4de"}]},
+    {featureType:"transit.station",elementType:"geometry",stylers:[{color:"#eae7e1"}]},
+    {featureType:"water",elementType:"geometry",stylers:[{color:"#cfe2f2"}]},
+    {featureType:"water",elementType:"labels.text.fill",stylers:[{color:"#93aec6"}]}
+  ],
+  dark: [
+    {elementType:"geometry",stylers:[{color:"#1a1e25"}]},
+    {elementType:"labels.icon",stylers:[{visibility:"off"}]},
+    {elementType:"labels.text.fill",stylers:[{color:"#8b95a4"}]},
+    {elementType:"labels.text.stroke",stylers:[{color:"#12151a"},{weight:3}]},
+    {featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#2c333d"}]},
+    {featureType:"landscape.man_made",elementType:"geometry",stylers:[{color:"#1f242b"}]},
+    {featureType:"poi",elementType:"labels.text",stylers:[{visibility:"off"}]},
+    {featureType:"poi.park",elementType:"geometry",stylers:[{color:"#1e2a24"}]},
+    {featureType:"road",elementType:"geometry",stylers:[{color:"#282e37"}]},
+    {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#3a3128"}]},
+    {featureType:"road",elementType:"labels",stylers:[{visibility:"simplified"}]},
+    {featureType:"transit",elementType:"labels.text",stylers:[{visibility:"off"}]},
+    {featureType:"transit.line",elementType:"geometry",stylers:[{color:"#252b33"}]},
+    {featureType:"water",elementType:"geometry",stylers:[{color:"#0e1620"}]},
+    {featureType:"water",elementType:"labels.text.fill",stylers:[{color:"#3f556b"}]}
+  ]
+};
+
+/* ============================================================================
+   3. STATE & HELPERS
+   ============================================================================ */
+const KEY_STORE   = "tokyoTrip.gmapsKey";
+const THEME_STORE = "tokyoTrip.theme";
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const state = { activeDay:"all", activeId:null, circles:true, routes:true, ready:false, gen:0 };
+
+let map, infoWindow;
+const layer  = [];   // [{ id, dayIdx, idx, place, day, marker, circle }]
+const routes = [];   // Polyline per day
+
+const $  = (s, r = document) => r.querySelector(s);
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+// 사용자 메모의 <b> 만 허용하고 나머지는 이스케이프
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const rich = s => esc(s).replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>")
+                         .replace(/&lt;br\s*\/?&gt;/g, "<br>");
+const pid  = (d, p) => `d${d}-p${p}`;
+
+function haversine(a, b) {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 +
+            Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const dayDistance = day =>
+  day.places.reduce((km, p, i) => i ? km + haversine(day.places[i - 1], p) : 0, 0);
+
+const MOVE_ICON = {
+  walk : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13" cy="4" r="2"/><path d="m10 21 2-5-2.5-2.5L9 9l4-1 3 3 3 1"/><path d="M8 21l2.5-6"/></svg>',
+  train: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="13" rx="3"/><path d="M8 19l-2 3M16 19l2 3M5 10h14"/><circle cx="9" cy="13" r=".6" fill="currentColor"/><circle cx="15" cy="13" r=".6" fill="currentColor"/></svg>',
+  bus  : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 20v2M17 20v2"/></svg>',
+  car  : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 13l1.5-5h11L19 13"/><rect x="3" y="13" width="18" height="6" rx="2"/><path d="M7 19v2M17 19v2"/></svg>'
+};
+const MOVE_LABEL = { walk:"도보", train:"전철", bus:"버스", car:"차량" };
+const PLANE_ICON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a.6.6 0 0 0-.6 1l5.2 3.4-2.4 2.4-2.3-.5a.6.6 0 0 0-.5 1l2.6 2.6 2.6 2.6a.6.6 0 0 0 1-.5l-.5-2.3 2.4-2.4 3.4 5.2a.6.6 0 0 0 1-.6z"/></svg>';
+
+const searchUrl = p => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + " " + (p.en || ""))}`;
+const routeUrl  = p => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+
+/* ---------- pin icon (SVG data URI) ---------- */
+function pinIcon(color, n, active) {
+  const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="46" height="58" viewBox="0 0 46 58">
+<defs><filter id="f" x="-60%" y="-60%" width="220%" height="220%">
+<feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-color="#0b1220" flood-opacity="${active ? .45 : .28}"/></filter></defs>
+<path filter="url(#f)" d="M23 3C13.6 3 6 10.6 6 20c0 12.1 15.1 30.6 15.8 31.4a1.6 1.6 0 0 0 2.4 0C24.9 50.6 40 32.1 40 20 40 10.6 32.4 3 23 3z"
+ fill="${color}" stroke="#ffffff" stroke-width="${active ? 4 : 3}"/>
+<circle cx="23" cy="20" r="9.6" fill="#ffffff" fill-opacity=".95"/>
+<text x="23" y="20" dy=".36em" text-anchor="middle" font-family="Helvetica,Arial,sans-serif"
+ font-size="12.5" font-weight="bold" fill="${color}">${n}</text>
+</svg>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
+/* ============================================================================
+   4. SIDEBAR RENDER
+   ============================================================================ */
+function countUp(node, to, suffix = "", decimals = 0) {
+  if (REDUCED) { node.textContent = to.toFixed(decimals) + suffix; return; }
+  const dur = 850, t0 = performance.now();
+  const step = t => {
+    const k = Math.min(1, (t - t0) / dur);
+    const e = 1 - Math.pow(1 - k, 3);                 // easeOutCubic
+    node.textContent = (to * e).toFixed(decimals) + suffix;
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function renderHeader() {
+  const days  = TRIP_DATA.days;
+  const spots = days.reduce((a, d) => a + d.places.length, 0);
+  const dist  = days.reduce((a, d) => a + dayDistance(d), 0);
+  $("#tripTitle").textContent = TRIP_DATA.title;
+  $("#tripDates").textContent = `${days[0].date} – ${days[days.length - 1].date}`;
+  $("#statDays").textContent  = `${days.length - 1}박 ${days.length}일`;
+  countUp($("#statSpots"), spots, "곳");
+  countUp($("#statDist"), dist, "km", 1);
+}
+
+function renderTabs() {
+  const tabs = $("#tabs");
+  tabs.innerHTML = "";
+
+  const all = el("button", "tab", `<i>ALL</i><b>전체 일정</b>`);
+  all.setAttribute("role", "tab");
+  all.style.setProperty("--tab-c", "#111827");
+  all.dataset.day = "all";
+  all.onclick = () => setDay("all");
+  tabs.appendChild(all);
+
+  TRIP_DATA.days.forEach((d, i) => {
+    const t = el("button", "tab", `<i>${esc(d.label)}</i><b>${esc(d.date)}</b>`);
+    t.setAttribute("role", "tab");
+    t.style.setProperty("--tab-c", d.color);
+    t.dataset.day = i;
+    t.onclick = () => setDay(i);
+    tabs.appendChild(t);
+  });
+}
+
+function renderLegend() {
+  const lg = $("#legend");
+  lg.innerHTML = "";
+  TRIP_DATA.days.forEach((d, i) => {
+    const b = el("button", null, `<i style="background:${d.color}"></i>${esc(d.label)} · ${esc(d.theme.split(" · ")[0])}`);
+    b.onclick = () => setDay(i);
+    lg.appendChild(b);
+  });
+}
+
+function flightRow(f) {
+  return el("div", "flight",
+    `${PLANE_ICON}
+     <div class="flight-leg">
+       <span><small>${esc(f.from)}</small><span class="flight-time">${esc(f.dep)}</span></span>
+       <span class="flight-line"></span>
+       <span><small>${esc(f.to)}</small><span class="flight-time">${esc(f.arr)}</span></span>
+     </div>`);
+}
+
+function renderList() {
+  const list = $("#list");
+  list.innerHTML = "";
+
+  TRIP_DATA.days.forEach((day, di) => {
+    const block = el("section", "day-block");
+    block.dataset.day = di;
+    block.style.setProperty("--d-c", day.color);
+
+    const head = el("div", "day-head");
+    head.append(
+      el("div", "day-bar"),
+      el("div", null, `<h2>${esc(day.label)} · ${esc(day.theme)}</h2><p>${esc(day.date)}</p>`),
+      el("div", "day-meta", `${day.places.length}곳 · ${dayDistance(day).toFixed(1)}km${day.budget ? `<br><b>${esc(day.budget)}</b>` : ""}`)
+    );
+    block.appendChild(head);
+
+    if (day.flight) block.appendChild(flightRow(day.flight));
+
+    day.places.forEach((p, i) => {
+      const id = pid(di, i);
+      const card = el("button", "card");
+      card.dataset.id = id;
+      card.style.setProperty("--i", i);
+      card.innerHTML =
+        `<div class="card-num">${i + 1}</div>
+         <div class="card-body">
+           <div class="card-title"><b>${esc(p.name)}</b><em>${esc(p.en || "")}</em></div>
+           <div class="card-sub">
+             <span class="time">${esc(p.time || "")}</span>
+             ${p.cat ? `<span class="tag">${esc(p.cat)}</span>` : ""}
+             ${p.cost ? `<span class="cost${/^(무료|¥0)/.test(p.cost) ? " free" : ""}">${esc(p.cost)}</span>` : ""}
+           </div>
+           ${p.note ? `<p class="card-note">${rich(p.note)}</p>` : ""}
+           <div class="card-links">
+             <a class="mini" href="${searchUrl(p)}" target="_blank" rel="noopener">구글 지도</a>
+             <a class="mini" href="${routeUrl(p)}" target="_blank" rel="noopener">길찾기</a>
+           </div>
+         </div>`;
+      card.querySelectorAll("a").forEach(a => a.addEventListener("click", e => e.stopPropagation()));
+      card.addEventListener("click", () => focusPlace(id, true));
+      card.addEventListener("mouseenter", () => hoverPin(id, true));
+      card.addEventListener("mouseleave", () => hoverPin(id, false));
+      block.appendChild(card);
+
+      if (p.move && i < day.places.length - 1) {
+        const m = p.move;
+        block.appendChild(el("div", "leg",
+          `<div class="leg-rail"></div>
+           <span>${MOVE_ICON[m.mode] || MOVE_ICON.walk}
+             ${MOVE_LABEL[m.mode] || "이동"} ${m.min}분${m.via ? " · " + esc(m.via) : ""}${m.cost ? ` · <span class="leg-cost">${esc(m.cost)}</span>` : ""}</span>`));
+      }
+    });
+
+    list.appendChild(block);
+  });
+}
+
+/* 일자 전환 시 카드 등장 애니메이션을 다시 재생 */
+function restagger() {
+  if (REDUCED) return;
+  document.querySelectorAll(".day-block").forEach(b => {
+    if (b.style.display === "none") return;
+    b.querySelectorAll(".card, .flight").forEach(n => {
+      n.style.animation = "none";
+      void n.offsetWidth;                 // 강제 리플로우로 애니메이션 리셋
+      n.style.animation = "";
+    });
+  });
+}
+
+/* ============================================================================
+   5. MAP
+   ============================================================================ */
+const currentTheme = () => document.documentElement.dataset.theme;
+
+function initMap() {
+  $("#gate").hidden = true;
+  document.body.classList.remove("gate-open");
+
+  map = new google.maps.Map($("#map"), {
+    center: { lat: 35.6812, lng: 139.7671 },
+    zoom: 12,
+    styles: MAP_STYLE[currentTheme()],
+    disableDefaultUI: true,
+    zoomControl: true,
+    gestureHandling: "greedy",
+    clickableIcons: false,
+    maxZoom: 18
+  });
+
+  infoWindow = new google.maps.InfoWindow({ headerDisabled: true, maxWidth: 268 });
+  google.maps.event.addListener(infoWindow, "closeclick", () => setActive(null));
+
+  TRIP_DATA.days.forEach((day, di) => {
+    day.places.forEach((p, i) => {
+      const marker = new google.maps.Marker({
+        position: { lat: p.lat, lng: p.lng },
+        title: p.name,
+        zIndex: 100 + i,
+        icon: {
+          url: pinIcon(day.color, i + 1, false),
+          scaledSize: new google.maps.Size(38, 48),
+          anchor: new google.maps.Point(19, 48)
+        }
+      });
+      const id = pid(di, i);
+      marker.addListener("click", () => focusPlace(id, false, true));
+
+      const circle = new google.maps.Circle({
+        center: { lat: p.lat, lng: p.lng },
+        radius: p.radius || 300,
+        strokeColor: day.color, strokeOpacity: .35, strokeWeight: 1.5,
+        fillColor: day.color, fillOpacity: .08,
+        clickable: false, zIndex: 1
+      });
+
+      layer.push({ id, dayIdx: di, idx: i, place: p, day, marker, circle });
+    });
+
+    routes.push(new google.maps.Polyline({
+      path: day.places.map(p => ({ lat: p.lat, lng: p.lng })),
+      strokeColor: day.color,
+      strokeOpacity: 0,
+      zIndex: 2,
+      icons: [{
+        icon: { path: "M 0,-1 0,1", strokeOpacity: .85, strokeWeight: 2.4, scale: 3 },
+        offset: "0", repeat: "13px"
+      }]
+    }));
+  });
+
+  state.ready = true;
+  applyVisibility(false);
+  startRouteFlow();
+  // 지도가 자기 크기를 확정한 뒤에 맞춰야 한다 — 즉시 fitBounds 하면 범위가 어긋난다
+  google.maps.event.addListenerOnce(map, "idle", fitToVisible);
+}
+window.__initMap = initMap;
+
+const markerIconFor = (item, active) => ({
+  url: pinIcon(item.day.color, item.idx + 1, active),
+  scaledSize: new google.maps.Size(active ? 46 : 38, active ? 58 : 48),
+  anchor: new google.maps.Point(active ? 23 : 19, active ? 58 : 48)
+});
+
+const isVisible = it => state.activeDay === "all" || it.dayIdx === state.activeDay;
+const visibleItems = () => layer.filter(isVisible);
+
+function applyVisibility(fit) {
+  document.querySelectorAll(".day-block").forEach(b => {
+    b.style.display = (state.activeDay === "all" || +b.dataset.day === state.activeDay) ? "" : "none";
+  });
+  document.querySelectorAll(".tab").forEach(t => {
+    t.setAttribute("aria-selected", String(t.dataset.day === String(state.activeDay)));
+  });
+  if (!state.ready) return;
+
+  const gen = ++state.gen;                       // 이전 전환의 지연 콜백을 무효화
+  layer.forEach(it => {
+    const on = isVisible(it);
+    if (!on) { it.marker.setMap(null); it.circle.setMap(null); return; }
+
+    it.circle.setMap(state.circles ? map : null);
+    if (it.marker.getMap()) return;              // 이미 떠 있으면 다시 떨어뜨리지 않는다
+    const show = () => {
+      if (state.gen !== gen || !isVisible(it)) return;
+      it.marker.setAnimation(REDUCED ? null : google.maps.Animation.DROP);
+      it.marker.setMap(map);
+    };
+    REDUCED ? show() : setTimeout(show, it.idx * 55);
+  });
+
+  routes.forEach((r, di) => {
+    const on = (state.activeDay === "all" || di === state.activeDay) && state.routes;
+    r.setMap(on ? map : null);
+  });
+
+  if (fit) fitToVisible();
+}
+
+function fitToVisible() {
+  if (!state.ready) return;
+  let items = visibleItems();
+  if (!items.length) return;
+  const core = items.filter(it => it.place.fit !== false);   // 공항처럼 멀리 떨어진 곳은 제외
+  if (core.length >= 2) items = core;
+
+  const b = new google.maps.LatLngBounds();
+  items.forEach(it => b.extend(it.marker.getPosition()));
+  map.fitBounds(b, { top: 78, right: 66, bottom: 66, left: 66 });
+}
+
+/* 동선 점선이 진행 방향으로 흐르는 애니메이션 */
+let flowRAF = null, flowOffset = 0, flowLast = 0;
+function flowTick(t) {
+  if (t - flowLast > 55) {
+    flowLast = t;
+    flowOffset = (flowOffset + 1.3) % 13;         // repeat 이 13px 이므로 13에서 되돌린다
+    routes.forEach(r => {
+      if (!r.getMap()) return;
+      const icons = r.get("icons");
+      icons[0].offset = flowOffset + "px";
+      r.set("icons", icons);
+    });
+  }
+  flowRAF = requestAnimationFrame(flowTick);
+}
+function startRouteFlow() {
+  if (REDUCED || flowRAF) return;
+  flowRAF = requestAnimationFrame(flowTick);
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { cancelAnimationFrame(flowRAF); flowRAF = null; }
+  else if (state.ready) { flowLast = 0; startRouteFlow(); }
+});
+
+function setDay(day) {
+  state.activeDay = day;
+  setActive(null);
+  if (infoWindow) infoWindow.close();
+  applyVisibility(true);
+  restagger();
+  if (matchMedia("(max-width:860px)").matches && day !== "all") {
+    document.querySelector(`.day-block[data-day="${day}"]`)?.scrollIntoView({ behavior:"smooth", block:"start" });
+  } else {
+    $("#list").scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function setActive(id) {
+  state.activeId = id;
+  document.querySelectorAll(".card").forEach(c => c.classList.toggle("is-active", c.dataset.id === id));
+  if (!state.ready) return;
+
+  layer.forEach(it => {
+    const on = it.id === id;
+    it.marker.setIcon(markerIconFor(it, on));
+    it.marker.setZIndex(on ? 999 : 100 + it.idx);
+    it.circle.setOptions(on
+      ? { strokeOpacity:.7, strokeWeight:2, fillOpacity:.16 }
+      : { strokeOpacity:.35, strokeWeight:1.5, fillOpacity:.08 });
+  });
+
+  if (!id || REDUCED) return;
+  const cur = layer.find(it => it.id === id);
+  if (cur && cur.marker.getMap()) {                 // 선택한 핀만 짧게 통통
+    cur.marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(() => cur.marker.setAnimation(null), 700);
+  }
+}
+
+function hoverPin(id, on) {
+  if (!state.ready || state.activeId === id) return;
+  const it = layer.find(x => x.id === id);
+  if (!it || !it.marker.getMap()) return;
+  it.marker.setIcon(markerIconFor(it, on));
+  it.marker.setZIndex(on ? 900 : 100 + it.idx);
+}
+
+function focusPlace(id, pan, fromMarker) {
+  const it = layer.find(x => x.id === id);
+  setActive(id);
+
+  if (it && state.ready) {
+    const p = it.place;
+    infoWindow.setContent(
+      `<div class="iw" style="--iw-c:${it.day.color}">
+         <div class="iw-top">
+           <span class="iw-num">${it.idx + 1}</span>
+           <span class="iw-day">${esc(it.day.label)} · ${esc(p.time || "")}</span>
+         </div>
+         <h4>${esc(p.name)}</h4>
+         <div class="iw-en">${esc(p.en || "")}</div>
+         ${p.note ? `<p>${rich(p.note)}</p>` : ""}
+         <a href="${searchUrl(p)}" target="_blank" rel="noopener">구글 지도에서 열기</a>
+       </div>`);
+    if (it.marker.getMap()) infoWindow.open({ map, anchor: it.marker });
+    if (pan) {
+      map.panTo(it.marker.getPosition());
+      if (map.getZoom() < 14) map.setZoom(15);
+    }
+  }
+
+  if (fromMarker) {
+    document.querySelector(`.card[data-id="${id}"]`)?.scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+}
+
+/* ============================================================================
+   6. THEME
+   ============================================================================ */
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem(THEME_STORE, t); } catch {}
+  if (state.ready) map.setOptions({ styles: MAP_STYLE[t] });
+}
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem(THEME_STORE); } catch {}
+  setTheme(saved === "dark" ? "dark" : "light");   // 기본은 밝게
+}
+
+/* ============================================================================
+   7. API KEY GATE
+   ============================================================================ */
+const gateError = msg => { $("#gateErr").innerHTML = msg ? `<div class="gate-err">${esc(msg)}</div>` : ""; };
+function showGate(msg) {
+  $("#gate").hidden = false;
+  document.body.classList.add("gate-open");
+  gateError(msg || "");
+}
+function loadMaps(key) {
+  gateError("");
+  const s = document.createElement("script");
+  s.src = "https://maps.googleapis.com/maps/api/js"
+        + `?key=${encodeURIComponent(key)}&v=weekly&language=ko&region=JP&callback=__initMap`;
+  s.async = true;
+  s.onerror = () => showGate("지도 스크립트를 불러오지 못했습니다. 키와 네트워크 연결을 확인해 주세요.");
+  document.head.appendChild(s);
+}
+window.gm_authFailure = () =>
+  showGate("API 키가 거부되었습니다. 키가 맞는지, Maps JavaScript API가 켜져 있는지, 리퍼러 제한에 이 주소가 포함돼 있는지 확인해 주세요.");
+
+/* ============================================================================
+   8. BOOT
+   ============================================================================ */
+document.body.classList.add("gate-open");
+initTheme();
+renderHeader();
+renderTabs();
+renderLegend();
+renderList();
+applyVisibility(false);
+
+$("#themeBtn").onclick = () => setTheme(currentTheme() === "dark" ? "light" : "dark");
+$("#fitBtn").onclick   = fitToVisible;
+
+$("#tgCircle").onclick = e => {
+  state.circles = e.currentTarget.getAttribute("aria-pressed") !== "true";
+  e.currentTarget.setAttribute("aria-pressed", String(state.circles));
+  applyVisibility(false);
+};
+$("#tgRoute").onclick = e => {
+  state.routes = e.currentTarget.getAttribute("aria-pressed") !== "true";
+  e.currentTarget.setAttribute("aria-pressed", String(state.routes));
+  applyVisibility(false);
+};
+$("#tgFit").onclick = () => setDay("all");
+
+$("#gateForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const key = $("#keyInput").value.trim();
+  if (!key) return gateError("키를 입력해 주세요.");
+  try { localStorage.setItem(KEY_STORE, key); } catch {}
+  loadMaps(key);
+});
+$("#clearKey").onclick = () => {
+  try { localStorage.removeItem(KEY_STORE); } catch {}
+  $("#keyInput").value = "";
+  gateError("저장된 키를 삭제했습니다.");
+};
+
+// 우선순위: gmaps-key.local.js → localStorage → 키 입력 화면
+let savedKey = window.__GMAPS_KEY || null;
+if (savedKey) {
+  loadMaps(savedKey);                       // 로컬 키 파일은 입력창에 노출하거나 저장하지 않음
+} else {
+  try { savedKey = localStorage.getItem(KEY_STORE); } catch {}
+  if (savedKey) { $("#keyInput").value = savedKey; loadMaps(savedKey); }
+}
+</script>
+</body>
+</html>
