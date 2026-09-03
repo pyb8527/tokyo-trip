@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="도쿄 3박 4일 (2026.10.08–10.11) 일정표 — 이동수단·소요시간·금액 포함, 지도 연동">
-<meta name="theme-color" content="#f2f5fa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0e12" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="도쿄 3박 4일">
@@ -16,45 +16,41 @@
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
-   TOKYO TRIP · bright theme tokens
+   TOKYO TRIP
+   중립 표면 + 헤어라인 경계 + 한 가지 강조색.
+   그라데이션·그림자·등장 애니메이션 없음. 색은 데이터에만 쓴다.
    ============================================================ */
 :root{
-  --bg:#f2f5fa;
-  --bg-tint-a:#ffd9d2;
-  --bg-tint-b:#dbe7ff;
+  --bg:#ffffff;
   --surface:#ffffff;
-  --surface-2:#f7f9fc;
-  --surface-3:#eaeff7;
-  --line:#e2e8f2;
-  --line-soft:#edf1f7;
-  --text:#111827;
-  --text-2:#5a6478;
-  --text-3:#96a0b3;
-  --accent:#ff6b5b;
-  --shadow-sm:0 1px 2px rgba(23,43,77,.05), 0 2px 6px rgba(23,43,77,.05);
-  --shadow-md:0 4px 14px rgba(23,43,77,.08), 0 1px 3px rgba(23,43,77,.05);
-  --shadow-lg:0 18px 44px rgba(23,43,77,.16), 0 4px 10px rgba(23,43,77,.06);
-  --radius:16px;
-  --radius-sm:11px;
-  --sidebar-w:410px;
-  --ease:cubic-bezier(.2,.75,.3,1);
+  --surface-2:#f6f7f9;
+  --surface-3:#eef0f3;
+  --line:#e4e6ea;
+  --line-soft:#eef0f3;
+  --text:#16181d;
+  --text-2:#5c626d;
+  --text-3:#9298a3;
+  --accent:#d8442f;
+  --good:#1a7f37;
+  --radius:10px;
+  --radius-sm:6px;
+  --sidebar-w:392px;
+  --ease:cubic-bezier(.2,.6,.3,1);
+  --shadow:0 6px 24px rgba(16,18,24,.10), 0 1px 2px rgba(16,18,24,.06);
 }
 :root[data-theme="dark"]{
-  --bg:#0d1117;
-  --bg-tint-a:#3a1f1c;
-  --bg-tint-b:#16233d;
-  --surface:#151a22;
-  --surface-2:#1b212b;
-  --surface-3:#222935;
-  --line:#2a323e;
-  --line-soft:#222935;
-  --text:#eef2f8;
-  --text-2:#a5afbf;
-  --text-3:#6f7b8c;
-  --accent:#ff8577;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow-md:0 4px 14px rgba(0,0,0,.45);
-  --shadow-lg:0 18px 44px rgba(0,0,0,.55);
+  --bg:#0c0e12;
+  --surface:#13161b;
+  --surface-2:#181c22;
+  --surface-3:#1f242c;
+  --line:#272c35;
+  --line-soft:#1f242c;
+  --text:#e9ebef;
+  --text-2:#9ba2ae;
+  --text-3:#6a717d;
+  --accent:#f0705c;
+  --good:#3fb950;
+  --shadow:0 6px 24px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -63,435 +59,318 @@ body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",
               "Malgun Gothic","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
-  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  word-break:keep-all;overflow-wrap:anywhere;   /* 한글은 어절 단위로만 끊는다 */
 }
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 a{color:inherit}
-::-webkit-scrollbar{width:10px;height:10px}
+:where(button,a,input):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::-webkit-scrollbar{width:9px;height:9px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:content-box}
 ::-webkit-scrollbar-thumb:hover{background:var(--text-3);background-clip:content-box;border:3px solid transparent}
 ::-webkit-scrollbar-track{background:transparent}
+
+.num{font-variant-numeric:tabular-nums}
 
 /* ============================================================
    Layout
    ============================================================ */
 .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;height:100dvh;overflow:hidden}
-.panel{
-  display:flex;flex-direction:column;min-height:0;z-index:2;
-  background:var(--surface);border-right:1px solid var(--line);
-}
-.stage{position:relative;min-width:0;background:var(--surface-3)}
+.panel{display:flex;flex-direction:column;min-height:0;z-index:2;background:var(--surface);border-right:1px solid var(--line)}
+.stage{position:relative;min-width:0;background:var(--surface-2)}
 
 /* ---------- Header ---------- */
-.head{
-  position:relative;flex:0 0 auto;padding:22px 22px 0;overflow:hidden;
-  background:
-    radial-gradient(520px 190px at 6% -30%, var(--bg-tint-a), transparent 68%),
-    radial-gradient(520px 210px at 96% -34%, var(--bg-tint-b), transparent 68%),
-    var(--surface);
-}
+.head{flex:0 0 auto;padding:20px 20px 0;background:var(--surface)}
 .head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
-.brand-mark{
-  width:42px;height:42px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;
-  background:linear-gradient(145deg,#ff8a7a,#ff6b5b 52%,#e14b3d);color:#fff;font-size:20px;
-  box-shadow:0 6px 16px rgba(255,107,91,.4);
-  animation:markIn .6s var(--ease) both;
-}
-.brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.4px;line-height:1.2}
-.brand p{margin:3px 0 0;font-size:12.5px;color:var(--text-3);letter-spacing:.2px}
+.brand{min-width:0}
+.brand h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.3px;line-height:1.3}
+.brand p{margin:1px 0 0;font-size:12px;color:var(--text-3);font-variant-numeric:tabular-nums}
 .icon-btn{
-  width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;border-radius:11px;
-  color:var(--text-2);transition:background .18s,color .18s,transform .3s var(--ease);
+  width:32px;height:32px;flex:0 0 auto;display:grid;place-items:center;border-radius:var(--radius-sm);
+  color:var(--text-3);transition:background .14s,color .14s;
 }
-.icon-btn:hover{background:var(--surface-3);color:var(--text)}
-.icon-btn:active{transform:scale(.9)}
-.icon-btn svg{transition:transform .45s var(--ease)}
-:root[data-theme="dark"] .icon-btn svg{transform:rotate(150deg)}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
 
 /* ---------- Stats ---------- */
-.stats{display:flex;gap:8px;margin-top:18px}
-.stat{
-  flex:1;min-width:0;padding:10px 12px;border-radius:var(--radius-sm);
-  background:color-mix(in srgb,var(--surface) 74%,transparent);
-  border:1px solid var(--line-soft);backdrop-filter:blur(6px);
-  animation:riseIn .5s var(--ease) both;
-}
-.stat:nth-child(2){animation-delay:.06s} .stat:nth-child(3){animation-delay:.12s}
-.stat b{display:block;font-size:18px;font-weight:800;letter-spacing:-.5px;line-height:1.25;font-variant-numeric:tabular-nums}
-.stat span{font-size:11px;color:var(--text-3);letter-spacing:.2px}
+.stats{display:flex;gap:20px;margin-top:16px}
+.stat b{display:block;font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.3;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--text-3)}
+
+/* ---------- Progress ---------- */
+.progress{margin-top:14px}
+.progress-bar{height:3px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.progress-bar i{display:block;height:100%;background:var(--good);transition:width .3s var(--ease)}
+.progress-txt{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-3)}
+.progress-txt b{font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums}
 
 /* ---------- Day tabs ---------- */
 .tabs{
-  display:flex;gap:6px;margin:18px -22px 0;padding:0 22px 14px;
+  display:flex;gap:2px;margin:16px -20px 0;padding:0 20px;
   overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  flex:0 0 auto;display:flex;flex-direction:column;gap:1px;white-space:nowrap;
-  padding:8px 14px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-soft);
-  transition:background .2s,color .2s,box-shadow .25s,transform .18s var(--ease);
-  animation:riseIn .45s var(--ease) both;
+  position:relative;flex:0 0 auto;display:flex;flex-direction:column;gap:1px;white-space:nowrap;
+  padding:9px 12px 11px;color:var(--text-3);transition:color .14s;
 }
-.tab:nth-child(2){animation-delay:.05s}.tab:nth-child(3){animation-delay:.1s}
-.tab:nth-child(4){animation-delay:.15s}.tab:nth-child(5){animation-delay:.2s}
-.tab:hover{background:var(--surface-3);transform:translateY(-1px)}
-.tab:active{transform:scale(.96)}
-.tab i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--text-3);text-transform:uppercase}
-.tab b{font-size:13px;font-weight:700;letter-spacing:-.2px}
-.tab[aria-selected="true"]{
-  background:var(--tab-c,var(--accent));border-color:transparent;color:#fff;
-  box-shadow:0 6px 16px color-mix(in srgb,var(--tab-c,var(--accent)) 40%,transparent);
+.tab i{font-style:normal;font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;opacity:.75}
+.tab b{font-size:12.5px;font-weight:500;letter-spacing:-.1px;font-variant-numeric:tabular-nums}
+.tab:hover{color:var(--text-2)}
+.tab[aria-selected="true"]{color:var(--text)}
+.tab[aria-selected="true"] b{font-weight:600}
+.tab[aria-selected="true"]::after{
+  content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;
+  background:var(--tab-c,var(--text));border-radius:2px 2px 0 0;
 }
-.tab[aria-selected="true"] i{color:rgba(255,255,255,.78)}
 
 /* ---------- Toggles ---------- */
-.toggles{display:flex;align-items:center;gap:6px;padding:13px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.chip{
-  display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;
-  font-size:12.5px;font-weight:650;background:var(--surface-2);border:1px solid var(--line);
-  color:var(--text-2);transition:.18s var(--ease);
+.toggles{
+  display:flex;align-items:center;gap:6px;padding:12px 20px;border-bottom:1px solid var(--line);
+  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
 }
-.chip:hover{border-color:var(--text-3);transform:translateY(-1px)}
-.chip:active{transform:scale(.95)}
-.chip .dot{width:7px;height:7px;border-radius:99px;background:var(--text-3);transition:.2s}
-.chip[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--surface)}
-.chip[aria-pressed="true"] .dot{background:#42d49a;box-shadow:0 0 0 3px rgba(66,212,154,.28)}
+.toggles::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--radius-sm);
+  font-size:12px;font-weight:500;color:var(--text-2);
+  background:transparent;border:1px solid var(--line);transition:.14s var(--ease);
+}
+.chip:hover{background:var(--surface-2);color:var(--text)}
+.chip .dot{width:5px;height:5px;border-radius:99px;background:var(--text-3);transition:background .14s}
+.chip[aria-pressed="true"]{background:var(--surface-3);color:var(--text);border-color:transparent}
+.chip[aria-pressed="true"] .dot{background:var(--text)}
+.chip:disabled{opacity:.45;cursor:default}
+.chip:disabled:hover{background:transparent;color:var(--text-2)}
 .chip-action{margin-left:auto}
 a.chip{text-decoration:none}
-.chip-action:hover{background:var(--surface-3);color:var(--text)}
 
-/* ---------- Itinerary list ---------- */
-.list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 0 48px;scroll-behavior:smooth}
-.day-block{padding:0 22px}
+/* ============================================================
+   Itinerary list
+   ============================================================ */
+.list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 0 48px;scroll-behavior:smooth}
+.day-block{padding:0 20px}
 .day-head{
-  display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:3;
-  padding:18px 0 11px;background:linear-gradient(var(--surface) 76%,transparent);
+  display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:3;
+  padding:22px 0 10px;background:var(--surface);
 }
-.day-bar{width:4px;height:32px;border-radius:99px;background:var(--d-c);box-shadow:0 0 0 4px color-mix(in srgb,var(--d-c) 14%,transparent)}
-.day-head h2{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.35px}
-.day-head p{margin:0;font-size:11.5px;color:var(--text-3)}
-.day-meta{margin-left:auto;flex:0 0 auto;font-size:11px;color:var(--text-3);text-align:right;line-height:1.35}
+.day-bar{width:3px;height:26px;border-radius:2px;background:var(--d-c)}
+.day-head h2{margin:0;font-size:13.5px;font-weight:600;letter-spacing:-.2px}
+.day-head p{margin:0;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.day-meta{margin-left:auto;flex:0 0 auto;font-size:11px;color:var(--text-3);text-align:right;line-height:1.45;font-variant-numeric:tabular-nums}
+.day-meta b{display:block;font-weight:500;color:var(--text-2)}
 
-/* flight banner */
+/* flight */
 .flight{
-  display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:11px 14px;
-  border-radius:var(--radius);border:1px dashed color-mix(in srgb,var(--d-c) 45%,var(--line));
-  background:color-mix(in srgb,var(--d-c) 7%,var(--surface));
-  animation:riseIn .5s var(--ease) both;
+  display:flex;align-items:center;gap:11px;margin-bottom:8px;padding:10px 13px;
+  border-radius:var(--radius);border:1px solid var(--line);background:var(--surface-2);
 }
-.flight svg{flex:0 0 auto;color:var(--d-c)}
-.flight-leg{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:750;letter-spacing:-.2px}
-.flight-leg small{font-size:10.5px;font-weight:600;color:var(--text-3);letter-spacing:.3px;display:block}
-.flight-line{flex:1;height:1px;min-width:22px;background:repeating-linear-gradient(90deg,var(--text-3) 0 3px,transparent 3px 7px);opacity:.5}
+.flight svg{flex:0 0 auto;color:var(--text-3)}
+.flight-leg{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;letter-spacing:-.1px}
+.flight-leg small{font-size:10px;font-weight:500;color:var(--text-3);letter-spacing:.2px;display:block}
+.flight-line{flex:1;height:1px;min-width:20px;background:var(--line)}
 .flight-time{font-variant-numeric:tabular-nums}
 
-/* place card */
+/* ---------- place card ---------- */
+.card-wrap{position:relative}
 .card{
-  position:relative;display:flex;gap:13px;width:100%;text-align:left;padding:13px;
-  border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--surface);
-  transition:border-color .2s,background .2s,box-shadow .25s,transform .2s var(--ease);
-  animation:cardIn .42s var(--ease) both;animation-delay:calc(var(--i,0) * 45ms);
+  position:relative;display:flex;gap:12px;width:100%;text-align:left;padding:12px 13px;
+  border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);
+  transition:border-color .14s,background .14s;
 }
-.card:hover{border-color:color-mix(in srgb,var(--d-c) 55%,transparent);transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.card:active{transform:translateY(0) scale(.995)}
-.card.is-active{
-  border-color:var(--d-c);background:color-mix(in srgb,var(--d-c) 5%,var(--surface));
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--d-c) 18%,transparent),var(--shadow-md);
-}
+.card:hover{border-color:var(--text-3)}
+.card.is-active{border-color:var(--d-c);background:var(--surface-2)}
+.card.is-visited{opacity:.45}
+.card.is-visited:hover{opacity:.8}
 .card-num{
-  flex:0 0 auto;width:28px;height:28px;margin-top:1px;border-radius:10px;
+  flex:0 0 auto;width:22px;height:22px;margin-top:1px;border-radius:var(--radius-sm);
   background:var(--d-c);color:#fff;display:grid;place-items:center;
-  font-size:13px;font-weight:800;box-shadow:0 3px 9px color-mix(in srgb,var(--d-c) 40%,transparent);
-  transition:transform .25s var(--ease);
+  font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums;
 }
-.card.is-active .card-num{transform:scale(1.12)}
 .card-body{min-width:0;flex:1}
-.card-title{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
-.card-title b{font-size:14.5px;font-weight:750;letter-spacing:-.3px}
-.card-title em{font-style:normal;font-size:10.5px;color:var(--text-3);letter-spacing:.2px}
-.card-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;font-size:11.5px;color:var(--text-3)}
-.tag{
-  padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:750;letter-spacing:.2px;
-  background:color-mix(in srgb,var(--d-c) 14%,transparent);color:var(--d-c);
-}
-.time{font-variant-numeric:tabular-nums;font-weight:750;color:var(--text-2)}
-.cost{
-  display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
-  font-size:10.5px;font-weight:750;letter-spacing:.1px;font-variant-numeric:tabular-nums;
-  background:var(--surface-3);color:var(--text-2);border:1px solid var(--line-soft);
-}
-.cost.free{background:color-mix(in srgb,#22c55e 13%,transparent);color:#15803d;border-color:transparent}
-:root[data-theme="dark"] .cost.free{background:rgba(34,197,94,.16);color:#5fd99a}
-.day-meta b{display:block;font-weight:750;color:var(--d-c);font-variant-numeric:tabular-nums}
-.leg .leg-cost{color:var(--text-2);font-weight:700}
-.card-note{margin:8px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.55}
-.card-note b{color:var(--d-c);font-weight:750}
-.card-links{display:flex;gap:6px;margin-top:10px}
+.card-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;padding-right:26px}
+.card-title b{font-size:14px;font-weight:600;letter-spacing:-.2px}
+.card-title em{font-style:normal;font-size:10.5px;color:var(--text-3)}
+.card-sub{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;font-size:11.5px;color:var(--text-3)}
+.time{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text-2)}
+.tag{color:var(--text-3)}
+.tag::before{content:"";display:inline-block;width:3px;height:3px;border-radius:99px;background:currentColor;margin:0 6px 3px 0;vertical-align:middle}
+.cost{font-variant-numeric:tabular-nums;color:var(--text-2)}
+.cost.free{color:var(--good)}
+.card-note{margin:7px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.card-note b{color:var(--text);font-weight:600}
+.card-links{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
 .mini{
-  display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:9px;
-  font-size:11.5px;font-weight:650;text-decoration:none;color:var(--text-2);
-  background:var(--surface-3);transition:.18s var(--ease);
+  display:inline-flex;align-items:center;padding:4px 9px;border-radius:var(--radius-sm);
+  font-size:11.5px;font-weight:500;text-decoration:none;color:var(--text-2);
+  border:1px solid var(--line);transition:.14s var(--ease);
 }
-.mini:hover{background:var(--d-c);color:#fff;transform:translateY(-1px)}
+.mini:hover{border-color:var(--text-3);color:var(--text)}
+
+/* now */
+.card.is-now{border-color:var(--d-c);box-shadow:inset 2px 0 0 var(--d-c)}
+.now-pill{font-size:10.5px;font-weight:600;color:var(--d-c);letter-spacing:.2px}
+
+/* visited */
+.visit{
+  position:absolute;right:10px;top:11px;z-index:2;width:20px;height:20px;border-radius:var(--radius-sm);
+  display:grid;place-items:center;color:var(--text-3);
+  border:1px solid var(--line);transition:.14s var(--ease);
+}
+.visit:hover{border-color:var(--good);color:var(--good)}
+.visit svg{opacity:0;transition:opacity .14s}
+.visit:hover svg{opacity:.5}
+.visit[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.visit[aria-pressed="true"] svg{opacity:1}
 
 /* leg between stops */
-.leg{display:flex;align-items:center;gap:10px;padding:5px 0 5px 14px;color:var(--text-3);font-size:11.5px}
-.leg-rail{width:2px;height:28px;border-radius:2px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
-.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg{display:flex;align-items:center;gap:9px;padding:4px 0 4px 12px;color:var(--text-3);font-size:11px}
+.leg-rail{width:1px;height:22px;background:var(--line)}
+.leg span{display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
+.leg-cost{color:var(--text-2)}
 
 /* ============================================================
    Map stage
    ============================================================ */
 #map{position:absolute;inset:0}
-.map-hud{position:absolute;left:16px;top:16px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 32px)}
+.map-hud{position:absolute;left:14px;top:14px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 28px)}
 .hud-btn{
-  display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:11px;
-  background:var(--surface);color:var(--text);font-size:12.5px;font-weight:680;
-  box-shadow:var(--shadow-md);border:1px solid var(--line);transition:.2s var(--ease);
+  display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;
+  border:1px solid var(--line);box-shadow:var(--shadow);transition:.14s var(--ease);
 }
-.hud-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.hud-btn:active{transform:translateY(0) scale(.97)}
+.hud-btn:hover{color:var(--text);border-color:var(--text-3)}
+.hud-btn[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:transparent}
+
 .legend{
-  position:absolute;right:16px;bottom:32px;z-index:5;display:flex;flex-direction:column;gap:8px;
-  padding:12px 14px;border-radius:14px;border:1px solid var(--line);
-  background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(12px);
-  box-shadow:var(--shadow-md);animation:riseIn .6s var(--ease) both;animation-delay:.3s;
+  position:absolute;right:14px;bottom:26px;z-index:5;display:flex;flex-direction:column;gap:5px;
+  padding:10px 12px;border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--surface);box-shadow:var(--shadow);
 }
-.legend button{display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:650;color:var(--text-2);transition:color .18s}
+.legend button{
+  display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;color:var(--text-2);
+  white-space:nowrap;transition:color .14s;
+}
 .legend button:hover{color:var(--text)}
-.legend i{width:10px;height:10px;border-radius:99px;flex:0 0 auto;transition:transform .2s var(--ease)}
-.legend button:hover i{transform:scale(1.35)}
+.legend i{width:6px;height:6px;border-radius:99px;flex:0 0 auto}
+
+/* ---------- bottom sheet ---------- */
+.sheet{
+  position:absolute;left:14px;bottom:14px;z-index:6;width:min(320px,calc(100% - 28px));
+  padding:13px 14px;border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--surface);box-shadow:var(--shadow);
+}
+.sheet[hidden]{display:none}
+.sheet-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sheet-num{
+  width:20px;height:20px;flex:0 0 auto;border-radius:var(--radius-sm);background:var(--s-c);color:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;
+}
+.sheet-day{font-size:11px;font-weight:500;color:var(--text-3);font-variant-numeric:tabular-nums}
+.sheet-close{
+  margin-left:auto;width:22px;height:22px;flex:0 0 auto;border-radius:var(--radius-sm);
+  display:grid;place-items:center;color:var(--text-3);transition:.14s var(--ease);
+}
+.sheet-close:hover{background:var(--surface-3);color:var(--text)}
+.sheet h4{margin:0;font-size:14px;font-weight:600;letter-spacing:-.2px;line-height:1.35}
+.sheet .sheet-en{margin:1px 0 0;font-size:10.5px;color:var(--text-3)}
+.sheet-meta{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap;font-size:11.5px;color:var(--text-3)}
+.sheet p{margin:8px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.55}
+.sheet-acts{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
 
 /* ---------- API key gate ---------- */
-.gate{
-  position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;
-  background:
-    radial-gradient(900px 460px at 20% -10%, var(--bg-tint-a), transparent 62%),
-    radial-gradient(900px 460px at 88% 8%, var(--bg-tint-b), transparent 62%),
-    var(--surface-3);
-}
+.gate{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:22px;background:var(--surface-2)}
 .gate[hidden]{display:none}
-body.gate-open .map-hud,body.gate-open .legend{display:none}
 .gate-card{
-  width:min(450px,100%);padding:28px;border-radius:20px;
-  background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-lg);
-  animation:riseIn .5s var(--ease) both;
+  width:min(430px,100%);padding:26px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--line);
 }
-.gate-card h3{margin:0 0 7px;font-size:17.5px;font-weight:800;letter-spacing:-.35px}
-.gate-card p{margin:0;font-size:13px;color:var(--text-2);line-height:1.6}
-.gate-form{display:flex;gap:8px;margin-top:18px}
+.gate-card h3{margin:0 0 6px;font-size:16px;font-weight:600;letter-spacing:-.25px}
+.gate-card p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.gate-form{display:flex;gap:7px;margin-top:16px}
 .gate-form input{
-  flex:1;min-width:0;padding:12px 14px;border-radius:11px;border:1px solid var(--line);
-  background:var(--surface-2);color:var(--text);font-size:13.5px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;transition:.18s;
+  flex:1;min-width:0;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);font-size:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;transition:.14s;
 }
-.gate-form input:focus{outline:2px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:1px;border-color:transparent}
+.gate-form input:focus{outline:0;border-color:var(--accent);background:var(--surface)}
 .gate-form button{
-  flex:0 0 auto;padding:12px 19px;border-radius:11px;background:var(--text);color:var(--surface);
-  font-size:13.5px;font-weight:750;transition:.18s var(--ease);
+  padding:10px 16px;border-radius:var(--radius-sm);background:var(--text);color:var(--bg);
+  font-size:13px;font-weight:600;transition:opacity .14s;
 }
-.gate-form button:hover{opacity:.86;transform:translateY(-1px)}
-.gate-steps{margin-top:18px;padding:15px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line-soft)}
-.gate-steps ol{margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.8}
-.gate-steps code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:var(--surface-3);padding:1px 5px;border-radius:5px}
-.gate-note{margin-top:13px;font-size:11.5px;color:var(--text-3);line-height:1.6}
+.gate-form button:hover{opacity:.85}
+.gate-steps{margin-top:16px;padding:13px 15px;border-radius:var(--radius-sm);background:var(--surface-2);font-size:11.5px;color:var(--text-2);line-height:1.75}
+.gate-steps ol{margin:0;padding-left:17px}
+.gate-steps code{
+  padding:1px 5px;border-radius:4px;background:var(--surface-3);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
+}
 .gate-err{
-  margin-top:13px;padding:11px 13px;border-radius:11px;font-size:12.5px;
-  background:color-mix(in srgb,#e2483d 12%,transparent);color:#c93a30;
-  border:1px solid color-mix(in srgb,#e2483d 28%,transparent);animation:shake .4s var(--ease);
+  margin-top:11px;padding:9px 12px;border-radius:var(--radius-sm);font-size:12px;
+  color:#c0392b;background:color-mix(in srgb,#e2483d 8%,transparent);
+  border:1px solid color-mix(in srgb,#e2483d 24%,transparent);
 }
-:root[data-theme="dark"] .gate-err{color:#ff8a80}
-
-/* ---------- Google InfoWindow restyle ---------- */
-.gm-style .gm-style-iw-c{padding:0!important;border-radius:16px!important;box-shadow:var(--shadow-lg)!important;background:var(--surface)!important}
-.gm-style .gm-style-iw-d{overflow:hidden!important;padding:0!important}
-.gm-style .gm-style-iw-tc::after{background:var(--surface)!important}
-.gm-style .gm-style-iw-chr{display:none}
-.iw{width:236px;padding:15px 16px 14px;color:var(--text);animation:iwIn .3s var(--ease) both}
-.iw-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.iw-num{width:21px;height:21px;flex:0 0 auto;border-radius:7px;background:var(--iw-c);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
-.iw-day{font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--iw-c)}
-.iw h4{margin:0;font-size:15px;font-weight:750;letter-spacing:-.3px}
-.iw .iw-en{margin:2px 0 0;font-size:10.5px;color:var(--text-3)}
-.iw p{margin:9px 0 0;font-size:12px;color:var(--text-2);line-height:1.55}
-.iw a{display:block;margin-top:12px;padding:9px;border-radius:10px;text-align:center;background:var(--iw-c);color:#fff;font-size:12px;font-weight:750;text-decoration:none}
+:root[data-theme="dark"] .gate-err{color:#ff8577}
+.gate-note{margin-top:13px;font-size:11px;color:var(--text-3)}
+.gate-note button{color:var(--text-2)}
 
 /* ============================================================
-   Animations
+   Panel collapse
    ============================================================ */
-@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
-@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes markIn{from{opacity:0;transform:scale(.5) rotate(-18deg)}to{opacity:1;transform:none}}
-@keyframes iwIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.panel{transition:opacity .16s var(--ease)}
+body.panel-collapsed .app{grid-template-columns:0px 1fr}
+body.panel-collapsed .panel{opacity:0;pointer-events:none;overflow:hidden;border-right-color:transparent}
+.panel-ico{transition:transform .22s var(--ease)}
+body.panel-collapsed .panel-ico{transform:rotate(180deg)}
+
+body.gate-open .map-hud,body.gate-open .legend,body.gate-open .sheet{display:none}
+body.gate-open.panel-collapsed .app{grid-template-columns:var(--sidebar-w) 1fr}
+body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:visible}
 
 /* ============================================================
    Responsive
    ============================================================ */
-@media (max-width:1100px){ :root{--sidebar-w:346px} }
+@media (max-width:1180px){ :root{--sidebar-w:340px} }
 
 @media (max-width:860px){
-  /* flex column, not grid: sticky needs a containing block taller than itself,
-     which a grid row (sized to the item) never is. */
   .app{display:flex;flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
-  .stage{
-    position:sticky;top:0;height:46vh;min-height:280px;flex:0 0 auto;order:-1;
-    border-bottom:1px solid var(--line);
-    z-index:3;                        /* must beat .panel's z-index:2 or the list scrolls over the map */
-  }
+  .stage{position:sticky;top:0;height:46vh;min-height:260px;flex:0 0 auto;order:-1;border-bottom:1px solid var(--line);z-index:3}
   .panel{border-right:0;overflow:visible;flex:1 1 auto;min-height:0}
   .list{flex:none;overflow:visible}
-  .day-head{top:calc(46vh - 1px)}
-  /* the key card is taller than 46vh — let the stage grow around it instead of overflowing */
+  .day-head{top:0}
   body.gate-open .stage{position:relative;height:auto;min-height:0;z-index:auto}
   body.gate-open #map{display:none}
-  body.gate-open .gate{position:relative;inset:auto;padding:22px 14px}
-  .head{padding-top:18px}
-  .legend{right:10px;bottom:10px;padding:10px 12px;gap:6px}
-  .legend button{font-size:10.5px}
-  .map-hud{left:10px;top:10px}
-  .stat{padding:9px 10px}
-  .stat b{font-size:16px}
-}
+  body.gate-open .gate{position:relative;inset:auto;padding:20px 14px}
+  .legend{right:9px;bottom:9px;padding:8px 10px;gap:4px}
+  .legend button{font-size:10px}
+  .map-hud{left:9px;top:9px}
+  .sheet{left:9px;right:9px;bottom:9px;width:auto;max-height:52vh;overflow-y:auto}
 
-@media (max-width:420px){
-  body{font-size:14.5px}
-  .head,.day-block,.toggles{padding-left:15px;padding-right:15px}
-  .tabs{margin-left:-15px;margin-right:-15px;padding-left:15px;padding-right:15px}
-  .stage{height:42vh}
-  .day-head{top:calc(42vh - 1px)}
-  .legend{display:none}
-  .card{padding:12px 11px;gap:11px}
-  .gate-card{padding:21px}
-  .gate-form{flex-direction:column}
-  .gate-form button{width:100%}
-  .stats{gap:6px}
-}
-
-@media (hover:none){
-  .card:hover{border-color:var(--line-soft);transform:none;box-shadow:none}
-  .tab:hover,.chip:hover,.hud-btn:hover,.mini:hover{transform:none}
-}
-/* ============================================================
-   Panel collapse — 지도 넓게 보기
-   ============================================================ */
-/* ============================================================
-   Bottom sheet · 지금 · 방문체크 · 내 위치
-   ============================================================ */
-.sheet{
-  position:absolute;left:16px;bottom:16px;z-index:6;width:min(340px,calc(100% - 32px));
-  padding:14px 15px 13px;border-radius:16px;border:1px solid var(--line);
-  background:color-mix(in srgb,var(--surface) 96%,transparent);backdrop-filter:blur(14px);
-  box-shadow:var(--shadow-lg);animation:sheetIn .26s var(--ease) both;
-}
-.sheet[hidden]{display:none}
-.sheet-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.sheet-num{
-  width:23px;height:23px;flex:0 0 auto;border-radius:8px;background:var(--s-c);color:#fff;
-  display:grid;place-items:center;font-size:11.5px;font-weight:800;
-}
-.sheet-day{font-size:10.5px;font-weight:800;letter-spacing:.4px;color:var(--s-c)}
-.sheet-close{
-  margin-left:auto;width:26px;height:26px;flex:0 0 auto;border-radius:8px;display:grid;place-items:center;
-  color:var(--text-3);background:var(--surface-3);transition:.16s var(--ease);
-}
-.sheet-close:hover{background:var(--line);color:var(--text)}
-.sheet-close:active{transform:scale(.9)}
-.sheet h4{margin:0;font-size:15px;font-weight:780;letter-spacing:-.3px;line-height:1.3}
-.sheet .sheet-en{margin:2px 0 0;font-size:10.5px;color:var(--text-3)}
-.sheet-meta{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;font-size:11.5px}
-.sheet p{margin:9px 0 0;font-size:12.5px;color:var(--text-2);line-height:1.5}
-.sheet p b{color:var(--s-c);font-weight:750}
-.sheet-acts{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
-@keyframes sheetIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
-
-@media (max-width:860px){
-  .sheet{left:10px;right:10px;bottom:10px;width:auto;max-height:52vh;overflow-y:auto}
-}
-
-/* ---------- 지금 ---------- */
-.card.is-now{border-color:var(--d-c);box-shadow:0 0 0 2px color-mix(in srgb,var(--d-c) 26%,transparent)}
-.now-pill{
-  display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;
-  font-size:10px;font-weight:800;letter-spacing:.3px;background:var(--d-c);color:#fff;
-}
-.now-pill::before{
-  content:"";width:5px;height:5px;border-radius:99px;background:#fff;
-  animation:nowPulse 1.6s ease-in-out infinite;
-}
-@keyframes nowPulse{0%,100%{opacity:1}50%{opacity:.25}}
-
-/* ---------- 방문 체크 ---------- */
-.card-wrap{position:relative}
-.card.is-visited{opacity:.5}
-.card.is-visited:hover{opacity:.85}
-.visit{
-  position:absolute;right:9px;top:9px;z-index:2;width:26px;height:26px;border-radius:99px;
-  display:grid;place-items:center;color:var(--text-3);
-  background:var(--surface-2);border:1px solid var(--line);transition:.16s var(--ease);
-}
-.visit:hover{border-color:var(--d-c);color:var(--d-c);transform:scale(1.08)}
-.visit[aria-pressed="true"]{background:#22c55e;border-color:#22c55e;color:#fff}
-.visit svg{opacity:.55;transition:opacity .16s}
-.visit[aria-pressed="true"] svg{opacity:1}
-
-/* ---------- 진행률 ---------- */
-.progress{margin-top:11px}
-.progress-bar{height:5px;border-radius:99px;background:var(--surface-3);overflow:hidden}
-.progress-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#42d49a,#22c55e);transition:width .4s var(--ease)}
-.progress-txt{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--text-3)}
-.progress-txt b{font-weight:750;color:var(--text-2);font-variant-numeric:tabular-nums}
-
-/* ---------- 내 위치 ---------- */
-.hud-btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
-
-/* ---------- 모바일 지도 높이 조절 손잡이 ---------- */
-.grabber{display:none}
-@media (max-width:860px){
   .grabber{
-    display:block;position:sticky;z-index:4;height:16px;flex:0 0 auto;
+    display:block;position:sticky;z-index:4;height:15px;flex:0 0 auto;
     background:var(--surface);border-bottom:1px solid var(--line);cursor:ns-resize;touch-action:none;
   }
   .grabber::after{
     content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);
-    width:38px;height:4px;border-radius:99px;background:var(--line);
+    width:32px;height:3px;border-radius:99px;background:var(--line);
   }
-  .grabber:active::after{background:var(--text-3)}
-  body.panel-collapsed .grabber{display:none}
-}
-
-/* ---------- 작은 화면에서도 범례 유지 ---------- */
-@media (max-width:420px){
-  .legend{display:flex;right:8px;bottom:8px;padding:7px 9px;gap:4px}
-  .legend button{font-size:9.5px}
-  .legend i{width:7px;height:7px}
-}
-
-/* grid-template-columns / height 에 트랜지션을 걸면 값 자체가 적용되지 않는
-   문제가 있어(브라우저가 보간을 포기하고 이전 값을 유지) 레이아웃은 즉시 전환하고
-   패널만 페이드시킵니다. */
-.panel{transition:opacity .18s var(--ease)}
-body.panel-collapsed .app{grid-template-columns:0px 1fr}
-body.panel-collapsed .panel{opacity:0;pointer-events:none;overflow:hidden;border-right-color:transparent}
-.panel-ico{transition:transform .3s var(--ease)}
-body.panel-collapsed .panel-ico{transform:rotate(180deg)}
-
-@media (max-width:860px){
-  /* .stage 에 height 트랜지션을 걸면 46vh → 100dvh 전환이 씹혀서 높이가 안 바뀝니다.
-     모바일에서는 즉시 전환합니다. */
-  .panel-ico{transform:rotate(-90deg)}
   body.panel-collapsed .stage{height:100dvh}
-  body.panel-collapsed .panel{display:none}
+  body.panel-collapsed .panel,body.panel-collapsed .grabber{display:none}
   body.panel-collapsed .panel-ico{transform:rotate(90deg)}
-}
-
-/* 키 입력창이 떠 있을 땐 접힘을 무시 — 목록이 영영 안 보이는 상황 방지 */
-body.gate-open.panel-collapsed .app{grid-template-columns:var(--sidebar-w) 1fr}
-body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:visible}
-@media (max-width:860px){
+  .panel-ico{transform:rotate(-90deg)}
   body.gate-open.panel-collapsed .panel{display:flex}
   body.gate-open.panel-collapsed .stage{height:auto}
+}
+.grabber{display:none}
+
+@media (max-width:420px){
+  body{font-size:13.5px}
+  .head,.day-block,.toggles{padding-left:14px;padding-right:14px}
+  .tabs{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
+  .stage{height:42vh}
+  .stats{gap:15px}
+  .gate-card{padding:20px}
+  .gate-form{flex-direction:column}
+  .gate-form button{width:100%}
 }
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
@@ -505,11 +384,8 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
     <div class="head">
       <div class="head-top">
         <div class="brand">
-          <div class="brand-mark">⛩</div>
-          <div>
-            <h1 id="tripTitle">도쿄 3박 4일</h1>
-            <p id="tripDates">—</p>
-          </div>
+          <h1 id="tripTitle">도쿄 3박 4일</h1>
+          <p id="tripDates">—</p>
         </div>
         <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" aria-label="라이트/다크 전환">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -641,7 +517,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:4, cost:"무료"} },
 
         { name:"그란스타 도쿄", en:"GRANSTA Tokyo", lat:35.6809, lng:139.7673,
-          cat:"간식 🍡", time:"18:40", cost:"¥500~1,200",
+          cat:"간식", time:"18:40", cost:"¥500~1,200",
           note:"저녁까지 3시간 남았으니 슈크림 하나 정도. <b>배는 채우지 마세요.</b>",
           move:{mode:"walk", min:5, cost:"무료"} },
 
@@ -662,7 +538,7 @@ const TRIP_DATA = {
 
         { name:"긴자 4초메 · 세이코 하우스", en:"Ginza 4-chome", lat:35.6717, lng:139.7659,
           cat:"야경", time:"19:45", cost:"무료",
-          note:"시계탑은 <b>매시 정각에 종</b>이 울립니다. 호코텐(차없는 거리)은 주말 낮에만.<br>🍡 기무라야 총본점 안팡 ¥200 (교차로 옆, ~20:00)",
+          note:"시계탑은 <b>매시 정각에 종</b>이 울립니다. 호코텐(차없는 거리)은 주말 낮에만.<br>기무라야 총본점 안팡 ¥200 (교차로 옆, ~20:00)",
           move:{mode:"walk", min:5, cost:"무료"} },
 
         { name:"긴자 식스", en:"GINZA SIX", lat:35.6696, lng:139.7639,
@@ -696,7 +572,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:12, via:"공원 남쪽 계단 → 아메요코", cost:"무료"} },
 
         { name:"아메요코 시장", en:"Ameyoko Market", lat:35.7089, lng:139.7748,
-          cat:"시장 🍡", time:"11:50", cost:"간식 ¥300~800",
+          cat:"시장", time:"11:50", cost:"간식 ¥300~800",
           note:"이치란 가는 길목 그대로. <b>구경만 30분</b>, 배는 남겨두세요.",
           move:{mode:"walk", min:3, cost:"무료"} },
 
@@ -706,7 +582,7 @@ const TRIP_DATA = {
           move:{mode:"train", min:12, via:"긴자선 우에노 → 아사쿠사", cost:"IC ¥180"} },
 
         { name:"나카미세도리 · 가미나리몬", en:"Nakamise-dori", lat:35.7118, lng:139.7966,
-          cat:"거리 🍡", time:"13:45", cost:"간식 ¥300~1,000",
+          cat:"거리", time:"13:45", cost:"간식 ¥300~1,000",
           note:"닌교야키·튀김만주·멜론빵. <b>걸어다니며 먹는 건 금지</b>, 대부분 현금만.",
           move:{mode:"walk", min:5, cost:"무료"} },
 
@@ -761,7 +637,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:10, cost:"무료"} },
 
         { name:"다케시타도리", en:"Takeshita St.", lat:35.6716, lng:139.7031,
-          cat:"거리 🍡", time:"11:05", cost:"¥600~1,500",
+          cat:"거리", time:"11:05", cost:"¥600~1,500",
           note:"토요일엔 발 디딜 틈이 없습니다. <b>크레페 하나 물고 25분 컷.</b>",
           move:{mode:"walk", min:8, cost:"무료"} },
 
@@ -771,7 +647,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:5, cost:"무료"} },
 
         { name:"캣스트리트", en:"Cat Street", lat:35.6668, lng:139.7060,
-          cat:"산책 🍡", time:"12:25", cost:"카페 ¥600~1,000",
+          cat:"산책", time:"12:25", cost:"카페 ¥600~1,000",
           note:"시부야까지 걸어 내려가는 <b>차 없는 내리막 골목</b>. 중간에 카페 한 번 쉬세요.",
           move:{mode:"walk", min:30, via:"캣스트리트 종주 → 시부야역", cost:"무료"} },
 
@@ -786,7 +662,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:4, cost:"무료"} },
 
         { name:"시부야 109", en:"SHIBUYA109", lat:35.6595, lng:139.6987,
-          cat:"쇼핑 🍡", time:"14:45", cost:"무료 (쇼핑 별도)",
+          cat:"쇼핑", time:"14:45", cost:"무료 (쇼핑 별도)",
           note:"옷에 관심 없으면 <b>B2 푸드홀</b>에서 디저트만 먹고 20분 컷.",
           move:{mode:"walk", min:8, via:"센터가이 → 우다가와초", cost:"무료"} },
 
@@ -827,7 +703,7 @@ const TRIP_DATA = {
           move:{mode:"walk", min:2, cost:"무료"} },
 
         { name:"로손 우치칸다 2초메점", en:"Lawson", lat:35.6907, lng:139.7679,
-          cat:"아침 🍡", time:"05:20", cost:"¥500~800",
+          cat:"아침", time:"05:20", cost:"¥500~800",
           note:"숙소 앞 24시간. <b>열차에서 먹을 아침</b>을 여기서 사세요 — 유일한 식사 타이밍입니다.",
           move:{mode:"walk", min:4, cost:"무료"} },
 
@@ -1071,7 +947,6 @@ function renderList() {
       const wrap = el("div", "card-wrap");
       const card = el("button", "card");
       card.dataset.id = id;
-      card.style.setProperty("--i", i);
       card.innerHTML =
         `<div class="card-num">${i + 1}</div>
          <div class="card-body">
@@ -1126,17 +1001,8 @@ function renderList() {
   });
 }
 
-/* 일자 전환 시 카드 등장 애니메이션을 다시 재생 */
+/* 등장 애니메이션을 걷어내면서 남은 호출부 호환용 */
 function restagger() {
-  if (REDUCED) return;
-  document.querySelectorAll(".day-block").forEach(b => {
-    if (b.style.display === "none") return;
-    b.querySelectorAll(".card, .flight").forEach(n => {
-      n.style.animation = "none";
-      void n.offsetWidth;                 // 강제 리플로우로 애니메이션 리셋
-      n.style.animation = "";
-    });
-  });
 }
 
 /* ============================================================================
@@ -1202,7 +1068,6 @@ function initMap() {
 
   state.ready = true;
   applyVisibility(false);
-  startRouteFlow();
   // 지도가 자기 크기를 확정한 뒤에 맞춰야 한다 — 즉시 fitBounds 하면 범위가 어긋난다
   google.maps.event.addListenerOnce(map, "idle", fitToVisible);
 }
@@ -1261,30 +1126,6 @@ function fitToVisible() {
   map.fitBounds(b, { top: 78, right: 66, bottom: 66, left: 66 });
 }
 
-/* 동선 점선이 진행 방향으로 흐르는 애니메이션 */
-let flowRAF = null, flowOffset = 0, flowLast = 0;
-function flowTick(t) {
-  if (t - flowLast > 55) {
-    flowLast = t;
-    flowOffset = (flowOffset + 1.3) % 13;         // repeat 이 13px 이므로 13에서 되돌린다
-    routes.forEach(r => {
-      if (!r.getMap()) return;
-      const icons = r.get("icons");
-      icons[0].offset = flowOffset + "px";
-      r.set("icons", icons);
-    });
-  }
-  flowRAF = requestAnimationFrame(flowTick);
-}
-function startRouteFlow() {
-  if (REDUCED || flowRAF) return;
-  flowRAF = requestAnimationFrame(flowTick);
-}
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) { cancelAnimationFrame(flowRAF); flowRAF = null; }
-  else if (state.ready) { flowLast = 0; startRouteFlow(); }
-});
-
 function setDay(day) {
   state.activeDay = day;
   setActive(null);
@@ -1313,12 +1154,6 @@ function setActive(id) {
       : { strokeOpacity:.35, strokeWeight:1.5, fillOpacity:.08 });
   });
 
-  if (!id || REDUCED) return;
-  const cur = layer.find(it => it.id === id);
-  if (cur && cur.marker.getMap()) {                 // 선택한 핀만 짧게 통통
-    cur.marker.setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(() => cur.marker.setAnimation(null), 700);
-  }
 }
 
 function hoverPin(id, on) {
@@ -1390,7 +1225,7 @@ function renderProgress() {
   const pct   = total ? Math.round(done / total * 100) : 0;
   $("#progFill").style.width = pct + "%";
   $("#progCount").textContent = `${done} / ${total}`;
-  $("#progLabel").textContent = done === 0 ? "방문 전" : done === total ? "전 일정 완주 🎉" : `${pct}% 진행`;
+  $("#progLabel").textContent = done === 0 ? "방문 전" : done === total ? "전 일정 완주" : `${pct}% 진행`;
 }
 
 /* 오늘이 여행 기간이면 현재 시각에 해당하는 일정을 찾는다. (한국·일본 모두 UTC+9) */

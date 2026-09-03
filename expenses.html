@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>가계부 · 도쿄 3박 4일</title>
 <meta name="description" content="도쿄 여행 예산과 실제 지출 기록">
-<meta name="theme-color" content="#f2f5fa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0e12" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="가계부">
 <link rel="manifest" href="manifest.webmanifest">
@@ -14,161 +14,135 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
 :root{
-  --bg:#f2f5fa; --surface:#ffffff; --surface-2:#f7f9fc; --surface-3:#eaeff7;
-  --line:#e2e8f2; --line-soft:#edf1f7;
-  --text:#111827; --text-2:#5a6478; --text-3:#96a0b3;
-  --accent:#ff6b5b;
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f6f7f9; --surface-3:#eef0f3;
+  --line:#e4e6ea; --line-soft:#eef0f3;
+  --text:#16181d; --text-2:#5c626d; --text-3:#9298a3;
+  --accent:#d8442f;
   /* 차트 단일 계열 — dataviz 검증 통과(밝기밴드·채도·대비 PASS) */
   --bar:#e14b3d;
-  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
-  --shadow-sm:0 1px 2px rgba(23,43,77,.05), 0 2px 6px rgba(23,43,77,.05);
-  --shadow-md:0 4px 14px rgba(23,43,77,.08), 0 1px 3px rgba(23,43,77,.05);
-  --radius:16px; --radius-sm:11px;
-  --ease:cubic-bezier(.2,.75,.3,1);
+  --good:#1a7f37; --warn:#9a6700; --crit:#c0392b;
+  --radius:10px; --radius-sm:6px;
+  --ease:cubic-bezier(.2,.6,.3,1);
 }
 :root[data-theme="dark"]{
-  --bg:#0d1117; --surface:#151a22; --surface-2:#1b212b; --surface-3:#222935;
-  --line:#2a323e; --line-soft:#222935;
-  --text:#eef2f8; --text-2:#a5afbf; --text-3:#6f7b8c;
-  --accent:#ff8577;
+  --bg:#0c0e12; --surface:#13161b; --surface-2:#181c22; --surface-3:#1f242c;
+  --line:#272c35; --line-soft:#1f242c;
+  --text:#e9ebef; --text-2:#9ba2ae; --text-3:#6a717d;
+  --accent:#f0705c;
   --bar:#e85a49;                       /* 다크 표면 기준으로 따로 고른 스텝 */
-  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow-md:0 4px 14px rgba(0,0,0,.45);
+  --good:#3fb950; --warn:#d29922; --crit:#f85149;
 }
 *,*::before,*::after{box-sizing:border-box}
 body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",
               "Malgun Gothic","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
-  font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%;
-  padding:0 0 60px;
+  font-size:14px;line-height:1.55;-webkit-text-size-adjust:100%;padding:0 0 56px;
+  word-break:keep-all;overflow-wrap:anywhere;
 }
 button,input,select{font:inherit;color:inherit}
 button{border:0;background:none;cursor:pointer}
 a{color:inherit}
-.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+:where(button,a,input,select):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px}
 
 /* ---------- 헤더 ---------- */
-.top{
-  position:sticky;top:0;z-index:10;padding:16px 0 14px;margin-bottom:18px;
-  background:linear-gradient(var(--bg) 80%,transparent);
-}
+.top{position:sticky;top:0;z-index:10;padding:18px 0 14px;margin-bottom:14px;background:var(--bg);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:12px}
 .back{
-  display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:11px;
-  background:var(--surface);border:1px solid var(--line);font-size:12.5px;font-weight:680;
-  text-decoration:none;box-shadow:var(--shadow-sm);transition:.18s var(--ease);
+  display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:var(--radius-sm);
+  border:1px solid var(--line);font-size:12px;font-weight:500;color:var(--text-2);
+  text-decoration:none;transition:.14s var(--ease);
 }
-.back:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
-h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}
-.top p{margin:2px 0 0;font-size:12px;color:var(--text-3)}
-.icon-btn{margin-left:auto;width:38px;height:38px;display:grid;place-items:center;border-radius:11px;color:var(--text-2)}
-.icon-btn:hover{background:var(--surface-3);color:var(--text)}
+.back:hover{color:var(--text);border-color:var(--text-3)}
+h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.3px}
+.top p{margin:1px 0 0;font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.icon-btn{margin-left:auto;width:32px;height:32px;display:grid;place-items:center;border-radius:var(--radius-sm);color:var(--text-3);transition:.14s}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
 
-/* ---------- 카드 ---------- */
-.card{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:18px;margin-bottom:14px;box-shadow:var(--shadow-sm);
-}
+/* ---------- 섹션 ---------- */
+.card{border-top:1px solid var(--line);padding:22px 0}
+.card:first-of-type{border-top:0;padding-top:6px}
 .card > h2{
-  margin:0 0 14px;font-size:13px;font-weight:800;letter-spacing:.2px;color:var(--text-2);
-  display:flex;align-items:center;gap:8px;
+  margin:0 0 14px;font-size:11.5px;font-weight:600;letter-spacing:.3px;color:var(--text-3);
+  text-transform:uppercase;display:flex;align-items:center;gap:8px;
 }
-.card > h2 small{margin-left:auto;font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:0}
+.card > h2 small{margin-left:auto;font-size:11px;font-weight:400;color:var(--text-3);letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
 
-/* ---------- 히어로 숫자 + 예산 게이지 ---------- */
+/* ---------- 총액 ---------- */
 .hero{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
-.hero-main > b{
-  display:block;font-size:34px;font-weight:800;letter-spacing:-1.2px;line-height:1.1;
-  font-variant-numeric:tabular-nums;
-}
-.hero-main span{display:block;margin-top:4px;font-size:12px;color:var(--text-3)}
-.hero-main span b{font-size:12px;font-weight:750;color:var(--text-2);font-variant-numeric:tabular-nums}
-.hero-krw{
-  margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;
-}
-.hero-krw b{display:block;font-size:17px;font-weight:750;letter-spacing:-.4px}
+.hero-main > b{display:block;font-size:32px;font-weight:600;letter-spacing:-1.1px;line-height:1.1;font-variant-numeric:tabular-nums}
+.hero-main span{display:block;margin-top:3px;font-size:11.5px;color:var(--text-3)}
+.hero-main span b{font-size:11.5px;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums}
+.hero-krw{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
+.hero-krw b{display:block;font-size:15px;font-weight:500;letter-spacing:-.2px;color:var(--text-2)}
 .hero-krw span{font-size:11px;color:var(--text-3)}
 
 .meter{margin-top:16px}
-.meter-bar{height:9px;border-radius:99px;background:var(--surface-3);overflow:hidden}
-.meter-bar i{display:block;height:100%;border-radius:99px;transition:width .45s var(--ease),background .3s}
+.meter-bar{height:4px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.meter-bar i{display:block;height:100%;transition:width .3s var(--ease),background .2s}
 .meter-legend{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:12px;color:var(--text-2)}
-.meter-legend .dot{width:9px;height:9px;border-radius:99px;flex:0 0 auto}
-.meter-legend b{font-weight:750;font-variant-numeric:tabular-nums}
-.meter-legend .rest{margin-left:auto;color:var(--text-3);font-size:11.5px}
+.meter-legend #meterIcon{display:inline-flex}
+.meter-legend b{font-weight:500;font-variant-numeric:tabular-nums;color:var(--text-3)}
+.meter-legend .rest{margin-left:auto;color:var(--text-3);font-size:11.5px;font-variant-numeric:tabular-nums}
 
 /* ---------- 가로 막대 ---------- */
-.bars{display:flex;flex-direction:column;gap:9px}
-.bar-row{display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:10px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:grid;grid-template-columns:66px 1fr auto;align-items:center;gap:11px}
 .bar-label{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;min-width:0}
-.bar-label i{width:7px;height:7px;border-radius:99px;flex:0 0 auto}
+.bar-label i{width:5px;height:5px;border-radius:99px;flex:0 0 auto}
 .bar-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-track{height:16px;border-radius:5px;background:var(--surface-3);position:relative;overflow:hidden}
-.bar-track i{
-  display:block;height:100%;background:var(--bar);
-  border-radius:0 4px 4px 0;                    /* 기준선에 붙고 데이터 끝만 둥글게 */
-  transition:width .45s var(--ease);
-}
-.bar-val{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--text-2);min-width:62px;text-align:right}
-.bar-plan{font-size:10.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.bar-track{height:12px;border-radius:3px;background:var(--surface-3);position:relative;overflow:hidden}
+.bar-track i{display:block;height:100%;background:var(--bar);border-radius:0 3px 3px 0;transition:width .3s var(--ease)}
+.bar-val{font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--text);min-width:62px;text-align:right;line-height:1.35}
+.bar-plan{font-size:10.5px;color:var(--text-3);font-variant-numeric:tabular-nums;font-weight:400}
 .bar-row.over .bar-val{color:var(--crit)}
 
 /* ---------- 입력 폼 ---------- */
-.form{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .form .full{grid-column:1 / -1}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.2px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--text-3)}
 .field input,.field select{
-  padding:10px 12px;border-radius:10px;border:1px solid var(--line);
-  background:var(--surface-2);font-size:13.5px;transition:.16s;
+  padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--line);
+  background:var(--surface);font-size:13px;transition:.14s;
 }
-.field input:focus,.field select:focus{outline:0;border-color:var(--accent);background:var(--surface)}
+.field input:focus,.field select:focus{outline:0;border-color:var(--accent)}
 .submit{
-  grid-column:1 / -1;padding:12px;border-radius:11px;background:var(--text);color:var(--surface);
-  font-size:13.5px;font-weight:750;transition:.18s var(--ease);
+  grid-column:1 / -1;padding:11px;border-radius:var(--radius-sm);background:var(--text);color:var(--bg);
+  font-size:13px;font-weight:600;transition:opacity .14s;
 }
-.submit:hover{opacity:.87;transform:translateY(-1px)}
-.submit:active{transform:none}
+.submit:hover{opacity:.85}
 
 /* ---------- 목록 ---------- */
-.daygroup + .daygroup{margin-top:16px}
-.daygroup h3{
-  margin:0 0 8px;font-size:12px;font-weight:800;color:var(--text-2);
-  display:flex;align-items:center;gap:7px;
-}
-.daygroup h3 i{width:8px;height:8px;border-radius:99px;flex:0 0 auto}
-.daygroup h3 b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text-3);font-weight:700}
-.item{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;
-  background:var(--surface-2);border:1px solid var(--line-soft);margin-bottom:6px;
-}
-.item-cat{
-  padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:750;flex:0 0 auto;
-  background:var(--surface-3);color:var(--text-2);
-}
+.daygroup + .daygroup{margin-top:18px}
+.daygroup h3{margin:0 0 7px;font-size:11.5px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:7px}
+.daygroup h3 i{width:5px;height:5px;border-radius:99px;flex:0 0 auto}
+.daygroup h3 b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--text-3);font-weight:500}
+.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.item-cat{font-size:11px;color:var(--text-3);flex:0 0 auto;min-width:52px}
 .item-name{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-pay{font-size:10.5px;color:var(--text-3);flex:0 0 auto}
-.item-amt{font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;flex:0 0 auto}
-.item-del{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--text-3);flex:0 0 auto}
-.item-del:hover{background:var(--crit);color:#fff}
-.empty{padding:26px 0;text-align:center;color:var(--text-3);font-size:13px}
+.item-amt{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.item-del{width:20px;height:20px;border-radius:4px;display:grid;place-items:center;color:var(--text-3);flex:0 0 auto;opacity:0;transition:.14s}
+.item:hover .item-del{opacity:1}
+.item-del:hover{background:var(--surface-3);color:var(--crit)}
+.empty{padding:24px 0;text-align:center;color:var(--text-3);font-size:12.5px}
 
-/* ---------- 하단 도구 ---------- */
-.tools{display:flex;gap:8px;flex-wrap:wrap}
-.tool{
-  padding:9px 13px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);
-  font-size:12.5px;font-weight:680;transition:.16s var(--ease);
-}
-.tool:hover{border-color:var(--text-3);transform:translateY(-1px)}
+/* ---------- 도구 ---------- */
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tool{padding:7px 11px;border-radius:var(--radius-sm);border:1px solid var(--line);font-size:12px;font-weight:500;color:var(--text-2);transition:.14s var(--ease)}
+.tool:hover{border-color:var(--text-3);color:var(--text)}
 .rate{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);flex-wrap:wrap}
-.rate input{width:82px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);text-align:right;font-variant-numeric:tabular-nums}
+.rate input{width:76px;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);text-align:right;font-variant-numeric:tabular-nums}
+.rate small{color:var(--text-3);font-size:11px}
 
 @media (max-width:520px){
-  .wrap{padding:0 13px}
+  .wrap{padding:0 15px}
   .form{grid-template-columns:1fr}
-  .bar-row{grid-template-columns:66px 1fr auto}
-  .hero-main b{font-size:29px}
+  .bar-row{grid-template-columns:58px 1fr auto}
+  .hero-main > b{font-size:27px}
+  .item-del{opacity:1}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -211,8 +185,7 @@ h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}
     <div class="meter">
       <div class="meter-bar"><i id="meterFill" style="width:0%"></i></div>
       <div class="meter-legend">
-        <span class="dot" id="meterDot"></span>
-        <span id="meterIcon" aria-hidden="true">✅</span>
+        <span id="meterIcon" aria-hidden="true"></span>
         <span id="meterLabel">예산 내</span>
         <b id="meterPct">0%</b>
         <span class="rest" id="meterRest"></span>
@@ -276,12 +249,12 @@ h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px}
     <div class="rate">
       <label for="fRate">환율 100엔 =</label>
       <input id="fRate" type="number" min="0" step="1" value="930">원
-      <span style="color:var(--text-3);font-size:11.5px">오프라인에서도 쓰도록 직접 입력합니다</span>
+      <small>오프라인에서도 쓰도록 직접 입력합니다</small>
     </div>
     <div class="tools" style="margin-top:14px">
       <button class="tool" id="btnExport">JSON 내보내기</button>
       <button class="tool" id="btnImport">가져오기</button>
-      <button class="tool" id="btnClear" style="color:var(--crit)">전체 삭제</button>
+      <button class="tool" id="btnClear">전체 삭제</button>
       <input type="file" id="fileInput" accept="application/json" hidden>
     </div>
   </section>
@@ -330,14 +303,21 @@ function renderTotals() {
   $("#rateNote").textContent = `100엔 = ${rate.toLocaleString("ko-KR")}원`;
 
   /* 상태색은 아이콘 + 라벨과 함께만 쓴다 — 색만으로 의미를 나르지 않는다 */
-  const st = pct > 100 ? { c:"var(--crit)", i:"⚠️", t:"예산 초과" }
-           : pct >= 80 ? { c:"var(--warn)", i:"⏳", t:"예산 임박" }
-           :             { c:"var(--good)", i:"✅", t:"예산 내"   };
+  /* 상태는 색만으로 나르지 않는다 — 아이콘 + 라벨을 항상 같이 붙인다 */
+  const ICON = {
+    over: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>',
+    near: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    ok:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>'
+  };
+  const st = pct > 100 ? { c:"var(--crit)", i:ICON.over, t:"예산 초과" }
+           : pct >= 80 ? { c:"var(--warn)", i:ICON.near, t:"예산 임박" }
+           :             { c:"var(--good)", i:ICON.ok,   t:"예산 내"   };
   $("#meterFill").style.width = Math.min(100, pct) + "%";
   $("#meterFill").style.background = st.c;
-  $("#meterDot").style.background = st.c;
-  $("#meterIcon").textContent = st.i;
+  $("#meterIcon").innerHTML = st.i;
+  $("#meterIcon").style.color = st.c;
   $("#meterLabel").textContent = st.t;
+  $("#meterLabel").style.color = st.c;
   $("#meterPct").textContent = Math.round(pct) + "%";
   const rest = PLAN_TOTAL - total;
   $("#meterRest").textContent = rest >= 0 ? `${yen(rest)} 남음` : `${yen(-rest)} 초과`;
