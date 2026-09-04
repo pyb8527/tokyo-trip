@@ -11,7 +11,7 @@
 
    일정을 고쳐 배포할 때 CACHE 뒤 숫자만 올리면 옛 캐시가 정리됩니다.
    ========================================================================== */
-const CACHE = "tokyo-trip-v6";
+const CACHE = "tokyo-trip-v7";
 
 const SHELL = [
   "./",
@@ -19,12 +19,12 @@ const SHELL = [
   "expenses.html",
   "admin.html",
   "manifest.webmanifest",
-  "shell.css",
-  "shell.js",
-  "api.js",
-  "edit.css",
-  "edit.js",
-  "panels.js",
+  "shell.css?v=7",
+  "shell.js?v=7",
+  "api.js?v=7",
+  "edit.css?v=7",
+  "edit.js?v=7",
+  "panels.js?v=7",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-180.png",
@@ -45,6 +45,10 @@ self.addEventListener("activate", e => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
     await self.clients.claim();
+    /* 새 버전이 자리를 잡았다고 열려 있는 페이지에 알린다 */
+    for (const c of await self.clients.matchAll({ type: "window" })) {
+      c.postMessage({ type: "sw-activated" });
+    }
   })());
 });
 
@@ -59,6 +63,9 @@ self.addEventListener("fetch", e => {
      /api/auth/me 같은 응답이 캐시되면 로그아웃 상태가 계속 되돌아와서
      로그인 자체가 되지 않는다. 항상 네트워크로 보낸다. */
   if (url.pathname.startsWith("/api/")) return;
+
+  /* 지도 키 파일도 캐시하지 않는다 — 바꿔도 반영이 안 되면 곤란하다 */
+  if (url.pathname.endsWith("/gmaps-key.local.js")) return;
 
   const isHTML = req.mode === "navigate" ||
                  (req.headers.get("accept") || "").includes("text/html");
@@ -81,16 +88,18 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // 정적 파일 — 캐시 우선
+  /* 정적 파일 — 캐시를 즉시 주고, 뒤에서 새 버전을 받아 둔다.
+     캐시 우선으로만 주면 새로 배포해도 옛 스크립트가 계속 나가서
+     "최신 HTML + 옛 JS" 조합이 만들어지고, 그 조합에서 부트가 죽는다. */
   e.respondWith((async () => {
-    const hit = await caches.match(req);
-    if (hit) return hit;
-    try {
-      const res = await fetch(req);
-      if (res.ok) (await caches.open(CACHE)).put(req, res.clone());
+    const cache = await caches.open(CACHE);
+    const hit = await cache.match(req);
+    const network = fetch(req).then(res => {
+      if (res.ok) cache.put(req, res.clone());
       return res;
-    } catch {
-      return new Response("", { status: 504 });
-    }
+    }).catch(() => null);
+
+    if (hit) { e.waitUntil(network); return hit; }
+    return (await network) || new Response("", { status: 504 });
   })());
 });

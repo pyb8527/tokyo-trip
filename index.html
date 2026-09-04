@@ -13,12 +13,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css">
-<link rel="stylesheet" href="edit.css">
-<script src="api.js"></script>
-<script src="shell.js"></script>
-<script src="edit.js"></script>
-<script src="panels.js"></script>
+<link rel="stylesheet" href="shell.css?v=7">
+<link rel="stylesheet" href="edit.css?v=7">
+<script src="api.js?v=7"></script>
+<script src="shell.js?v=7"></script>
+<script src="edit.js?v=7"></script>
+<script src="panels.js?v=7"></script>
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -1678,6 +1678,14 @@ addEventListener("hashchange", applyHash);
 /* ---------- 서비스 워커 (오프라인) ---------- */
 if ("serviceWorker" in navigator) {
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  /* 새 버전이 깔리면 알려 준다. 캐시가 어긋난 채로 계속 쓰는 걸 막는다. */
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data?.type !== "sw-activated") return;
+    if (!sessionStorage.getItem("tokyoTrip.reloaded")) {
+      sessionStorage.setItem("tokyoTrip.reloaded", "1");
+      location.reload();
+    }
+  });
 }
 
 $("#gateForm").addEventListener("submit", e => {
@@ -1694,11 +1702,15 @@ $("#clearKey").onclick = () => {
 };
 
 /* ---------- 공통 셸 (로그인 · 드로어 · 하단바) ---------- */
-/* 편집은 화면 이동이 아니라 상태 토글이라 도보 반경·동선 옆에 둔다 */
-$("#tgEdit").onclick = () => Edit.setEditMode(!Edit.isOn());
-Edit.onModeChange(on => $("#tgEdit").setAttribute("aria-pressed", String(on)));
-
-Shell.on("map", () => setPanelCollapsed(!document.body.classList.contains("panel-collapsed")));
+/* 편집은 화면 이동이 아니라 상태 토글이라 도보 반경·동선 옆에 둔다.
+   여기서 예외가 나면 아래 Shell.init 까지 막혀 화면이 통째로 죽으므로 감싼다. */
+try {
+  $("#tgEdit").onclick = () => Edit.setEditMode(!Edit.isOn());
+  Edit.onModeChange?.(on => $("#tgEdit").setAttribute("aria-pressed", String(on)));
+  Shell.on("map", () => setPanelCollapsed(!document.body.classList.contains("panel-collapsed")));
+} catch (e) {
+  console.error("[boot] 토글 연결 실패", e);
+}
 
 Shell.init({ page: "trip", title: TRIP_DATA.title }).then(async shell => {
   if (shell.blocked) return;               // 로그인 화면이 떠 있으면 지도를 부르지 않는다
