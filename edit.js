@@ -248,23 +248,20 @@ const Edit = (() => {
   }
 
   /* ---------------------------------------------------------------- 편집 모드 */
+  const modeListeners = [];
+  const onModeChange = fn => modeListeners.push(fn);
+
   function setEditMode(on) {
     editMode = on;
     document.body.classList.toggle("edit-mode", on);
+    modeListeners.forEach(f => f(on));
     hooks.reload();
-    if (on) toast("편집 모드입니다. 카드의 연필을 누르면 고칠 수 있습니다");
+    toast(on ? "편집 모드 — 카드의 연필을 누르면 고칠 수 있습니다" : "편집 모드를 껐습니다");
   }
 
   /* 목록이 다시 그려질 때 index.html 이 불러 준다 */
   function decorate(block, day) {
     if (!editMode) return;
-
-    const bar = document.createElement("div");
-    bar.className = "edit-bar";
-    bar.innerHTML = `<span class="grow">${esc(day.label)} 편집 중</span>
-                     <button class="ghost" data-done>완료</button>`;
-    block.insertBefore(bar, block.children[1] || null);
-    bar.querySelector("[data-done]").onclick = () => setEditMode(false);
 
     block.querySelectorAll(".card-wrap").forEach(wrap => {
       const id = wrap.querySelector(".card")?.dataset.id;
@@ -302,5 +299,5 @@ const Edit = (() => {
   const attach = h => { hooks = h; };
   const isOn = () => editMode;
 
-  return { attach, setEditMode, decorate, openForm, isOn, toast, parseLatLng };
+  return { attach, setEditMode, onModeChange, decorate, openForm, isOn, toast, parseLatLng };
 })();

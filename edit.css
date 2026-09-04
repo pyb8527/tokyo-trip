@@ -74,19 +74,6 @@
 
 /* ---------- 편집 모드 ---------- */
 body.edit-mode .card-wrap{padding-right:0}
-.edit-bar{
-  position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;
-  margin:0 0 10px;padding:11px 14px;border-radius:var(--radius,16px);
-  background:var(--accent-bg,var(--surface-2));color:var(--accent);
-  font-size:13px;font-weight:700;
-}
-.edit-bar .grow{flex:1}
-.edit-bar button{
-  padding:7px 12px;border-radius:99px;background:var(--accent);color:#fff;
-  font-size:12.5px;font-weight:700;transition:.15s var(--ease);
-}
-.edit-bar button:active{transform:scale(.96)}
-.edit-bar .ghost{background:transparent;color:var(--accent)}
 
 /* 카드 위 편집 버튼 */
 .place-edit{

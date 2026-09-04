@@ -439,7 +439,9 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
       <button class="chip" id="tgRoute" aria-pressed="true"><span class="dot"></span>동선</button>
       <button class="chip" id="tgFit">전체</button>
       <button class="chip" id="tgNow" title="현재 시각 일정으로 이동">지금</button>
-      <a class="chip chip-action" id="tgExpense" href="expenses.html">가계부</a>
+      <button class="chip chip-action" id="tgEdit" aria-pressed="false" hidden>
+        <span class="dot"></span>편집
+      </button>
     </div>
 
     <div class="grabber" id="grabber" title="드래그해서 지도 높이 조절"></div>
@@ -947,8 +949,8 @@ function renderHeader() {
   const spots = days.reduce((a, d) => a + d.places.length, 0);
   const dist  = days.reduce((a, d) => a + dayDistance(d), 0);
   $("#tripTitle").textContent = TRIP_DATA.title;
-  $("#tripDates").textContent = `${days[0].date} – ${days[days.length - 1].date}`;
-  $("#statDays").textContent  = `${days.length - 1}박 ${days.length}일`;
+  $("#tripDates").textContent = days.length ? `${days[0].date} – ${days[days.length - 1].date}` : "—";
+  $("#statDays").textContent  = days.length ? `${days.length - 1}박 ${days.length}일` : "—";
   countUp($("#statSpots"), spots, "곳");
   countUp($("#statDist"), dist, "km", 1);
 }
@@ -1328,9 +1330,11 @@ function renderProgress() {
 function nowInfo() {
   const n = new Date();
   const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  if (!TRIP_DATA.days.length) return { onTrip: false, dDay: 0 };
   const di = TRIP_DATA.days.findIndex(d => d.iso === today);
   if (di < 0) {
-    const first = TRIP_DATA.days[0].iso;
+    const first = TRIP_DATA.days[0]?.iso;
+    if (!first) return { onTrip: false, dDay: 0 };
     const diff = Math.round((new Date(first + "T00:00:00") - new Date(today + "T00:00:00")) / 86400000);
     return { onTrip: false, dDay: diff };
   }
@@ -1492,9 +1496,18 @@ $("#fitBtn").onclick   = fitToVisible;
    9. 서버 연동 — 일정 적재 · 편집 후 재적재 · 지도에서 좌표 찍기
    ============================================================================ */
 const TRIP_CACHE = "tokyoTrip.serverTrip";
+/* 화면이 서버 일정을 쓰고 있는지. 내장/캐시 일정에는 서버 ID 가 없어서
+   편집을 열어 주면 안 된다 (수정·삭제가 대상을 못 찾는다). */
+let tripFromServer = false;
 
 /* 서버 응답을 화면이 쓰는 모양으로 바꾼다 */
 function applyServerTrip(data) {
+  /* 서버에 아직 일정이 없으면(seed 미실행) 내장 일정을 지우지 않는다.
+     지워 버리면 화면이 통째로 비고, 빈 배열을 훑는 코드가 죽는다. */
+  if (!data?.days?.length) {
+    console.warn("[trip] 서버에 일정이 없습니다. 내장 일정을 그대로 씁니다. (seed 미실행)");
+    return false;
+  }
   TRIP_DATA.title = data.trip?.title || TRIP_DATA.title;
   TRIP_DATA.days = data.days.map(d => ({
     id: d.id, label: d.label, short: d.short, date: d.date, iso: d.iso,
@@ -1506,6 +1519,8 @@ function applyServerTrip(data) {
     }))
   }));
   visited = new Set(data.visited || []);
+  tripFromServer = true;
+  return true;
 }
 
 async function loadTripFromServer() {
@@ -1679,23 +1694,40 @@ $("#clearKey").onclick = () => {
 };
 
 /* ---------- 공통 셸 (로그인 · 드로어 · 하단바) ---------- */
+/* 편집은 화면 이동이 아니라 상태 토글이라 도보 반경·동선 옆에 둔다 */
+$("#tgEdit").onclick = () => Edit.setEditMode(!Edit.isOn());
+Edit.onModeChange(on => $("#tgEdit").setAttribute("aria-pressed", String(on)));
+
 Shell.on("map", () => setPanelCollapsed(!document.body.classList.contains("panel-collapsed")));
-Shell.on("edit", () => Edit.setEditMode(true));
 
 Shell.init({ page: "trip", title: TRIP_DATA.title }).then(async shell => {
   if (shell.blocked) return;               // 로그인 화면이 떠 있으면 지도를 부르지 않는다
 
   /* 서버가 있으면 서버 일정으로 갈아끼우고, 없으면 마지막 캐시,
-     그것도 없으면 이 파일에 박혀 있는 기본 일정을 그대로 쓴다. */
-  if (API.isOnline() && API.state.user) {
-    try { await loadTripFromServer(); }
-    catch { loadTripFromCache(); }
-  } else {
-    loadTripFromCache();
+     그것도 없으면 이 파일에 박혀 있는 기본 일정을 그대로 쓴다.
+
+     이 구간에서 무슨 일이 나든 아래 지도 로딩까지 막으면 안 된다.
+     예전엔 여기서 예외가 나면 지도가 영영 안 떴다. */
+  try {
+    if (API.isOnline() && API.state.user) {
+      try { await loadTripFromServer(); }
+      catch { loadTripFromCache(); }
+    } else {
+      loadTripFromCache();
+    }
+    /* 서버 일정을 쓰고 있을 때만 편집을 연다 */
+    $("#tgEdit").hidden = !(API.canEdit() && tripFromServer);
+    if (API.canEdit() && !tripFromServer && API.isOnline()) {
+      Edit.toast("서버에 일정이 없어 기본 일정을 보고 있습니다. seed 를 실행하세요.", true);
+    }
+
+    renderHeader(); renderTabs(); renderLegend(); renderList();
+    renderProgress(); renderNow();
+    if (!applyHash()) setHash(null);
+  } catch (e) {
+    console.error("[trip] 일정 표시 중 오류", e);
+    Edit.toast("일정을 표시하는 중 문제가 있었습니다. 지도는 계속 씁니다.", true);
   }
-  renderHeader(); renderTabs(); renderLegend(); renderList();
-  renderProgress(); renderNow();
-  if (!applyHash()) setHash(null);
 
   // 우선순위: gmaps-key.local.js → localStorage → 키 입력 화면
   let savedKey = window.__GMAPS_KEY || null;

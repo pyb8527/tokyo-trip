@@ -130,7 +130,6 @@ const Shell = (() => {
       <nav class="drawer-nav">
         ${item("index.html#all", ICON.trip, "일정", "trip")}
         ${item("expenses.html", ICON.money, "가계부", "expenses")}
-        ${API.canEdit() && has("edit") ? `<button class="drawer-item" data-act="edit">${svg(ICON.edit)}<span>장소 관리</span></button>` : ""}
         ${API.isOnline() && API.state.user && has("members") ? `<button class="drawer-item" data-act="members">${svg(ICON.people)}<span>동행자</span></button>` : ""}
         ${isAdmin ? `<a class="drawer-item" href="admin.html" data-nav="admin">${svg(ICON.shield)}<span>관리자</span></a>` : ""}
         <div class="drawer-sep"></div>
