@@ -35,7 +35,18 @@
 }
 .auth-note{margin-top:18px;font-size:12px;color:var(--text-3);line-height:1.7}
 
+/* 앱바·하단바 높이. 데스크톱에선 0 이라 계산에 영향이 없다. */
+:root{ --appbar-h:0px; --tabbar-h:0px; }
+@media (max-width:860px){
+  :root{
+    --appbar-h:62px;
+    --tabbar-h:calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ---------- 상단 앱바 (모바일) ---------- */
+/* 높이를 var(--appbar-h) 로 주면 안 된다. 그 변수를 앱바 높이에서 재기 때문에
+   0 으로 한 번 잡히면 영영 0 에 갇힌다. 자연 높이로 두고 재기만 한다. */
 .appbar{
   display:none;align-items:center;gap:10px;padding:12px 14px;
   background:var(--surface);position:sticky;top:0;z-index:30;
@@ -106,7 +117,8 @@
 .tabbar a:active,.tabbar button:active{transform:scale(.94)}
 
 /* 하단 바가 가리지 않도록 여백 확보 */
-body.has-tabbar{padding-bottom:64px}
+/* 하단바가 마지막 내용을 가리지 않도록 딱 그만큼만 비운다 */
+body.has-tabbar{padding-bottom:var(--tabbar-h)}
 
 @media (max-width:860px){
   .appbar{display:flex}

@@ -13,12 +13,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css?v=7">
-<link rel="stylesheet" href="edit.css?v=7">
-<script src="api.js?v=7"></script>
-<script src="shell.js?v=7"></script>
-<script src="edit.js?v=7"></script>
-<script src="panels.js?v=7"></script>
+<link rel="stylesheet" href="shell.css?v=9">
+<link rel="stylesheet" href="edit.css?v=9">
+<script src="api.js?v=9"></script>
+<script src="shell.js?v=9"></script>
+<script src="edit.js?v=9"></script>
+<script src="panels.js?v=9"></script>
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -345,11 +345,20 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
 @media (max-width:1180px){ :root{--sidebar-w:348px} }
 
 @media (max-width:860px){
-  .app{display:flex;flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
-  .stage{position:sticky;top:0;height:46vh;min-height:260px;flex:0 0 auto;order:-1;z-index:3}
+  /* 앱바와 하단바가 차지하는 만큼 빼야 내용이 없을 때 세로 스크롤이 안 생긴다 */
+  .app{
+    display:flex;flex-direction:column;height:auto;overflow:visible;
+    min-height:calc(100dvh - var(--appbar-h) - var(--tabbar-h));
+  }
+  /* 지도는 앱바 바로 아래에 붙는다 (top:0 이면 앱바 밑으로 파고든다) */
+  .stage{
+    position:sticky;top:var(--appbar-h);height:var(--stage-h,46vh);
+    min-height:260px;flex:0 0 auto;order:-1;z-index:3;
+  }
   .panel{overflow:visible;flex:1 1 auto;min-height:0}
   .list{flex:none;overflow:visible}
-  .day-head{top:0}
+  /* 날짜 머리글은 지도 바로 밑에 걸린다 */
+  .day-head{top:calc(var(--appbar-h) + var(--stage-h,46vh) - 1px)}
   body.gate-open .stage{position:relative;height:auto;min-height:0;z-index:auto}
   body.gate-open #map{display:none}
   body.gate-open .gate{position:relative;inset:auto;padding:20px 14px}
@@ -366,7 +375,10 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
     content:"";position:absolute;left:50%;top:7px;transform:translateX(-50%);
     width:36px;height:4px;border-radius:99px;background:var(--surface-3);
   }
-  body.panel-collapsed .stage{height:100dvh}
+  body.panel-collapsed .stage{height:calc(100dvh - var(--appbar-h) - var(--tabbar-h))}
+  /* 접으면 지도가 화면을 다 쓰므로, 하단바가 시트·범례를 가리지 않게 올린다 */
+  body.panel-collapsed .sheet{bottom:calc(10px + var(--tabbar-h))}
+  body.panel-collapsed .legend{bottom:calc(10px + var(--tabbar-h))}
   body.panel-collapsed .panel,body.panel-collapsed .grabber{display:none}
   body.panel-collapsed .panel-ico{transform:rotate(90deg)}
   .panel-ico{transform:rotate(-90deg)}
@@ -379,7 +391,9 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
   .head,.toggles{padding-left:16px;padding-right:16px}
   .tabs{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
   .day-block{padding:0 12px}
-  .stage{height:42vh}
+  :root{--appbar-h:58px}
+  .stage{height:var(--stage-h,42vh)}
+  .day-head{top:calc(var(--appbar-h) + var(--stage-h,42vh) - 1px)}
   .stats{gap:16px}
   .brand h1{font-size:19px}
   .gate-card{padding:22px}
@@ -1636,10 +1650,8 @@ addEventListener("keydown", e => {
 (() => {
   const grab = $("#grabber"), stage = $(".stage");
   if (!grab) return;
-  const apply = vh => {
-    stage.style.height = vh + "vh";
-    document.querySelectorAll(".day-head").forEach(h => h.style.top = `calc(${vh}vh - 1px)`);
-  };
+  /* CSS 변수 하나만 움직이면 지도 높이와 날짜 머리글 위치가 같이 따라온다 */
+  const apply = vh => document.documentElement.style.setProperty("--stage-h", vh + "vh");
   let saved = null;
   try { saved = localStorage.getItem(MAPH_STORE); } catch {}
   if (saved && matchMedia("(max-width:860px)").matches) apply(Number(saved));

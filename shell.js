@@ -183,6 +183,21 @@ const Shell = (() => {
       </div>`;
     document.body.appendChild(tabbar);
     document.body.classList.add("has-tabbar");
+    /* 앱바·하단바의 실제 높이를 재서 CSS 변수에 넣는다.
+       글꼴·안전영역·기기에 따라 달라지므로 숫자를 박아 두면 어긋난다.
+       이 값으로 .app 의 min-height 를 깎아야 세로 스크롤이 안 생긴다. */
+    const measure = () => {
+      const bar = document.querySelector(".appbar");
+      const tabH = tabbar.offsetHeight;
+      const barH = bar && getComputedStyle(bar).display !== "none" ? bar.offsetHeight : 0;
+      const root = document.documentElement.style;
+      root.setProperty("--appbar-h", barH + "px");
+      root.setProperty("--tabbar-h", tabH + "px");
+    };
+    measure();
+    addEventListener("resize", measure);
+    addEventListener("orientationchange", () => setTimeout(measure, 120));
+
     $("#tabMore").onclick = open;
     $("#tabMap").onclick = () => {
       if (opts.page === "trip") emit("map");
