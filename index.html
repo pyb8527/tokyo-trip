@@ -3,23 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="도쿄 3박 4일 (2026.10.08–10.11) 일정표 — 이동수단·소요시간·금액 포함, 지도 연동">
+<meta name="description" content="FIT — 여행 일정·동선·가계부를 한 곳에서. 이동수단과 금액까지 지도와 함께 봅니다.">
 <meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="도쿄 3박 4일">
+<meta name="apple-mobile-web-app-title" content="FIT">
 <meta name="mobile-web-app-capable" content="yes">
+<script>/* 저장해 둔 테마를 먼저 입혀 스플래시가 번쩍이지 않게 한다 */
+try{if(localStorage.getItem("tokyoTrip.theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css?v=10">
-<link rel="stylesheet" href="edit.css?v=10">
-<script src="api.js?v=10"></script>
-<script src="shell.js?v=10"></script>
-<script src="edit.js?v=10"></script>
-<script src="panels.js?v=10"></script>
-<title>도쿄 3박 4일 · 10.08 – 10.11</title>
+<link rel="stylesheet" href="shell.css?v=11">
+<link rel="stylesheet" href="edit.css?v=11">
+<script src="api.js?v=11"></script>
+<script src="shell.js?v=11"></script>
+<script src="edit.js?v=11"></script>
+<script src="trips.js?v=11"></script>
+<script src="panels.js?v=11"></script>
+<title>FIT · 일정</title>
 <style>
 /* ============================================================
    TOKYO TRIP
@@ -417,6 +420,12 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
 </style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true">
+  <div>
+    <div class="splash-word">FIT</div>
+    <div class="splash-sub">FALL INTO TRIP</div>
+  </div>
+</div>
 
 <header class="appbar">
   <button class="icon-square" data-shell-menu aria-label="메뉴 열기">
@@ -859,7 +868,7 @@ const el = (tag, cls, html) => {
   return n;
 };
 // 사용자 메모의 <b> 만 허용하고 나머지는 이스케이프
-const esc = s => String(s).replace(/[&<>"']/g, c =>
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 const rich = s => esc(s).replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>")
                          .replace(/&lt;br\s*\/?&gt;/g, "<br>");
@@ -984,7 +993,9 @@ function renderHeader() {
   const spots = days.reduce((a, d) => a + d.places.length, 0);
   const dist  = days.reduce((a, d) => a + dayDistance(d), 0);
   $("#tripTitle").textContent = TRIP_DATA.title;
-  $("#tripDates").textContent = days.length ? `${days[0].date} – ${days[days.length - 1].date}` : "—";
+  $("#tripDates").textContent = days.length
+    ? (days.length === 1 ? days[0].date : `${days[0].date} – ${days[days.length - 1].date}`)
+    : "날짜 없음";
   $("#statDays").textContent  = days.length ? `${days.length - 1}박 ${days.length}일` : "—";
   countUp($("#statSpots"), spots, "곳");
   countUp($("#statDist"), dist, "km", 1);
@@ -1018,7 +1029,7 @@ function renderLegend() {
   TRIP_DATA.days.forEach((d, i) => {
     const b = el("button", null,
       `<i style="background:${d.color}"></i><em>${esc(d.label.replace("Day ", "D"))}</em>${esc(d.short || d.theme)}`);
-    b.title = `${d.label} · ${d.date} — ${d.theme}`;
+    b.title = [d.label, d.date].filter(Boolean).join(" · ") + (d.theme ? " — " + d.theme : "");
     b.onclick = () => setDay(i);
     lg.appendChild(b);
   });
@@ -1049,7 +1060,7 @@ function renderList() {
     const head = el("div", "day-head");
     head.append(
       el("div", "day-bar"),
-      el("div", null, `<h2>${esc(day.label)} · ${esc(day.theme)}</h2><p>${esc(day.date)}</p>`),
+      el("div", null, `<h2>${esc(day.label)}${day.theme ? " · " + esc(day.theme) : ""}</h2><p>${esc(day.date)}</p>`),
       el("div", "day-meta", `${day.places.length}곳 · ${dayDistance(day).toFixed(1)}km${day.budget ? `<br><b>${esc(day.budget)}</b>` : ""}`)
     );
     block.appendChild(head);
@@ -1120,6 +1131,15 @@ function renderList() {
     Edit.decorate(block, day);
     list.appendChild(block);
   });
+
+  /* 편집 모드에서는 목록 끝에 날짜를 더할 수 있게 한다 */
+  if (Edit.isOn() && API.canEdit()) {
+    const wrap = el("div", "day-block");
+    const add = el("button", "trip-add-day", "+ 날짜 추가");
+    add.onclick = () => Edit.addDay();
+    wrap.appendChild(add);
+    list.appendChild(wrap);
+  }
 }
 
 /* 등장 애니메이션을 걷어내면서 남은 호출부 호환용 */
@@ -1559,7 +1579,7 @@ function applyServerTrip(data) {
 }
 
 async function loadTripFromServer() {
-  const data = await API.get("/api/trip");
+  const data = await API.get(Trips.q("/api/trip"));
   applyServerTrip(data);
   /* 오프라인 대비 캐시 — 다음에 서버에 못 닿으면 이걸 쓴다 */
   try { localStorage.setItem(TRIP_CACHE, JSON.stringify(data)); } catch {}
@@ -1745,7 +1765,7 @@ try {
   console.error("[boot] 토글 연결 실패", e);
 }
 
-Shell.init({ page: "trip", title: TRIP_DATA.title }).then(async shell => {
+Shell.init({ page: "trip", title: "FIT" }).then(async shell => {
   if (shell.blocked) return;               // 로그인 화면이 떠 있으면 지도를 부르지 않는다
 
   /* 서버가 있으면 서버 일정으로 갈아끼우고, 없으면 마지막 캐시,

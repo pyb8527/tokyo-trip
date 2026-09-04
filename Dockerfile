@@ -7,7 +7,7 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 COPY index.html expenses.html admin.html manifest.webmanifest sw.js /usr/share/nginx/html/
-COPY api.js shell.js shell.css edit.js edit.css panels.js /usr/share/nginx/html/
+COPY api.js shell.js shell.css edit.js edit.css panels.js trips.js /usr/share/nginx/html/
 COPY icons/ /usr/share/nginx/html/icons/
 
 # 키 자리표시자. 값이 PASTE_ 로 시작하면 null 을 넣도록 되어 있어

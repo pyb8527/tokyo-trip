@@ -20,13 +20,14 @@ const Shell = (() => {
     shield: '<path d="M12 3.5 20 6v6c0 4.5-3.4 7.7-8 8.5-4.6-.8-8-4-8-8.5V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
     gear:   '<circle cx="12" cy="12" r="3"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/>',
     out:    '<path d="M14 4.5H6.5v15H14"/><path d="M18.5 12H10M15.5 8.5 19 12l-3.5 3.5"/>',
-    more:   '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+    more:   '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+    bag:    '<path d="M4 8.5h16V20H4Z"/><path d="M9 8.5V6.5a3 3 0 0 1 6 0v2"/>'
   };
   const svg = (d, size = 20) =>
     `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-  let opts = { page: "trip", title: "도쿄 3박 4일" };
+  let opts = { page: "trip", title: "FIT" };
   const listeners = {};
   const on = (evt, fn) => ((listeners[evt] ||= []).push(fn));
   const emit = (evt, arg) => (listeners[evt] || []).forEach(f => f(arg));
@@ -129,6 +130,7 @@ const Shell = (() => {
       </div>
       <nav class="drawer-nav">
         ${item("index.html#all", ICON.trip, "일정", "trip")}
+        ${API.isOnline() && API.state.user && has("trips") ? `<button class="drawer-item" data-act="trips">${svg(ICON.bag)}<span>여행</span></button>` : ""}
         ${item("expenses.html", ICON.money, "가계부", "expenses")}
         ${API.isOnline() && API.state.user && has("members") ? `<button class="drawer-item" data-act="members">${svg(ICON.people)}<span>동행자</span></button>` : ""}
         ${isAdmin ? `<a class="drawer-item" href="admin.html" data-nav="admin">${svg(ICON.shield)}<span>관리자</span></a>` : ""}
@@ -207,10 +209,24 @@ const Shell = (() => {
     return { open, close };
   }
 
+  /* -------------------------------------------------------------- 스플래시 */
+  /* 너무 빨리 사라지면 깜빡임으로 보이므로 최소 표시 시간을 준다. */
+  const SPLASH_MIN = 620;
+  const bootAt = performance.now();
+  function hideSplash() {
+    const el = document.getElementById("splash");
+    if (!el || el.classList.contains("gone")) return;
+    const wait = Math.max(0, SPLASH_MIN - (performance.now() - bootAt));
+    setTimeout(() => {
+      el.classList.add("gone");
+      setTimeout(() => el.remove(), 500);
+    }, wait);
+  }
+
   /* ---------------------------------------------------------------- 진입 */
   async function init(options = {}) {
     opts = { ...opts, ...options };
-    await API.probe();
+    try { await API.probe(); } finally { hideSplash(); }
 
     /* 서버가 붙어 있는데 로그인 안 된 상태에서만 막는다.
        서버가 없으면(standalone) 지금까지처럼 그냥 보여준다. */
@@ -227,5 +243,5 @@ const Shell = (() => {
     return { blocked: false, ...ctl };
   }
 
-  return { init, on, emit, has, svg, ICON, esc };
+  return { init, on, emit, has, svg, ICON, esc, hideSplash };
 })();

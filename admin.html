@@ -3,18 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>관리자 · 도쿄 3박 4일</title>
+<title>FIT · 관리자</title>
 <meta name="description" content="계정과 동행자를 관리합니다">
 <meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex">
+<script>/* 저장해 둔 테마를 먼저 입혀 스플래시가 번쩍이지 않게 한다 */
+try{if(localStorage.getItem("tokyoTrip.theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
-<link rel="stylesheet" href="shell.css?v=10">
-<link rel="stylesheet" href="edit.css?v=10">
-<script src="api.js?v=10"></script>
-<script src="shell.js?v=10"></script>
-<script src="edit.js?v=10"></script>
-<script src="panels.js?v=10"></script>
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="shell.css?v=11">
+<link rel="stylesheet" href="edit.css?v=11">
+<script src="api.js?v=11"></script>
+<script src="shell.js?v=11"></script>
+<script src="edit.js?v=11"></script>
+<script src="trips.js?v=11"></script>
+<script src="panels.js?v=11"></script>
 <style>
 :root{
   --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e5e8eb;
@@ -105,6 +109,12 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
 </style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true">
+  <div>
+    <div class="splash-word">FIT</div>
+    <div class="splash-sub">FALL INTO TRIP</div>
+  </div>
+</div>
 
 <header class="appbar">
   <button class="icon-square" data-shell-menu aria-label="메뉴 열기">
@@ -330,7 +340,7 @@ function setTheme(t) {
 }
 try { setTheme(localStorage.getItem("tokyoTrip.theme") === "dark" ? "dark" : "light"); } catch {}
 
-Shell.init({ page: "admin", title: "도쿄 3박 4일" }).then(async shell => {
+Shell.init({ page: "admin", title: "FIT" }).then(async shell => {
   if (shell.blocked) return;
   me = API.state.user;
   if (!me || me.role !== "admin") {

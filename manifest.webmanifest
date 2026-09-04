@@ -1,14 +1,14 @@
 {
-  "name": "도쿄 3박 4일",
-  "short_name": "도쿄여행",
-  "description": "2026.10.08–10.11 도쿄 일정표 — 이동수단·소요시간·금액 포함, 지도 연동",
+  "name": "FIT — fall into trip",
+  "short_name": "FIT",
+  "description": "여행 일정·동선·가계부를 한 곳에서. 이동수단과 금액까지 지도와 함께 봅니다.",
   "lang": "ko",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f2f4f6",
+  "background_color": "#ffffff",
   "theme_color": "#f2f4f6",
   "categories": ["travel", "navigation"],
   "icons": [

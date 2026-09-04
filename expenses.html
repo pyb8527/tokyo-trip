@@ -3,21 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>가계부 · 도쿄 3박 4일</title>
+<title>FIT · 가계부</title>
 <meta name="description" content="도쿄 여행 예산과 실제 지출 기록">
 <meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="가계부">
+<meta name="apple-mobile-web-app-title" content="FIT">
+<script>/* 저장해 둔 테마를 먼저 입혀 스플래시가 번쩍이지 않게 한다 */
+try{if(localStorage.getItem("tokyoTrip.theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css?v=10">
-<link rel="stylesheet" href="edit.css?v=10">
-<script src="api.js?v=10"></script>
-<script src="shell.js?v=10"></script>
-<script src="edit.js?v=10"></script>
-<script src="panels.js?v=10"></script>
+<link rel="stylesheet" href="shell.css?v=11">
+<link rel="stylesheet" href="edit.css?v=11">
+<script src="api.js?v=11"></script>
+<script src="shell.js?v=11"></script>
+<script src="edit.js?v=11"></script>
+<script src="trips.js?v=11"></script>
+<script src="panels.js?v=11"></script>
 <style>
 :root{
   --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e5e8eb;
@@ -171,6 +174,12 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
 </style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true">
+  <div>
+    <div class="splash-word">FIT</div>
+    <div class="splash-sub">FALL INTO TRIP</div>
+  </div>
+</div>
 
 <div class="wrap">
   <header class="top">
@@ -185,7 +194,7 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
       </a>
       <div>
         <h1>가계부</h1>
-        <p>도쿄 3박 4일 · 10.08 – 10.11</p>
+        <p id="expSub">여행 지출</p>
       </div>
       <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" aria-label="라이트/다크 전환">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -312,7 +321,7 @@ const RATE_STORE = "tokyoTrip.rate";
 const THEME_STORE = "tokyoTrip.theme";     /* 일정 페이지와 같은 키를 써서 테마가 이어진다 */
 
 const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c =>
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 const yen = n => "¥" + Math.round(n).toLocaleString("ko-KR");
 const won = n => "₩" + Math.round(n).toLocaleString("ko-KR");
@@ -342,7 +351,7 @@ const toLocal = e => ({
 
 async function pullFromServer() {
   const [trip, ex, mm] = await Promise.all([
-    API.get("/api/trip"), API.get("/api/expenses"), API.get("/api/members")
+    API.get(Trips.q("/api/trip")), API.get(Trips.q("/api/expenses")), API.get(Trips.q("/api/members"))
   ]);
   dayIds = trip.days.map(d => d.id);
   members = mm.members;
@@ -354,6 +363,12 @@ async function pullFromServer() {
     DAYS[i].color = d.color || DAYS[i].color;
   });
   items = ex.expenses.map(toLocal);
+  /* 여러 여행을 쓰므로 머리글도 지금 보는 여행을 따른다 */
+  const sub = document.getElementById("expSub");
+  if (sub && trip.trip?.title) {
+    const d = trip.days;
+    sub.textContent = trip.trip.title + (d.length ? ` · ${d[0].date}${d.length > 1 ? " – " + d[d.length - 1].date : ""}` : "");
+  }
 }
 const PLAN_TOTAL = DAYS.reduce((a, d) => a + d.plan, 0);
 
@@ -487,8 +502,8 @@ $("#addForm").addEventListener("submit", async e => {
   if (online()) {
     try {
       const res = await API.post("/api/expenses", {
-        dayId: dayIds[day], name, amount: amt, cat: row.cat, pay: row.pay,
-        payerId, share
+        tripId: Trips.getActive(), dayId: dayIds[day], name, amount: amt,
+        cat: row.cat, pay: row.pay, payerId, share
       });
       items.push(toLocal(res.expense));
     } catch (err) { Edit.toast(err.message, true); return; }
@@ -504,7 +519,7 @@ $("#fRate").value = rate;
 $("#fRate").addEventListener("input", e => {
   rate = Number(e.target.value) || 0;
   try { localStorage.setItem(RATE_STORE, String(rate)); } catch {}
-  if (online()) { API.patch("/api/settings", { rate }).catch(() => {}); }
+  if (online()) { API.patch("/api/settings", { tripId: Trips.getActive(), rate }).catch(() => {}); }
   renderTotals();
 });
 
@@ -563,12 +578,12 @@ function renderPayerAndShare() {
     .map(m => `<label><input type="checkbox" value="${m.id}" checked>${esc(m.name)}</label>`).join("");
 }
 
-Shell.init({ page: "expenses", title: "도쿄 3박 4일" }).then(async shell => {
+Shell.init({ page: "expenses", title: "FIT" }).then(async shell => {
   if (shell.blocked) return;
   if (online()) {
     try {
       await pullFromServer();
-      try { rate = (await API.get("/api/settings")).rate ?? rate; } catch {}
+      try { rate = (await API.get(Trips.q("/api/settings"))).rate ?? rate; } catch {}
       $("#fRate").value = rate;
     } catch (e) { Edit.toast("가계부를 불러오지 못했습니다: " + e.message, true); }
   }

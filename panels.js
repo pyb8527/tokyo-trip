@@ -38,7 +38,7 @@
     const online = API.isOnline() && !!API.state.user;
     let rate = 930;
     try { rate = Number(localStorage.getItem("tokyoTrip.rate")) || 930; } catch {}
-    if (online) { try { rate = (await API.get("/api/settings")).rate ?? rate; } catch {} }
+    if (online) { try { rate = (await API.get(Trips.q("/api/settings"))).rate ?? rate; } catch {} }
 
     const close = panel(`<div class="modal-card">${head("설정")}
       <div class="f-grid">
@@ -74,7 +74,7 @@
       const v = Number(e.target.value);
       if (!(v > 0)) return;
       try { localStorage.setItem("tokyoTrip.rate", String(v)); } catch {}
-      if (online) { try { await API.patch("/api/settings", { rate: v }); } catch {} }
+      if (online) { try { await API.patch("/api/settings", { tripId: Trips.getActive(), rate: v }); } catch {} }
     });
 
     $("#stTheme").onclick = () => {
@@ -118,8 +118,8 @@
 
     try {
       const [mm, st] = await Promise.all([
-        API.get("/api/members"),
-        API.get("/api/expenses/settlement")
+        API.get(Trips.q("/api/members")),
+        API.get(Trips.q("/api/expenses/settlement"))
       ]);
 
       const row = m => {

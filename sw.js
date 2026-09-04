@@ -1,5 +1,5 @@
 /* ============================================================================
-   도쿄 3박 4일 · 서비스 워커
+   FIT · 서비스 워커
    ----------------------------------------------------------------------------
    목적은 하나입니다: 일본에서 데이터가 끊겨도 "일정"은 반드시 보이게 하는 것.
 
@@ -11,7 +11,7 @@
 
    일정을 고쳐 배포할 때 CACHE 뒤 숫자만 올리면 옛 캐시가 정리됩니다.
    ========================================================================== */
-const CACHE = "tokyo-trip-v10";
+const CACHE = "tokyo-trip-v11";
 
 const SHELL = [
   "./",
@@ -19,12 +19,13 @@ const SHELL = [
   "expenses.html",
   "admin.html",
   "manifest.webmanifest",
-  "shell.css?v=10",
-  "shell.js?v=10",
-  "api.js?v=10",
-  "edit.css?v=10",
-  "edit.js?v=10",
-  "panels.js?v=10",
+  "shell.css?v=11",
+  "shell.js?v=11",
+  "api.js?v=11",
+  "edit.css?v=11",
+  "edit.js?v=11",
+  "panels.js?v=11",
+  "trips.js?v=11",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-180.png",

@@ -4,6 +4,35 @@
    토큰(--bg, --surface, --accent …)을 그대로 물려받습니다.
    ========================================================================== */
 
+/* ---------- 스플래시 ----------
+   shell.css 는 <head> 에서 렌더를 막고 로드되므로 첫 페인트부터 덮여 있습니다.
+   JS 가 죽어도 화면이 갇히지 않도록 6초 뒤 스스로 걷히는 안전장치를 둡니다. */
+.splash{
+  position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:#fff;color:#111114;
+  animation:splashSafety .4s ease 6s forwards;
+}
+[data-theme="dark"] .splash{background:#17171c;color:#f2f4f6}
+.splash-word{
+  font-size:clamp(46px,15vw,72px);font-weight:900;letter-spacing:-.055em;line-height:1;
+  animation:splashIn .5s cubic-bezier(.22,1,.36,1) both;
+}
+.splash-sub{
+  margin-top:12px;text-align:center;
+  font-size:11px;font-weight:700;letter-spacing:.22em;opacity:.36;
+  animation:splashIn .5s cubic-bezier(.22,1,.36,1) .08s both;
+}
+@keyframes splashIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes splashSafety{to{opacity:0;visibility:hidden}}
+.splash.gone{
+  animation:none;opacity:0;visibility:hidden;
+  transition:opacity .38s var(--ease,ease),visibility 0s .38s;
+}
+@media (prefers-reduced-motion:reduce){
+  .splash-word,.splash-sub{animation:none}
+  .splash.gone{transition:none}
+}
+
 /* ---------- 로그인 / 최초 설정 ---------- */
 .auth-screen{
   position:fixed;inset:0;z-index:100;display:grid;place-items:center;

@@ -247,6 +247,78 @@ const Edit = (() => {
     });
   }
 
+  /* ---------------------------------------------------------------- 날짜 */
+  function openDayForm(day) {
+    let el = $("#dayModal");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "dayModal"; el.className = "modal";
+      document.body.appendChild(el);
+    }
+    el.innerHTML = `<div class="modal-card">
+      <div class="modal-head"><h3>날짜 수정</h3>
+        <button class="modal-x" id="dClose" aria-label="닫기">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button></div>
+      <form id="dayForm"><div class="f-grid">
+        <div class="f"><label for="dLabel">이름</label>
+          <input id="dLabel" required maxlength="30" value="${esc(day.label)}" placeholder="Day 1"></div>
+        <div class="f"><label for="dIso">날짜</label>
+          <input id="dIso" type="date" value="${esc(day.iso ?? "")}"></div>
+        <div class="f"><label for="dShort">짧은 이름</label>
+          <input id="dShort" maxlength="20" value="${esc(day.short ?? "")}" placeholder="시부야">
+          <span class="hint">지도 범례에 뜹니다</span></div>
+        <div class="f"><label for="dColor">색</label>
+          <input id="dColor" type="color" value="${esc(day.color || "#3182f6")}"></div>
+        <div class="f full"><label for="dTheme">설명</label>
+          <input id="dTheme" maxlength="60" value="${esc(day.theme ?? "")}" placeholder="시부야 코어 (+ 하라주쿠)"></div>
+        <div class="f full"><label for="dBudget">하루 예산</label>
+          <input id="dBudget" maxlength="40" value="${esc(day.budget ?? "")}" placeholder="1인 약 ¥14,000"></div>
+      </div>
+      <div id="dayErr"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-danger" id="dDelete">삭제</button>
+        <button type="button" class="btn btn-ghost" id="dCancel">취소</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div></form></div>`;
+    el.hidden = false;
+    const close = () => { el.hidden = true; el.innerHTML = ""; };
+    $("#dClose").onclick = close; $("#dCancel").onclick = close;
+    el.onclick = e => { if (e.target === el) close(); };
+    const fail = m => { $("#dayErr").innerHTML = `<div class="form-err">${esc(m)}</div>`; };
+
+    $("#dDelete").onclick = async () => {
+      if (!confirm(`"${day.label}" 을(를) 지웁니다. 그 날의 장소도 함께 사라집니다.`)) return;
+      try { await API.del("/api/days/" + day.id); close(); await hooks.reload(); toast("날짜를 지웠습니다"); }
+      catch (e) { fail(e.message); }
+    };
+
+    $("#dayForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      $("#dayErr").innerHTML = "";
+      try {
+        await API.patch("/api/days/" + day.id, {
+          label: $("#dLabel").value.trim(),
+          iso: $("#dIso").value || null,
+          short: $("#dShort").value.trim() || null,
+          color: $("#dColor").value,
+          theme: $("#dTheme").value.trim() || null,
+          budget: $("#dBudget").value.trim() || null
+        });
+        close(); await hooks.reload(); toast("저장했습니다");
+      } catch (err) { fail(err.message); }
+    });
+  }
+
+  async function addDay() {
+    try {
+      await API.post("/api/days", { tripId: typeof Trips !== "undefined" ? Trips.getActive() : undefined });
+      await hooks.reload();
+      toast("날짜를 추가했습니다");
+    } catch (e) { toast(e.message, true); }
+  }
+
   /* ---------------------------------------------------------------- 편집 모드 */
   const modeListeners = [];
   const onModeChange = fn => modeListeners.push(fn);
@@ -262,6 +334,19 @@ const Edit = (() => {
   /* 목록이 다시 그려질 때 index.html 이 불러 준다 */
   function decorate(block, day) {
     if (!editMode) return;
+
+    /* 날짜 머리글에 수정 버튼 */
+    const dh = block.querySelector(".day-head");
+    if (dh && day.id) {
+      const box = document.createElement("div");
+      box.className = "day-edit";
+      box.innerHTML = `<button data-day-e title="날짜 수정" aria-label="${esc(day.label)} 수정">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16Z"/><path d="m14.5 5.5 4 4"/></svg>
+      </button>`;
+      box.querySelector("[data-day-e]").onclick = e => { e.stopPropagation(); openDayForm(day); };
+      dh.appendChild(box);
+    }
 
     block.querySelectorAll(".card-wrap").forEach(wrap => {
       const id = wrap.querySelector(".card")?.dataset.id;
@@ -299,5 +384,5 @@ const Edit = (() => {
   const attach = h => { hooks = h; };
   const isOn = () => editMode;
 
-  return { attach, setEditMode, onModeChange, decorate, openForm, isOn, toast, parseLatLng };
+  return { attach, setEditMode, onModeChange, decorate, openForm, openDayForm, addDay, isOn, toast, parseLatLng };
 })();

@@ -110,6 +110,54 @@ body.picking .stage{cursor:crosshair}
   color:inherit;font-size:12px;font-weight:700;
 }
 
+/* ---------- 여행 목록 ---------- */
+.trip-row{
+  display:flex;align-items:stretch;gap:6px;margin-bottom:8px;
+  border-radius:var(--radius-sm,10px);background:var(--surface-2);overflow:hidden;
+}
+.trip-row.on{background:var(--accent-bg,var(--surface-3))}
+.trip-pick{flex:1;min-width:0;text-align:left;padding:14px 15px}
+.trip-title{
+  font-size:15px;font-weight:700;letter-spacing:-.3px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+}
+.trip-row.on .trip-title{color:var(--accent)}
+.trip-now{
+  padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;
+  background:var(--accent);color:#fff;
+}
+.trip-meta{margin-top:3px;font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.trip-sub{margin-top:2px;font-size:11.5px;color:var(--text-4);font-variant-numeric:tabular-nums}
+.trip-acts{display:flex;flex-direction:column;justify-content:center;gap:4px;padding-right:10px}
+.trip-acts button{
+  width:30px;height:30px;border-radius:99px;display:grid;place-items:center;
+  color:var(--text-3);background:var(--surface);transition:.15s var(--ease);
+}
+.trip-acts button:hover{color:var(--text)}
+.trip-acts button:active{transform:scale(.9)}
+.trip-acts .danger:hover{background:var(--danger,#f04452);color:#fff}
+
+/* ---------- 날짜 편집 ---------- */
+.day-edit{
+  margin-left:auto;display:flex;gap:4px;flex:0 0 auto;
+}
+.day-edit button{
+  width:26px;height:26px;border-radius:99px;display:grid;place-items:center;
+  color:var(--text-3);background:var(--surface-2);transition:.15s var(--ease);
+}
+.day-edit button:hover{color:var(--text);background:var(--surface-3)}
+.day-edit button:active{transform:scale(.9)}
+.day-edit .danger:hover{background:var(--danger,#f04452);color:#fff}
+
+.trip-add-day{
+  width:100%;margin:14px 0 4px;padding:14px;border-radius:var(--radius,16px);
+  background:var(--surface);color:var(--accent);font-size:13.5px;font-weight:700;
+  border:1px dashed color-mix(in srgb,var(--accent) 40%,transparent);
+  transition:.15s var(--ease);
+}
+.trip-add-day:hover{background:var(--accent-bg,var(--surface-2))}
+.trip-add-day:active{transform:scale(.99)}
+
 /* ---------- 토스트 ---------- */
 .toast{
   position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:90;
