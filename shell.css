@@ -45,9 +45,13 @@
 .auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .auth-field label{font-size:12px;font-weight:600;color:var(--text-3)}
 .auth-field input{
+  width:100%;min-width:0;
   padding:14px 15px;border-radius:var(--radius-sm,10px);border:0;
-  background:var(--surface-2);color:var(--text);font-size:15px;font-weight:500;transition:.15s;
+  background:var(--surface-2);color:var(--text);font-weight:500;transition:.15s;
+  /* iOS 는 16px 미만 입력에 손을 대면 화면을 확대해 버린다 */
+  font-size:16px;
 }
+@media (min-width:600px){ .auth-field input{font-size:15px} }
 .auth-field input::placeholder{color:var(--text-4)}
 .auth-field input:focus{outline:0;box-shadow:0 0 0 2px var(--accent) inset}
 .auth-btn{
@@ -113,7 +117,7 @@
 }
 .drawer-badge.off{background:var(--surface-2);color:var(--text-3)}
 
-.drawer-nav{flex:1;overflow-y:auto;padding:6px 12px}
+.drawer-nav{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:6px 12px}
 .drawer-item{
   display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px;
   border-radius:var(--radius-sm,10px);font-size:14.5px;font-weight:600;color:var(--text-2);
@@ -144,6 +148,13 @@
 }
 .tabbar .on{color:var(--accent)}
 .tabbar a:active,.tabbar button:active{transform:scale(.94)}
+
+/* ---------- 오버레이가 떠 있는 동안 배경 고정 ----------
+   모달·시트·드로어 위에서 손가락을 움직이면 뒤 일정 목록이 같이 밀려
+   올라가고, 닫고 나면 엉뚱한 자리에 가 있었다. shell.js 가 오버레이를
+   지켜보다가 이 클래스를 붙인다. */
+html.overlay-open,
+html.overlay-open body{overflow:hidden}
 
 /* 하단 바가 가리지 않도록 여백 확보 */
 /* 하단바가 마지막 내용을 가리지 않도록 딱 그만큼만 비운다 */

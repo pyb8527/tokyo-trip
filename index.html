@@ -15,13 +15,13 @@ try{if(localStorage.getItem("tokyoTrip.theme")==="dark")document.documentElement
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css?v=11">
-<link rel="stylesheet" href="edit.css?v=11">
-<script src="api.js?v=11"></script>
-<script src="shell.js?v=11"></script>
-<script src="edit.js?v=11"></script>
-<script src="trips.js?v=11"></script>
-<script src="panels.js?v=11"></script>
+<link rel="stylesheet" href="shell.css?v=12">
+<link rel="stylesheet" href="edit.css?v=12">
+<script src="api.js?v=12"></script>
+<script src="shell.js?v=12"></script>
+<script src="edit.js?v=12"></script>
+<script src="trips.js?v=12"></script>
+<script src="panels.js?v=12"></script>
 <title>FIT · 일정</title>
 <style>
 /* ============================================================
@@ -379,7 +379,11 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
   .legend{right:10px;bottom:10px;padding:11px 13px;gap:5px}
   .legend button{font-size:11.5px}
   .map-hud{left:10px;top:10px}
-  .sheet{left:10px;right:10px;bottom:10px;width:auto;max-height:52vh;overflow-y:auto}
+  .sheet{
+    left:10px;right:10px;bottom:10px;width:auto;max-height:52vh;overflow-y:auto;
+    /* 시트 안에서 끝까지 내렸을 때 지도·목록으로 스크롤이 넘어가지 않게 */
+    overscroll-behavior:contain;
+  }
 
   .grabber{
     display:block;position:sticky;z-index:4;height:18px;flex:0 0 auto;

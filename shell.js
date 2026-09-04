@@ -209,6 +209,53 @@ const Shell = (() => {
     return { open, close };
   }
 
+  /* ------------------------------------------------ 오버레이 · 배경 고정 */
+  /* 모달·시트·드로어가 떠 있는 동안 뒤 화면이 따라 움직이면 안 된다.
+     여닫는 곳이 여러 파일(edit.js · trips.js · panels.js · 각 페이지)에
+     흩어져 있어 호출을 하나씩 심는 대신 DOM 을 직접 지켜본다.
+     새 오버레이를 만들어도 따로 손볼 것이 없다. */
+  const OVERLAY_SEL = [
+    ".modal:not([hidden])",
+    ".sheet:not([hidden])",
+    ".auth-screen:not([hidden])",
+    ".drawer.open"
+  ].join(",");
+
+  let lockQueued = false;
+  function syncScrollLock() {
+    lockQueued = false;
+    const open = !!document.querySelector(OVERLAY_SEL);
+    document.documentElement.classList.toggle("overlay-open", open);
+    if (open) markStuckActions();
+  }
+  /* 지도가 DOM 을 자주 건드리므로 한 번에 몰아서 확인한다.
+     requestAnimationFrame 은 탭이 뒤로 가 있으면 멈춰서, 그 사이에 모달을
+     닫으면 잠금이 풀리지 않은 채 남는다. 타이머로 돌린다. */
+  function queueScrollLock() {
+    if (lockQueued) return;
+    lockQueued = true;
+    setTimeout(syncScrollLock, 0);
+  }
+
+  /* 카드 아래에 붙어 있는 동안에만 버튼줄 위에 경계선을 그린다 */
+  function markStuckActions() {
+    document.querySelectorAll(".modal:not([hidden]) .modal-card").forEach(card => {
+      const acts = card.querySelector(".modal-actions");
+      if (!acts) return;
+      const stuck = card.scrollHeight - card.clientHeight - card.scrollTop > 1;
+      acts.classList.toggle("stuck", stuck);
+      if (!card.dataset.stuckBound) {
+        card.dataset.stuckBound = "1";
+        card.addEventListener("scroll", () => markStuckActions(), { passive: true });
+      }
+    });
+  }
+
+  new MutationObserver(queueScrollLock).observe(document.documentElement, {
+    subtree: true, childList: true, attributes: true, attributeFilter: ["hidden", "class"]
+  });
+  addEventListener("resize", queueScrollLock);
+
   /* -------------------------------------------------------------- 스플래시 */
   /* 너무 빨리 사라지면 깜빡임으로 보이므로 최소 표시 시간을 준다. */
   const SPLASH_MIN = 620;
