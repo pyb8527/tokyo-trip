@@ -233,6 +233,13 @@ sudo docker compose exec api node src/seed.js
 sudo docker compose exec api node src/seed.js --force
 ```
 
+`index.html` 은 API 이미지 안에 `/app/index.html` 로 함께 들어갑니다.
+다른 파일에서 읽고 싶으면 `INDEX_HTML=/경로/index.html` 로 지정하세요.
+
+> ⚠️ **일정을 넣지 않으면 편집을 쓸 수 없습니다.** 서버가 빈 일정을 주면 화면은
+> `index.html` 에 내장된 일정을 그대로 보여주는데, 거기엔 서버 ID 가 없어
+> 수정·삭제가 대상을 찾지 못합니다. 이 경우 편집 토글이 숨겨지고 안내가 뜹니다.
+
 ### 계정
 
 가입 기능은 없습니다. **관리자만 계정을 만듭니다** (드로어 → 관리자 → 계정 추가).

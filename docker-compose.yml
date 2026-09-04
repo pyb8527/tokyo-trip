@@ -32,7 +32,10 @@ services:
 
   # ── API 서버 (로그인·장소·가계부·정산) ─────────────────────────────────
   api:
-    build: ./server
+    build:
+      # seed 가 index.html 을 읽어야 해서 컨텍스트를 저장소 루트로 둡니다
+      context: .
+      dockerfile: server/Dockerfile
     image: tokyo-trip-api:latest
     container_name: tokyo-trip-api
     restart: unless-stopped

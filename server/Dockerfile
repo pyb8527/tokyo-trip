@@ -6,8 +6,11 @@ RUN apk add --no-cache wget
 
 WORKDIR /app
 
-COPY package.json ./
-COPY src ./src
+COPY server/package.json ./
+COPY server/src ./src
+
+# seed 가 읽을 원본 일정. 컨테이너 안에서 /app/index.html 로 찾습니다.
+COPY index.html ./index.html
 
 # DB 파일이 놓일 자리. compose 에서 볼륨으로 덮어씁니다.
 RUN mkdir -p /app/data && chown -R node:node /app

@@ -4,14 +4,30 @@
      node src/seed.js            일정만 넣기
      node src/seed.js --force    기존 날짜·장소를 지우고 다시 넣기
    ========================================================================== */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { db, newId, now } from "./db.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const HTML = process.env.INDEX_HTML || resolve(HERE, "../../index.html");
 const force = process.argv.includes("--force");
+
+/* 도커에서는 /app/index.html, 로컬 개발에서는 저장소 루트에 있다.
+   INDEX_HTML 로 직접 지정할 수도 있다. */
+const CANDIDATES = [
+  process.env.INDEX_HTML,
+  resolve(HERE, "../index.html"),      // 컨테이너: /app/index.html
+  resolve(HERE, "../../index.html")    // 로컬: 저장소 루트
+].filter(Boolean);
+
+const HTML = CANDIDATES.find(p => existsSync(p));
+if (!HTML) {
+  console.error("[seed] index.html 을 찾지 못했습니다. 찾아본 곳:");
+  CANDIDATES.forEach(p => console.error("  -", p));
+  console.error("[seed] INDEX_HTML 환경변수로 직접 지정할 수 있습니다.");
+  process.exit(1);
+}
+console.log("[seed] 원본:", HTML);
 
 const src = readFileSync(HTML, "utf8");
 const start = src.indexOf("const TRIP_DATA = {");

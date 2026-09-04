@@ -9,3 +9,11 @@ Dockerfile
 docker-compose.yml
 README.md
 *.md
+
+# API 빌드 컨텍스트가 저장소 루트라 서버 쪽 산출물도 제외합니다
+server/data/
+server/node_modules/
+server/.env
+server/*.db
+server/*.db-shm
+server/*.db-wal
