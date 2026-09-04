@@ -106,7 +106,7 @@ router.post("/api/auth/setup", async ctx => {
   const user = createUser({ email: body.email, name: body.name, password: body.password, role: "admin" });
   const tripId = newId();
   db.prepare("INSERT INTO trips(id,title,owner_id,created_at) VALUES(?,?,?,?)")
-    .run(tripId, "도쿄 3박 4일", user.id, now());
+    .run(tripId, "첫 여행", user.id, now());
   db.prepare("INSERT INTO trip_members(trip_id,user_id,role) VALUES(?,?,?)").run(tripId, user.id, "editor");
   audit(user.id, "setup", user.id, { email: user.email });
   ctx.login(user);
