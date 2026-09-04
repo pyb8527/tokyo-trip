@@ -13,12 +13,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="stylesheet" href="shell.css?v=9">
-<link rel="stylesheet" href="edit.css?v=9">
-<script src="api.js?v=9"></script>
-<script src="shell.js?v=9"></script>
-<script src="edit.js?v=9"></script>
-<script src="panels.js?v=9"></script>
+<link rel="stylesheet" href="shell.css?v=10">
+<link rel="stylesheet" href="edit.css?v=10">
+<script src="api.js?v=10"></script>
+<script src="shell.js?v=10"></script>
+<script src="edit.js?v=10"></script>
+<script src="panels.js?v=10"></script>
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -345,6 +345,11 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
 @media (max-width:1180px){ :root{--sidebar-w:348px} }
 
 @media (max-width:860px){
+  /* html,body 높이가 100% 로 고정돼 있으면 body 의 content box 가 뷰포트 크기로
+     묶여서, 그 안에 있는 sticky 앱바가 스크롤 도중 밀려 올라간다.
+     모바일에서는 body 가 실제로 스크롤되므로 높이를 풀어 준다. */
+  html, body{ height:auto; min-height:100%; }
+
   /* 앱바와 하단바가 차지하는 만큼 빼야 내용이 없을 때 세로 스크롤이 안 생긴다 */
   .app{
     display:flex;flex-direction:column;height:auto;overflow:visible;
@@ -359,6 +364,12 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
   .list{flex:none;overflow:visible}
   /* 날짜 머리글은 지도 바로 밑에 걸린다 */
   .day-head{top:calc(var(--appbar-h) + var(--stage-h,46vh) - 1px)}
+
+  /* 탭·카드로 이동할 때 앱바와 지도에 가리지 않도록 목적지에 여백을 준다.
+     이게 없으면 scrollIntoView 가 뷰포트 맨 위에 맞춰서, 그 날 첫 일정이
+     지도 뒤에 숨고 세 번째쯤부터 보인다. */
+  .day-block{scroll-margin-top:calc(var(--appbar-h) + var(--stage-h,46vh) + 8px)}
+  .card-wrap,.card{scroll-margin-top:calc(var(--appbar-h) + var(--stage-h,46vh) + 12px)}
   body.gate-open .stage{position:relative;height:auto;min-height:0;z-index:auto}
   body.gate-open #map{display:none}
   body.gate-open .gate{position:relative;inset:auto;padding:20px 14px}
@@ -391,9 +402,10 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
   .head,.toggles{padding-left:16px;padding-right:16px}
   .tabs{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
   .day-block{padding:0 12px}
-  :root{--appbar-h:58px}
   .stage{height:var(--stage-h,42vh)}
   .day-head{top:calc(var(--appbar-h) + var(--stage-h,42vh) - 1px)}
+  .day-block{scroll-margin-top:calc(var(--appbar-h) + var(--stage-h,42vh) + 8px)}
+  .card-wrap,.card{scroll-margin-top:calc(var(--appbar-h) + var(--stage-h,42vh) + 12px)}
   .stats{gap:16px}
   .brand h1{font-size:19px}
   .gate-card{padding:22px}
@@ -852,6 +864,15 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
 const rich = s => esc(s).replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>")
                          .replace(/&lt;br\s*\/?&gt;/g, "<br>");
 /* 서버에서 받은 장소는 고정 ID 를 쓴다. 서버가 없을 때만 순번으로 만든다. */
+/* 모바일은 위쪽을 앱바와 지도가 덮고 있어 center 로 맞추면 카드가 그 뒤에 숨는다.
+   start 로 맞추고 scroll-margin-top 이 가려지는 만큼 밀어 준다. */
+const scrollCardIntoView = id => {
+  const el = document.querySelector(`.card[data-id="${id}"]`);
+  if (!el) return;
+  const mobile = matchMedia("(max-width:860px)").matches;
+  el.scrollIntoView({ behavior: "smooth", block: mobile ? "start" : "center" });
+};
+
 const pid  = (d, p) => TRIP_DATA.days[d]?.places[p]?.id || `d${d}-p${p}`;
 
 function haversine(a, b) {
@@ -1323,7 +1344,7 @@ function focusPlace(id, pan, fromMarker) {
     }
   }
   if (fromMarker) {
-    document.querySelector(`.card[data-id="${id}"]`)?.scrollIntoView({ behavior:"smooth", block:"center" });
+    scrollCardIntoView(id);
   }
   setHash(id);
 }
@@ -1384,7 +1405,7 @@ function goNow() {
   const di = Number(nowId.split("-")[0].slice(1));
   if (state.activeDay !== "all" && state.activeDay !== di) setDay(di);
   focusPlace(nowId, true);
-  document.querySelector(`.card[data-id="${nowId}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  scrollCardIntoView(nowId);
 }
 
 /* ---------- 딥링크 (#all, #day2, #d1-p4) ---------- */
