@@ -68,9 +68,12 @@
    카드 바닥에 붙여 두고, 위로 지나가는 내용이 비쳐 보이지 않게 배경을 깐다. */
 .modal-actions{
   display:flex;gap:8px;margin-top:20px;
-  position:sticky;bottom:calc((env(safe-area-inset-bottom) + 22px) * -1);
-  padding:12px 0 calc(env(safe-area-inset-bottom) + 22px);
+  position:sticky;bottom:0;
+  padding:12px 0 0;
   background:var(--surface);
+  /* 카드 아래 여백으로 내용이 비쳐 지나가지 않게 같은 색을 깔아 둔다.
+     여기에 padding 을 또 주면 카드 여백과 겹쳐 버튼이 바닥에서 붕 뜬다. */
+  box-shadow:0 calc(env(safe-area-inset-bottom) + 22px) 0 var(--surface);
 }
 /* 붙어 있는 동안에만 위쪽에 경계를 그린다 */
 .modal-actions::before{
