@@ -214,9 +214,11 @@ const Shell = (() => {
      여닫는 곳이 여러 파일(edit.js · trips.js · panels.js · 각 페이지)에
      흩어져 있어 호출을 하나씩 심는 대신 DOM 을 직접 지켜본다.
      새 오버레이를 만들어도 따로 손볼 것이 없다. */
+  /* 장소 상세(.sheet)는 여기 넣지 않는다. 지도 위에 얹히는 정보 카드일 뿐
+     막을 깔지도, 바깥을 눌러 닫지도 않는다. 띄워 둔 채로 아래 일정을 계속
+     훑어보는 물건이라 배경을 잠그면 목록이 안 움직인다. */
   const OVERLAY_SEL = [
     ".modal:not([hidden])",
-    ".sheet:not([hidden])",
     ".auth-screen:not([hidden])",
     ".drawer.open"
   ].join(",");
