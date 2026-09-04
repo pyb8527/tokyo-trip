@@ -19,26 +19,50 @@ const requireAdmin = ctx => {
   return u;
 };
 
-const theTrip = () => {
-  const t = db.prepare("SELECT * FROM trips ORDER BY created_at LIMIT 1").get();
-  if (!t) notFound("여행이 아직 만들어지지 않았습니다.");
+/* 여행 id 를 주면 그 여행, 없으면 가장 먼저 만든 여행 */
+const theTrip = (id) => {
+  const t = id
+    ? db.prepare("SELECT * FROM trips WHERE id=?").get(id)
+    : db.prepare("SELECT * FROM trips ORDER BY created_at LIMIT 1").get();
+  if (!t) notFound("여행을 찾을 수 없습니다.");
   return t;
 };
 
+/* 요청에서 여행 id 를 뽑는다 (?trip=... 또는 본문의 tripId) */
+const tripIdOf = (ctx, body) => body?.tripId || ctx.url.searchParams.get("trip") || null;
+
+/* 날짜 문자열 도우미 — iso(2026-10-08) 로부터 "10.08 (목)" 을 만든다 */
+const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
+/* 날짜 계산은 반드시 UTC 로 한다.
+   "2027-03-05T00:00:00" 은 로컬 자정으로 파싱되는데 toISOString() 은 UTC 로
+   되돌리므로, UTC+9 서버에서는 하루가 밀려 2027-03-04 가 되어 버린다. */
+function labelFromIso(iso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
+  const d = new Date(iso + "T00:00:00Z");
+  if (Number.isNaN(d.getTime())) return null;
+  return `${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")} (${WEEK[d.getUTCDay()]})`;
+}
+const addDays = (iso, n) => {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const DAY_COLORS = ["#f04452", "#e07800", "#7c5cff", "#00a98f", "#3182f6", "#e8590c", "#12b886", "#845ef7"];
+
 /* 여행 멤버이거나 관리자여야 편집할 수 있다 */
-function requireEditor(ctx) {
+function requireEditor(ctx, tripId) {
   const u = requireUser(ctx);
   if (u.role === "admin") return u;
-  const trip = theTrip();
+  const trip = theTrip(tripId);
   const m = db.prepare("SELECT * FROM trip_members WHERE trip_id=? AND user_id=?").get(trip.id, u.id);
   if (!m) forbid("이 여행의 동행자가 아닙니다.");
   if (m.role === "viewer") forbid("보기 전용 권한입니다.");
   return u;
 }
-function requireMember(ctx) {
+function requireMember(ctx, tripId) {
   const u = requireUser(ctx);
   if (u.role === "admin") return u;
-  const trip = theTrip();
+  const trip = theTrip(tripId);
   const m = db.prepare("SELECT * FROM trip_members WHERE trip_id=? AND user_id=?").get(trip.id, u.id);
   if (!m) forbid("이 여행의 동행자가 아닙니다.");
   return u;
@@ -205,9 +229,134 @@ router.get("/api/admin/audit", ctx => {
 });
 
 /* ============================================================ 여행 */
+
+/* 내가 볼 수 있는 여행 목록 (관리자는 전부) */
+router.get("/api/trips", ctx => {
+  const u = requireUser(ctx);
+  const rows = u.role === "admin"
+    ? db.prepare("SELECT * FROM trips ORDER BY created_at").all()
+    : db.prepare(`SELECT t.* FROM trips t JOIN trip_members m ON m.trip_id = t.id
+                  WHERE m.user_id = ? ORDER BY t.created_at`).all(u.id);
+  return {
+    trips: rows.map(t => {
+      const days = db.prepare("SELECT iso FROM days WHERE trip_id=? ORDER BY sort").all(t.id);
+      const n = db.prepare(`SELECT COUNT(*) n FROM places p JOIN days d ON d.id=p.day_id
+                            WHERE d.trip_id=?`).get(t.id).n;
+      return {
+        id: t.id, title: t.title, ownerId: t.owner_id, createdAt: t.created_at,
+        dayCount: days.length, placeCount: n,
+        startIso: days[0]?.iso ?? null, endIso: days[days.length - 1]?.iso ?? null
+      };
+    })
+  };
+});
+
+/* 새 여행 — 시작일과 일수를 주면 날짜를 자동으로 깔아 준다 */
+router.post("/api/trips", async ctx => {
+  const u = requireUser(ctx);
+  const b = await readJson(ctx.req);
+  const title = String(b.title || "").trim();
+  if (!title) bad("여행 이름이 필요합니다.");
+  const startIso = String(b.startIso || "");
+  if (!labelFromIso(startIso)) bad("시작일이 올바르지 않습니다. (YYYY-MM-DD)");
+  const nights = Math.max(0, Math.min(30, Number(b.nights ?? 0)));
+  const dayCount = nights + 1;
+
+  const id = newId();
+  db.exec("BEGIN");
+  try {
+    db.prepare("INSERT INTO trips(id,title,owner_id,created_at) VALUES(?,?,?,?)").run(id, title, u.id, now());
+    db.prepare("INSERT INTO trip_members(trip_id,user_id,role) VALUES(?,?,?)").run(id, u.id, "editor");
+    const ins = db.prepare(`INSERT INTO days(id,trip_id,sort,label,short,date,iso,theme,color,budget,flight)
+                            VALUES(?,?,?,?,?,?,?,?,?,?,?)`);
+    for (let i = 0; i < dayCount; i++) {
+      const iso = addDays(startIso, i);
+      ins.run(newId(), id, i, `Day ${i + 1}`, null, labelFromIso(iso), iso, null,
+              DAY_COLORS[i % DAY_COLORS.length], null, null);
+    }
+    db.exec("COMMIT");
+  } catch (e) { db.exec("ROLLBACK"); throw e; }
+
+  audit(u.id, "trip.create", id, { title, startIso, nights });
+  return { trip: { id, title } };
+});
+
+router.patch("/api/trips/:id", async ctx => {
+  const u = requireEditor(ctx, ctx.params.id);
+  const trip = theTrip(ctx.params.id);
+  const b = await readJson(ctx.req);
+  if (b.title !== undefined) {
+    const title = String(b.title).trim();
+    if (!title) bad("여행 이름이 비어 있습니다.");
+    db.prepare("UPDATE trips SET title=? WHERE id=?").run(title, trip.id);
+  }
+  /* 시작일을 옮기면 모든 날짜가 같은 간격으로 따라 움직인다 */
+  if (b.startIso) {
+    if (!labelFromIso(b.startIso)) bad("시작일이 올바르지 않습니다.");
+    const days = db.prepare("SELECT * FROM days WHERE trip_id=? ORDER BY sort").all(trip.id);
+    const up = db.prepare("UPDATE days SET iso=?, date=? WHERE id=?");
+    db.exec("BEGIN");
+    try {
+      days.forEach((d, i) => {
+        const iso = addDays(b.startIso, i);
+        up.run(iso, labelFromIso(iso), d.id);
+      });
+      db.exec("COMMIT");
+    } catch (e) { db.exec("ROLLBACK"); throw e; }
+  }
+  audit(u.id, "trip.update", trip.id, { title: b.title, startIso: b.startIso });
+  return { ok: true };
+});
+
+router.delete("/api/trips/:id", ctx => {
+  const u = requireUser(ctx);
+  const trip = theTrip(ctx.params.id);
+  if (u.role !== "admin" && trip.owner_id !== u.id)
+    forbid("여행을 만든 사람이나 관리자만 지울 수 있습니다.");
+  const total = db.prepare("SELECT COUNT(*) n FROM trips").get().n;
+  if (total <= 1) bad("마지막 여행은 지울 수 없습니다.");
+  db.prepare("DELETE FROM trips WHERE id=?").run(trip.id);   // days·places·expenses 는 CASCADE
+  audit(u.id, "trip.delete", trip.id, { title: trip.title });
+  return { ok: true };
+});
+
+/* ---------------------------------------------------------------- 날짜 */
+router.post("/api/days", async ctx => {
+  const b = await readJson(ctx.req);
+  const trip = theTrip(tripIdOf(ctx, b));
+  const u = requireEditor(ctx, trip.id);
+  const days = db.prepare("SELECT * FROM days WHERE trip_id=? ORDER BY sort").all(trip.id);
+  const last = days[days.length - 1];
+  const iso = b.iso || (last?.iso ? addDays(last.iso, 1) : null);
+  if (iso && !labelFromIso(iso)) bad("날짜가 올바르지 않습니다.");
+  const id = newId();
+  db.prepare(`INSERT INTO days(id,trip_id,sort,label,short,date,iso,theme,color,budget,flight)
+              VALUES(?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(id, trip.id, days.length, b.label || `Day ${days.length + 1}`, b.short ?? null,
+         iso ? labelFromIso(iso) : null, iso, b.theme ?? null,
+         b.color || DAY_COLORS[days.length % DAY_COLORS.length], b.budget ?? null, null);
+  audit(u.id, "day.create", id);
+  return { dayId: id };
+});
+
+router.delete("/api/days/:id", ctx => {
+  const day = db.prepare("SELECT * FROM days WHERE id=?").get(ctx.params.id) || notFound();
+  const u = requireEditor(ctx, day.trip_id);
+  const n = db.prepare("SELECT COUNT(*) n FROM days WHERE trip_id=?").get(day.trip_id).n;
+  if (n <= 1) bad("마지막 날짜는 지울 수 없습니다.");
+  db.prepare("DELETE FROM days WHERE id=?").run(day.id);      // places 는 CASCADE
+  /* 순번을 다시 매긴다 */
+  const rest = db.prepare("SELECT id FROM days WHERE trip_id=? ORDER BY sort").all(day.trip_id);
+  const up = db.prepare("UPDATE days SET sort=? WHERE id=?");
+  rest.forEach((d, i) => up.run(i, d.id));
+  audit(u.id, "day.delete", day.id, { label: day.label });
+  return { ok: true };
+});
+
 router.get("/api/trip", ctx => {
-  const u = requireMember(ctx);
-  const trip = theTrip();
+  const tripId = ctx.url.searchParams.get("trip");
+  const u = requireMember(ctx, tripId);
+  const trip = theTrip(tripId);
   const days = db.prepare("SELECT * FROM days WHERE trip_id=? ORDER BY sort").all(trip.id);
   const places = db.prepare(`
     SELECT p.* FROM places p JOIN days d ON d.id = p.day_id
@@ -218,7 +367,10 @@ router.get("/api/trip", ctx => {
     WHERE m.trip_id=?`).all(trip.id);
 
   return {
-    trip: { id: trip.id, title: trip.title },
+    trip: {
+      id: trip.id, title: trip.title, ownerId: trip.owner_id,
+      startIso: days[0]?.iso ?? null, endIso: days[days.length - 1]?.iso ?? null
+    },
     days: days.map(d => ({
       id: d.id, sort: d.sort, label: d.label, short: d.short, date: d.date, iso: d.iso,
       theme: d.theme, color: d.color, budget: d.budget, flight: J(d.flight),
@@ -230,9 +382,14 @@ router.get("/api/trip", ctx => {
 });
 
 router.patch("/api/days/:id", async ctx => {
-  const u = requireEditor(ctx);
   const day = db.prepare("SELECT * FROM days WHERE id=?").get(ctx.params.id) || notFound();
+  const u = requireEditor(ctx, day.trip_id);
   const b = await readJson(ctx.req);
+  /* iso 를 바꾸면 화면에 뿌릴 "10.08 (목)" 도 같이 맞춘다 */
+  if (b.iso !== undefined && b.iso) {
+    if (!labelFromIso(b.iso)) bad("날짜가 올바르지 않습니다. (YYYY-MM-DD)");
+    if (b.date === undefined) b.date = labelFromIso(b.iso);
+  }
   const f = (k, cur) => (b[k] === undefined ? cur : b[k]);
   db.prepare(`UPDATE days SET label=?, short=?, date=?, iso=?, theme=?, color=?, budget=?, flight=? WHERE id=?`)
     .run(f("label", day.label), f("short", day.short), f("date", day.date), f("iso", day.iso),
@@ -267,9 +424,9 @@ function resortDay(dayId) {
 }
 
 router.post("/api/places", async ctx => {
-  const u = requireEditor(ctx);
   const b = await readJson(ctx.req);
   const day = db.prepare("SELECT * FROM days WHERE id=?").get(b.dayId) || notFound("날짜를 찾을 수 없습니다.");
+  const u = requireEditor(ctx, day.trip_id);
   validPlace(b, false);
   const id = newId();
   const maxSort = db.prepare("SELECT COALESCE(MAX(sort),-1) s FROM places WHERE day_id=?").get(day.id).s;
@@ -286,8 +443,8 @@ router.post("/api/places", async ctx => {
 });
 
 router.patch("/api/places/:id", async ctx => {
-  const u = requireEditor(ctx);
   const p = db.prepare("SELECT * FROM places WHERE id=?").get(ctx.params.id) || notFound();
+  const u = requireEditor(ctx, db.prepare("SELECT trip_id FROM days WHERE id=?").get(p.day_id)?.trip_id);
   const b = await readJson(ctx.req);
   validPlace(b, true);
   const f = (k, cur) => (b[k] === undefined ? cur : b[k]);
@@ -304,8 +461,8 @@ router.patch("/api/places/:id", async ctx => {
 });
 
 router.delete("/api/places/:id", ctx => {
-  const u = requireEditor(ctx);
   const p = db.prepare("SELECT * FROM places WHERE id=?").get(ctx.params.id) || notFound();
+  const u = requireEditor(ctx, db.prepare("SELECT trip_id FROM days WHERE id=?").get(p.day_id)?.trip_id);
   db.prepare("DELETE FROM places WHERE id=?").run(p.id);
   resortDay(p.day_id);
   audit(u.id, "place.delete", p.id, { name: p.name });
@@ -349,17 +506,18 @@ const expenseOut = e => ({
 });
 
 router.get("/api/expenses", ctx => {
-  requireMember(ctx);
-  const trip = theTrip();
+  const tripId = ctx.url.searchParams.get("trip");
+  requireMember(ctx, tripId);
+  const trip = theTrip(tripId);
   return {
     expenses: db.prepare("SELECT * FROM expenses WHERE trip_id=? ORDER BY created_at").all(trip.id).map(expenseOut)
   };
 });
 
 router.post("/api/expenses", async ctx => {
-  const u = requireEditor(ctx);
-  const trip = theTrip();
   const b = await readJson(ctx.req);
+  const trip = theTrip(tripIdOf(ctx, b));
+  const u = requireEditor(ctx, trip.id);
   const amount = Math.round(Number(b.amount));
   if (!Number.isFinite(amount) || amount < 0) bad("금액이 올바르지 않습니다.");
   if (!b.name || !String(b.name).trim()) bad("내용이 필요합니다.");
@@ -395,8 +553,9 @@ router.delete("/api/expenses/:id", ctx => {
 
 /* 정산 — 누가 얼마 냈고, 누가 누구에게 얼마를 주면 되는지 */
 router.get("/api/expenses/settlement", ctx => {
-  requireMember(ctx);
-  const trip = theTrip();
+  const tripId = ctx.url.searchParams.get("trip");
+  requireMember(ctx, tripId);
+  const trip = theTrip(tripId);
   const members = db.prepare(`
     SELECT u.id, u.name FROM trip_members m JOIN users u ON u.id = m.user_id WHERE m.trip_id=?`).all(trip.id);
   const rows = db.prepare("SELECT * FROM expenses WHERE trip_id=?").all(trip.id);
@@ -435,8 +594,9 @@ router.get("/api/expenses/settlement", ctx => {
 
 /* ============================================================ 동행자 */
 router.get("/api/members", ctx => {
-  requireMember(ctx);
-  const trip = theTrip();
+  const tripId = ctx.url.searchParams.get("trip");
+  requireMember(ctx, tripId);
+  const trip = theTrip(tripId);
   return {
     members: db.prepare(`
       SELECT u.id, u.name, u.email, m.role FROM trip_members m JOIN users u ON u.id = m.user_id
@@ -446,8 +606,8 @@ router.get("/api/members", ctx => {
 
 router.post("/api/members", async ctx => {
   const me = requireAdmin(ctx);
-  const trip = theTrip();
   const b = await readJson(ctx.req);
+  const trip = theTrip(tripIdOf(ctx, b));
   const target = db.prepare("SELECT * FROM users WHERE id=? OR email=? COLLATE NOCASE")
     .get(b.userId ?? "", String(b.email ?? "").trim()) || notFound("사용자를 찾을 수 없습니다.");
   db.prepare("INSERT OR REPLACE INTO trip_members(trip_id,user_id,role) VALUES(?,?,?)")
@@ -467,12 +627,12 @@ router.delete("/api/members/:userId", ctx => {
 
 /* ============================================================ 설정 */
 router.get("/api/settings", ctx => {
-  requireMember(ctx);
+  requireMember(ctx, ctx.url.searchParams.get("trip"));
   return { rate: Number(getSetting("rate") ?? 930) };
 });
 router.patch("/api/settings", async ctx => {
-  requireEditor(ctx);
   const b = await readJson(ctx.req);
+  requireEditor(ctx, tripIdOf(ctx, b));
   if (b.rate !== undefined) {
     const r = Number(b.rate);
     if (!Number.isFinite(r) || r <= 0) bad("환율이 올바르지 않습니다.");
