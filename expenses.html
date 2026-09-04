@@ -13,8 +13,11 @@
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="stylesheet" href="shell.css">
+<link rel="stylesheet" href="edit.css">
 <script src="api.js"></script>
 <script src="shell.js"></script>
+<script src="edit.js"></script>
+<script src="panels.js"></script>
 <style>
 :root{
   --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e5e8eb;
@@ -146,6 +149,17 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
 .rate input:focus{outline:0;box-shadow:0 0 0 2px var(--accent) inset}
 .rate small{color:var(--text-4);font-size:12px}
 
+/* 정산 대상 고르기 */
+.share-pick{display:flex;gap:7px;flex-wrap:wrap}
+.share-pick label{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:99px;
+  background:var(--surface-2);font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;
+  transition:.15s var(--ease);
+}
+.share-pick input{position:absolute;opacity:0;width:0;height:0}
+.share-pick label:has(input:checked){background:var(--accent-bg);color:var(--accent)}
+.share-pick label:active{transform:scale(.96)}
+
 @media (max-width:520px){
   .wrap{padding:0 13px}
   .form{grid-template-columns:1fr}
@@ -238,6 +252,14 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
         <label for="fAmt">금액 (¥)</label>
         <input id="fAmt" type="number" inputmode="numeric" min="0" step="10" placeholder="1190" required>
       </div>
+      <div class="field" id="payerWrap" hidden>
+        <label for="fPayer">낸 사람</label>
+        <select id="fPayer"></select>
+      </div>
+      <div class="field full" id="shareWrap" hidden>
+        <label>나눠 낼 사람</label>
+        <div class="share-pick" id="sharePick"></div>
+      </div>
       <div class="field">
         <label for="fPay">결제수단</label>
         <select id="fPay">
@@ -300,7 +322,39 @@ try { items = JSON.parse(localStorage.getItem(STORE) || "[]"); } catch {}
 let rate = 930;
 try { rate = Number(localStorage.getItem(RATE_STORE)) || 930; } catch {}
 
-const save = () => { try { localStorage.setItem(STORE, JSON.stringify(items)); } catch {} };
+const saveLocal = () => { try { localStorage.setItem(STORE, JSON.stringify(items)); } catch {} };
+const save = saveLocal;
+
+/* ---------------------------------------------------------------------------
+   서버가 붙어 있으면 지출을 서버에 저장하고, 아니면 이 브라우저에만 남긴다.
+   여행 중 데이터가 끊겨도 기록은 계속할 수 있어야 하므로 폴백을 유지한다.
+   --------------------------------------------------------------------------- */
+const online = () => typeof API !== "undefined" && API.isOnline() && !!API.state.user;
+let dayIds = [];          // 화면의 0~3 인덱스 ↔ 서버 dayId
+let members = [];         // 동행자 (낸 사람 · 나눠 낼 사람 선택용)
+
+const toLocal = e => ({
+  id: e.id,
+  day: Math.max(0, dayIds.indexOf(e.dayId)),
+  cat: e.cat || "기타", name: e.name, amt: e.amount, pay: e.pay || "현금",
+  payerId: e.payerId, share: e.share || []
+});
+
+async function pullFromServer() {
+  const [trip, ex, mm] = await Promise.all([
+    API.get("/api/trip"), API.get("/api/expenses"), API.get("/api/members")
+  ]);
+  dayIds = trip.days.map(d => d.id);
+  members = mm.members;
+  /* 날짜 이름·계획 예산도 서버 값을 따른다 */
+  trip.days.forEach((d, i) => {
+    if (!DAYS[i]) return;
+    DAYS[i].label = d.label || DAYS[i].label;
+    DAYS[i].date  = d.date  || DAYS[i].date;
+    DAYS[i].color = d.color || DAYS[i].color;
+  });
+  items = ex.expenses.map(toLocal);
+}
 const PLAN_TOTAL = DAYS.reduce((a, d) => a + d.plan, 0);
 
 /* ============================================================================
@@ -390,12 +444,16 @@ function renderList() {
     </div>`;
   }).join("");
 
-  el.querySelectorAll(".item-del").forEach(b => b.onclick = () => {
-    items.splice(Number(b.dataset.idx), 1);
-    save(); renderAll();
-
-/* ---------- 공통 셸 ---------- */
-Shell.init({ page: "expenses", title: "도쿄 3박 4일" });
+  el.querySelectorAll(".item-del").forEach(b => b.onclick = async () => {
+    const idx = Number(b.dataset.idx);
+    const row = items[idx];
+    if (online() && row?.id) {
+      try { await API.del("/api/expenses/" + row.id); }
+      catch (err) { return Edit.toast(err.message, true); }
+    }
+    items.splice(idx, 1);
+    if (!online()) saveLocal();
+    renderAll();
   });
 }
 
@@ -416,13 +474,29 @@ CATS.forEach(c => $("#fCat").add(new Option(c, c)));
   if (i >= 0) $("#fDay").value = String(i);
 })();
 
-$("#addForm").addEventListener("submit", e => {
+$("#addForm").addEventListener("submit", async e => {
   e.preventDefault();
   const amt = Number($("#fAmt").value);
   const name = $("#fName").value.trim();
   if (!name || !(amt >= 0)) return;
-  items.push({ day: Number($("#fDay").value), cat: $("#fCat").value, name, amt, pay: $("#fPay").value });
-  save(); renderAll();
+  const day = Number($("#fDay").value);
+  const payerId = $("#fPayer")?.value || undefined;
+  const share = [...document.querySelectorAll(".share-pick input:checked")].map(i => i.value);
+  const row = { day, cat: $("#fCat").value, name, amt, pay: $("#fPay").value, payerId, share };
+
+  if (online()) {
+    try {
+      const res = await API.post("/api/expenses", {
+        dayId: dayIds[day], name, amount: amt, cat: row.cat, pay: row.pay,
+        payerId, share
+      });
+      items.push(toLocal(res.expense));
+    } catch (err) { Edit.toast(err.message, true); return; }
+  } else {
+    items.push(row);
+    saveLocal();
+  }
+  renderAll();
   $("#fName").value = ""; $("#fAmt").value = ""; $("#fName").focus();
 });
 
@@ -430,6 +504,7 @@ $("#fRate").value = rate;
 $("#fRate").addEventListener("input", e => {
   rate = Number(e.target.value) || 0;
   try { localStorage.setItem(RATE_STORE, String(rate)); } catch {}
+  if (online()) { API.patch("/api/settings", { rate }).catch(() => {}); }
   renderTotals();
 });
 
@@ -453,10 +528,15 @@ $("#fileInput").addEventListener("change", async e => {
   } catch { alert("읽을 수 없는 파일입니다."); }
   e.target.value = "";
 });
-$("#btnClear").onclick = () => {
+$("#btnClear").onclick = async () => {
   if (!items.length) return;
   if (!confirm(`기록 ${items.length}건을 모두 지웁니다. 되돌릴 수 없습니다.`)) return;
-  items = []; save(); renderAll();
+  if (online()) {
+    for (const row of items.filter(r => r.id)) {
+      try { await API.del("/api/expenses/" + row.id); } catch {}
+    }
+  }
+  items = []; saveLocal(); renderAll();
 };
 
 function setTheme(t) {
@@ -470,6 +550,31 @@ $("#themeBtn").onclick = () =>
   setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 
 renderAll();
+
+/* ---------- 공통 셸 · 서버 적재 ---------- */
+function renderPayerAndShare() {
+  const wrapP = $("#payerWrap"), wrapS = $("#shareWrap");
+  if (!online() || members.length < 2) { wrapP.hidden = true; wrapS.hidden = true; return; }
+  wrapP.hidden = false; wrapS.hidden = false;
+
+  $("#fPayer").innerHTML = members
+    .map(m => `<option value="${m.id}"${m.id === API.state.user.id ? " selected" : ""}>${esc(m.name)}</option>`).join("");
+  $("#sharePick").innerHTML = members
+    .map(m => `<label><input type="checkbox" value="${m.id}" checked>${esc(m.name)}</label>`).join("");
+}
+
+Shell.init({ page: "expenses", title: "도쿄 3박 4일" }).then(async shell => {
+  if (shell.blocked) return;
+  if (online()) {
+    try {
+      await pullFromServer();
+      try { rate = (await API.get("/api/settings")).rate ?? rate; } catch {}
+      $("#fRate").value = rate;
+    } catch (e) { Edit.toast("가계부를 불러오지 못했습니다: " + e.message, true); }
+  }
+  renderPayerAndShare();
+  renderAll();
+});
 
 if ("serviceWorker" in navigator) {
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

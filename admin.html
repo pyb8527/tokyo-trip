@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>관리자 · 도쿄 3박 4일</title>
+<meta name="description" content="계정과 동행자를 관리합니다">
+<meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="stylesheet" href="shell.css">
+<link rel="stylesheet" href="edit.css">
+<script src="api.js"></script>
+<script src="shell.js"></script>
+<script src="edit.js"></script>
+<script src="panels.js"></script>
+<style>
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e5e8eb;
+  --line:#e5e8eb; --line-soft:#f2f4f6;
+  --text:#191f28; --text-2:#4e5968; --text-3:#8b95a1; --text-4:#b0b8c1;
+  --accent:#3182f6; --accent-bg:#e8f3ff;
+  --good:#00b884; --warn:#e07800; --crit:#f04452; --danger:#f04452;
+  --radius:16px; --radius-sm:10px; --radius-xs:8px;
+  --ease:cubic-bezier(.25,.8,.35,1);
+  --shadow:0 4px 16px rgba(25,31,40,.10), 0 1px 3px rgba(25,31,40,.06);
+}
+:root[data-theme="dark"]{
+  --bg:#17171c; --surface:#202027; --surface-2:#26262d; --surface-3:#2e2e36;
+  --line:#2e2e36; --line-soft:#26262d;
+  --text:#eaeaee; --text-2:#a0a0ab; --text-3:#7a7a86; --text-4:#5c5c66;
+  --accent:#4593fc; --accent-bg:#1c2a3d;
+  --good:#1ec99b; --warn:#f0a63c; --crit:#ff6b78; --danger:#ff6b78;
+  --shadow:0 4px 16px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",
+              "Malgun Gothic","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
+  font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%;padding:0 0 60px;
+  word-break:keep-all;overflow-wrap:anywhere;
+}
+button,input,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+a{color:inherit}
+:where(button,a,input,select):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+.top{position:sticky;top:0;z-index:10;padding:16px 0 14px;margin-bottom:8px;background:var(--bg)}
+.top-in{display:flex;align-items:center;gap:12px}
+.back{
+  display:inline-flex;align-items:center;gap:5px;padding:9px 13px;border-radius:99px;
+  background:var(--surface);font-size:13px;font-weight:600;color:var(--text-2);text-decoration:none;
+}
+h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
+.top p{margin:2px 0 0;font-size:12.5px;color:var(--text-3)}
+
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:12px}
+.card > h2{
+  margin:0 0 16px;font-size:13px;font-weight:700;color:var(--text-3);
+  display:flex;align-items:center;gap:8px;
+}
+.card > h2 small{margin-left:auto;font-size:12px;font-weight:500;color:var(--text-4)}
+
+/* 사용자 행 */
+.u{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--radius-sm);background:var(--surface-2);margin-bottom:8px}
+.u-av{
+  width:36px;height:36px;flex:0 0 auto;border-radius:99px;display:grid;place-items:center;
+  background:var(--accent-bg);color:var(--accent);font-size:14px;font-weight:700;
+}
+.u-main{flex:1;min-width:0}
+.u-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.u-mail{font-size:11.5px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.u-meta{font-size:11px;color:var(--text-4);margin-top:2px;font-variant-numeric:tabular-nums}
+.pill{padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700}
+.pill.admin{background:var(--accent-bg);color:var(--accent)}
+.pill.off{background:color-mix(in srgb,var(--crit) 12%,transparent);color:var(--crit)}
+.pill.member{background:var(--surface-3);color:var(--text-3)}
+.u-acts{display:flex;gap:5px;flex:0 0 auto}
+.u-acts button{
+  width:30px;height:30px;border-radius:99px;display:grid;place-items:center;
+  background:var(--surface);color:var(--text-3);transition:.15s var(--ease);
+}
+.u-acts button:hover{color:var(--text)}
+.u-acts button:active{transform:scale(.9)}
+.u-acts .danger:hover{background:var(--crit);color:#fff}
+
+.empty{padding:26px 0;text-align:center;color:var(--text-3);font-size:13.5px}
+
+/* 감사 로그 */
+.log{font-size:12.5px}
+.log-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.log-at{flex:0 0 auto;color:var(--text-4);font-variant-numeric:tabular-nums;font-size:11.5px}
+.log-who{flex:0 0 auto;font-weight:600;color:var(--text-2);min-width:64px}
+.log-act{flex:1;color:var(--text-3)}
+
+.notice{
+  padding:14px 16px;border-radius:var(--radius-sm);background:var(--accent-bg);
+  color:var(--accent);font-size:13px;font-weight:600;line-height:1.6;
+}
+@media (max-width:520px){ .wrap{padding:0 13px} .card{padding:18px 16px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <button class="icon-square" data-shell-menu aria-label="메뉴 열기">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <h2>관리자</h2>
+</header>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-in">
+      <a class="back" href="index.html">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>
+        일정
+      </a>
+      <div><h1>관리자</h1><p>계정과 동행자를 관리합니다</p></div>
+    </div>
+  </header>
+
+  <div id="content"><div class="empty">불러오는 중…</div></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const initial = n => (n || "?").trim().slice(0, 1).toUpperCase();
+const dt = s => s ? new Date(s).toLocaleString("ko-KR", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" }) : "—";
+
+let users = [], members = [], me = null;
+
+function userRow(u) {
+  const isMe = u.id === me.id;
+  const inTrip = members.some(m => m.id === u.id);
+  return `
+  <div class="u" data-id="${u.id}">
+    <div class="u-av">${esc(initial(u.name))}</div>
+    <div class="u-main">
+      <div class="u-name">${esc(u.name)}${isMe ? " (나)" : ""}
+        <span class="pill ${u.role === "admin" ? "admin" : "member"}">${u.role === "admin" ? "관리자" : "동행자"}</span>
+        ${u.disabled ? '<span class="pill off">비활성</span>' : ""}
+        ${inTrip ? "" : '<span class="pill member">여행 미포함</span>'}
+      </div>
+      <div class="u-mail">${esc(u.email)}</div>
+      <div class="u-meta">마지막 로그인 ${dt(u.lastLoginAt)}</div>
+    </div>
+    <div class="u-acts">
+      <button data-act="role" title="${u.role === "admin" ? "동행자로" : "관리자로"}" aria-label="역할 변경">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 20 6v6c0 4.5-3.4 7.7-8 8.5-4.6-.8-8-4-8-8.5V6Z"/></svg>
+      </button>
+      <button data-act="pw" title="비밀번호 재설정" aria-label="비밀번호 재설정">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+      </button>
+      <button data-act="toggle" title="${u.disabled ? "다시 활성화" : "비활성화"}" aria-label="활성 전환">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round"><path d="M12 4v8"/><path d="M6.5 7.5a8 8 0 1 0 11 0"/></svg>
+      </button>
+      ${isMe ? "" : `<button class="danger" data-act="del" title="삭제" aria-label="삭제">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}
+    </div>
+  </div>`;
+}
+
+function render(audit) {
+  $("#content").innerHTML = `
+    <section class="card">
+      <h2>계정<small>${users.length}명</small></h2>
+      ${users.map(userRow).join("") || '<div class="empty">계정이 없습니다</div>'}
+      <button class="btn btn-primary" id="addUser" style="width:100%;margin-top:10px">+ 계정 추가</button>
+    </section>
+
+    <section class="card">
+      <h2>이번 여행 동행자<small>${members.length}명</small></h2>
+      ${members.length ? members.map(m => `
+        <div class="u">
+          <div class="u-av">${esc(initial(m.name))}</div>
+          <div class="u-main">
+            <div class="u-name">${esc(m.name)}
+              <span class="pill ${m.role === "viewer" ? "member" : "admin"}">${m.role === "viewer" ? "보기 전용" : "편집 가능"}</span>
+            </div>
+            <div class="u-mail">${esc(m.email)}</div>
+          </div>
+        </div>`).join("") : '<div class="empty">동행자가 없습니다</div>'}
+      <div class="notice" style="margin-top:10px">
+        계정을 추가하면 자동으로 이번 여행의 동행자가 됩니다.
+        동행자는 일정을 고치고 가계부에 지출을 남길 수 있습니다.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>최근 활동<small>${audit.length}건</small></h2>
+      <div class="log">
+        ${audit.slice(0, 40).map(a => `
+          <div class="log-row">
+            <span class="log-at">${dt(a.at)}</span>
+            <span class="log-who">${esc(a.user_name ?? "—")}</span>
+            <span class="log-act">${esc(a.action)}${a.detail?.name ? " · " + esc(a.detail.name) : ""}${a.detail?.email ? " · " + esc(a.detail.email) : ""}</span>
+          </div>`).join("") || '<div class="empty">기록이 없습니다</div>'}
+      </div>
+    </section>`;
+
+  $("#addUser").onclick = openAddUser;
+  document.querySelectorAll(".u[data-id]").forEach(row => {
+    const id = row.dataset.id;
+    const u = users.find(x => x.id === id);
+    row.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act, u));
+  });
+}
+
+async function act(what, u) {
+  try {
+    if (what === "role") {
+      const next = u.role === "admin" ? "member" : "admin";
+      if (!confirm(`${u.name} 을(를) ${next === "admin" ? "관리자" : "동행자"}로 바꿉니다.`)) return;
+      await API.patch("/api/admin/users/" + u.id, { role: next });
+    }
+    if (what === "toggle") {
+      if (!confirm(`${u.name} 계정을 ${u.disabled ? "다시 활성화" : "비활성화"}합니다.`)) return;
+      await API.patch("/api/admin/users/" + u.id, { disabled: !u.disabled });
+    }
+    if (what === "del") {
+      if (!confirm(`${u.name} 계정을 삭제합니다. 되돌릴 수 없습니다.`)) return;
+      await API.del("/api/admin/users/" + u.id);
+    }
+    if (what === "pw") { openResetPw(u); return; }
+    await load();
+    Edit.toast("반영했습니다");
+  } catch (e) { Edit.toast(e.message, true); }
+}
+
+/* ---------------- 모달 ---------------- */
+function modal(html) {
+  let el = $("#adminModal");
+  if (!el) { el = document.createElement("div"); el.id = "adminModal"; el.className = "modal"; document.body.appendChild(el); }
+  el.innerHTML = html;
+  el.hidden = false;
+  const close = () => { el.hidden = true; el.innerHTML = ""; };
+  el.onclick = e => { if (e.target === el) close(); };
+  el.querySelector("[data-x]").onclick = close;
+  el.querySelector("[data-cancel]")?.addEventListener("click", close);
+  return close;
+}
+const head = t => `<div class="modal-head"><h3>${t}</h3>
+  <button class="modal-x" data-x aria-label="닫기">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>`;
+
+function openAddUser() {
+  const close = modal(`<div class="modal-card">${head("계정 추가")}
+    <form id="uf">
+      <div class="f-grid">
+        <div class="f full"><label for="uName">이름</label><input id="uName" required maxlength="40"></div>
+        <div class="f full"><label for="uEmail">이메일</label><input id="uEmail" type="email" required autocomplete="off"></div>
+        <div class="f full"><label for="uPw">임시 비밀번호</label>
+          <input id="uPw" type="password" required minlength="8" autocomplete="new-password">
+          <span class="hint">8자 이상. 본인이 로그인한 뒤 설정에서 바꾸게 하세요.</span></div>
+        <div class="f"><label for="uRole">역할</label>
+          <select id="uRole"><option value="member">동행자</option><option value="admin">관리자</option></select></div>
+        <div class="f"><label for="uTrip">여행 권한</label>
+          <select id="uTrip"><option value="editor">편집 가능</option><option value="viewer">보기 전용</option></select></div>
+      </div>
+      <div id="ufErr"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-cancel>취소</button>
+        <button type="submit" class="btn btn-primary">추가</button>
+      </div>
+    </form></div>`);
+
+  $("#uf").addEventListener("submit", async e => {
+    e.preventDefault();
+    try {
+      await API.post("/api/admin/users", {
+        name: $("#uName").value.trim(), email: $("#uEmail").value.trim(),
+        password: $("#uPw").value, role: $("#uRole").value, tripRole: $("#uTrip").value
+      });
+      close(); await load(); Edit.toast("계정을 만들었습니다");
+    } catch (err) { $("#ufErr").innerHTML = `<div class="form-err">${esc(err.message)}</div>`; }
+  });
+}
+
+function openResetPw(u) {
+  const close = modal(`<div class="modal-card">${head("비밀번호 재설정")}
+    <form id="pf">
+      <div class="f-grid">
+        <div class="f full"><label>대상</label><input value="${esc(u.name)} · ${esc(u.email)}" disabled></div>
+        <div class="f full"><label for="pNew">새 비밀번호</label>
+          <input id="pNew" type="password" required minlength="8" autocomplete="new-password">
+          <span class="hint">재설정하면 그 계정의 모든 기기에서 로그아웃됩니다.</span></div>
+      </div>
+      <div id="pfErr"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-cancel>취소</button>
+        <button type="submit" class="btn btn-primary">재설정</button>
+      </div>
+    </form></div>`);
+
+  $("#pf").addEventListener("submit", async e => {
+    e.preventDefault();
+    try {
+      await API.post(`/api/admin/users/${u.id}/password`, { password: $("#pNew").value });
+      close(); Edit.toast("재설정했습니다");
+    } catch (err) { $("#pfErr").innerHTML = `<div class="form-err">${esc(err.message)}</div>`; }
+  });
+}
+
+/* ---------------- 적재 ---------------- */
+async function load() {
+  const [uu, mm, aa] = await Promise.all([
+    API.get("/api/admin/users"), API.get("/api/members"), API.get("/api/admin/audit")
+  ]);
+  users = uu.users; members = mm.members;
+  render(aa.audit);
+}
+
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("tokyoTrip.theme", t); } catch {}
+}
+try { setTheme(localStorage.getItem("tokyoTrip.theme") === "dark" ? "dark" : "light"); } catch {}
+
+Shell.init({ page: "admin", title: "도쿄 3박 4일" }).then(async shell => {
+  if (shell.blocked) return;
+  me = API.state.user;
+  if (!me || me.role !== "admin") {
+    $("#content").innerHTML = `<section class="card"><div class="notice">
+      관리자만 볼 수 있는 화면입니다. <a href="index.html" style="text-decoration:underline">일정으로 돌아가기</a>
+    </div></section>`;
+    return;
+  }
+  try { await load(); }
+  catch (e) { $("#content").innerHTML = `<section class="card"><div class="empty">${esc(e.message)}</div></section>`; }
+});
+</script>
+</body>
+</html>

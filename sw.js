@@ -11,18 +11,20 @@
 
    일정을 고쳐 배포할 때 CACHE 뒤 숫자만 올리면 옛 캐시가 정리됩니다.
    ========================================================================== */
-const CACHE = "tokyo-trip-v3";
+const CACHE = "tokyo-trip-v5";
 
 const SHELL = [
   "./",
   "index.html",
   "expenses.html",
+  "admin.html",
   "manifest.webmanifest",
   "shell.css",
   "shell.js",
   "api.js",
   "edit.css",
   "edit.js",
+  "panels.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-180.png",

@@ -156,9 +156,14 @@ router.patch("/api/admin/users/:id", async ctx => {
   const role = b.role === "admin" ? "admin" : b.role === "member" ? "member" : target.role;
   const disabled = b.disabled === undefined ? target.disabled : (b.disabled ? 1 : 0);
 
-  /* 마지막 관리자를 스스로 강등하거나 잠그면 아무도 관리할 수 없게 된다 */
-  const admins = db.prepare("SELECT COUNT(*) n FROM users WHERE role='admin' AND disabled=0").get().n;
-  if (target.role === "admin" && admins <= 1 && (role !== "admin" || disabled))
+  /* 관리자가 한 명도 남지 않으면 아무도 관리할 수 없게 된다.
+     판단 기준은 "대상을 뺀 나머지 활성 관리자" 다. 대상이 이미 비활성이면
+     지금도 관리 인원에서 빠져 있으므로 막을 이유가 없다. */
+  const otherAdmins = db.prepare(
+    "SELECT COUNT(*) n FROM users WHERE role='admin' AND disabled=0 AND id != ?").get(target.id).n;
+  const targetWasActiveAdmin = target.role === "admin" && !target.disabled;
+  const staysActiveAdmin = role === "admin" && !disabled;
+  if (targetWasActiveAdmin && !staysActiveAdmin && otherAdmins === 0)
     bad("마지막 관리자입니다. 다른 관리자를 먼저 지정해 주세요.");
 
   db.prepare("UPDATE users SET name=?, role=?, disabled=? WHERE id=?").run(name, role, disabled, target.id);
@@ -182,8 +187,10 @@ router.delete("/api/admin/users/:id", ctx => {
   const me = requireAdmin(ctx);
   const target = db.prepare("SELECT * FROM users WHERE id=?").get(ctx.params.id) || notFound();
   if (target.id === me.id) bad("자기 계정은 지울 수 없습니다.");
-  const admins = db.prepare("SELECT COUNT(*) n FROM users WHERE role='admin' AND disabled=0").get().n;
-  if (target.role === "admin" && admins <= 1) bad("마지막 관리자는 지울 수 없습니다.");
+  const otherAdmins = db.prepare(
+    "SELECT COUNT(*) n FROM users WHERE role='admin' AND disabled=0 AND id != ?").get(target.id).n;
+  if (target.role === "admin" && !target.disabled && otherAdmins === 0)
+    bad("마지막 관리자는 지울 수 없습니다.");
   db.prepare("DELETE FROM users WHERE id=?").run(target.id);
   audit(me.id, "user.delete", target.id, { email: target.email });
   return { ok: true };
