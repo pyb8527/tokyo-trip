@@ -13,12 +13,18 @@
   animation:splashSafety .4s ease 6s forwards;
 }
 [data-theme="dark"] .splash{background:#17171c;color:#f2f4f6}
+/* 상자 폭은 더 긴 "FALL INTO TRIP" 이 정한다. FIT 은 그 안에서 따로
+   가운데로 맞춰 줘야 한다.
+   letter-spacing 은 마지막 글자 뒤에도 붙어서 글자 덩어리가 상자 가운데에서
+   그 절반만큼 밀린다. 같은 값을 text-indent 로 되돌려 눈에 보이는 가운데를
+   맞춘다. */
 .splash-word{
+  text-align:center;text-indent:-.055em;
   font-size:clamp(46px,15vw,72px);font-weight:900;letter-spacing:-.055em;line-height:1;
   animation:splashIn .5s cubic-bezier(.22,1,.36,1) both;
 }
 .splash-sub{
-  margin-top:12px;text-align:center;
+  margin-top:12px;text-align:center;text-indent:.22em;
   font-size:11px;font-weight:700;letter-spacing:.22em;opacity:.36;
   animation:splashIn .5s cubic-bezier(.22,1,.36,1) .08s both;
 }
