@@ -14,8 +14,10 @@
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="stylesheet" href="shell.css">
+<link rel="stylesheet" href="edit.css">
 <script src="api.js"></script>
 <script src="shell.js"></script>
+<script src="edit.js"></script>
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -472,6 +474,11 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
 
     <div class="sheet" id="sheet" hidden></div>
 
+    <div class="pick-banner" id="pickBanner" hidden>
+      <span>지도를 눌러 위치를 지정하세요</span>
+      <button type="button" id="pickCancel">취소</button>
+    </div>
+
     <div class="legend" id="legend"></div>
 
     <!-- API key gate -->
@@ -827,7 +834,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 const rich = s => esc(s).replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>")
                          .replace(/&lt;br\s*\/?&gt;/g, "<br>");
-const pid  = (d, p) => `d${d}-p${p}`;
+/* 서버에서 받은 장소는 고정 ID 를 쓴다. 서버가 없을 때만 순번으로 만든다. */
+const pid  = (d, p) => TRIP_DATA.days[d]?.places[p]?.id || `d${d}-p${p}`;
 
 function haversine(a, b) {
   const R = 6371, rad = x => x * Math.PI / 180;
@@ -1047,8 +1055,13 @@ function renderList() {
       card.classList.toggle("is-visited", visited.has(id));
       vb.addEventListener("click", e => {
         e.stopPropagation();
-        visited.has(id) ? visited.delete(id) : visited.add(id);
+        const on = !visited.has(id);
+        on ? visited.add(id) : visited.delete(id);
         saveVisited();
+        if (API.isOnline() && API.state.user) {
+          (on ? API.put("/api/visits/" + id) : API.del("/api/visits/" + id))
+            .catch(err => Edit.toast("방문 기록 저장 실패: " + err.message, true));
+        }
         vb.setAttribute("aria-pressed", String(visited.has(id)));
         card.classList.toggle("is-visited", visited.has(id));
         renderProgress();
@@ -1066,6 +1079,7 @@ function renderList() {
       }
     });
 
+    Edit.decorate(block, day);
     list.appendChild(block);
   });
 }
@@ -1097,6 +1111,24 @@ function initMap() {
   /* 지도 빈 곳을 누르면 하단 카드를 닫는다 */
   map.addListener("click", () => { hideSheet(); setActive(null); });
 
+  buildLayer();
+
+  state.ready = true;
+  applyVisibility(false);
+  // 지도가 자기 크기를 확정한 뒤에 맞춰야 한다 — 즉시 fitBounds 하면 범위가 어긋난다
+  google.maps.event.addListenerOnce(map, "idle", fitToVisible);
+}
+window.__initMap = initMap;
+
+/* 장소가 바뀌면 마커·원·동선을 통째로 다시 만든다 */
+function clearLayer() {
+  layer.forEach(it => { it.marker.setMap(null); it.circle.setMap(null); });
+  layer.length = 0;
+  routes.forEach(r => r.setMap(null));
+  routes.length = 0;
+}
+
+function buildLayer() {
   TRIP_DATA.days.forEach((day, di) => {
     day.places.forEach((p, i) => {
       const marker = new google.maps.Marker({
@@ -1134,13 +1166,7 @@ function initMap() {
       }]
     }));
   });
-
-  state.ready = true;
-  applyVisibility(false);
-  // 지도가 자기 크기를 확정한 뒤에 맞춰야 한다 — 즉시 fitBounds 하면 범위가 어긋난다
-  google.maps.event.addListenerOnce(map, "idle", fitToVisible);
 }
-window.__initMap = initMap;
 
 const markerIconFor = (item, active) => ({
   url: pinIcon(item.day.color, item.idx + 1, item.place.cat, active),
@@ -1361,6 +1387,13 @@ function applyHash() {
       return true;
     }
   }
+  /* 서버가 준 고정 ID 로도 열 수 있게 한다 */
+  const di2 = TRIP_DATA.days.findIndex(d => d.places.some(p => p.id === h));
+  if (di2 >= 0) {
+    setDay(di2);
+    setTimeout(() => focusPlace(h, true), 260);
+    return true;
+  }
   return false;
 }
 
@@ -1453,6 +1486,83 @@ applyVisibility(false);
 
 $("#themeBtn").onclick = () => setTheme(currentTheme() === "dark" ? "light" : "dark");
 $("#fitBtn").onclick   = fitToVisible;
+
+/* ============================================================================
+   9. 서버 연동 — 일정 적재 · 편집 후 재적재 · 지도에서 좌표 찍기
+   ============================================================================ */
+const TRIP_CACHE = "tokyoTrip.serverTrip";
+
+/* 서버 응답을 화면이 쓰는 모양으로 바꾼다 */
+function applyServerTrip(data) {
+  TRIP_DATA.title = data.trip?.title || TRIP_DATA.title;
+  TRIP_DATA.days = data.days.map(d => ({
+    id: d.id, label: d.label, short: d.short, date: d.date, iso: d.iso,
+    theme: d.theme, color: d.color, budget: d.budget, flight: d.flight,
+    places: d.places.map(p => ({
+      id: p.id, name: p.name, ja: p.ja, en: p.en, lat: p.lat, lng: p.lng,
+      cat: p.cat, time: p.time, cost: p.cost, note: p.note, url: p.url,
+      radius: p.radius, fit: p.fit, move: p.move
+    }))
+  }));
+  visited = new Set(data.visited || []);
+}
+
+async function loadTripFromServer() {
+  const data = await API.get("/api/trip");
+  applyServerTrip(data);
+  /* 오프라인 대비 캐시 — 다음에 서버에 못 닿으면 이걸 쓴다 */
+  try { localStorage.setItem(TRIP_CACHE, JSON.stringify(data)); } catch {}
+  return data;
+}
+
+/* 서버에 못 닿을 때: 마지막으로 받은 서버 일정이 있으면 그걸 쓴다 */
+function loadTripFromCache() {
+  try {
+    const raw = localStorage.getItem(TRIP_CACHE);
+    if (!raw) return false;
+    applyServerTrip(JSON.parse(raw));
+    return true;
+  } catch { return false; }
+}
+
+/* 화면 전체를 다시 그린다 */
+async function reloadTrip() {
+  if (API.isOnline() && API.state.user) {
+    try { await loadTripFromServer(); }
+    catch (e) { Edit.toast("일정을 불러오지 못했습니다: " + e.message, true); }
+  }
+  renderHeader(); renderTabs(); renderLegend(); renderList();
+  renderProgress(); renderNow();
+  if (state.ready) { clearLayer(); buildLayer(); applyVisibility(false); }
+}
+
+/* 지도를 눌러 좌표를 고르게 한다. 취소하면 null 을 돌려준다. */
+function mapPick() {
+  return new Promise(resolve => {
+    if (!state.ready) { Edit.toast("지도가 아직 준비되지 않았습니다", true); return resolve(null); }
+    const banner = $("#pickBanner");
+    banner.hidden = false;
+    document.body.classList.add("picking");
+    if (matchMedia("(max-width:860px)").matches) setPanelCollapsed(true, false);
+
+    const done = pos => {
+      google.maps.event.removeListener(h);
+      banner.hidden = true;
+      document.body.classList.remove("picking");
+      $("#pickCancel").onclick = null;
+      resolve(pos);
+    };
+    const h = map.addListener("click", e => done({ lat: e.latLng.lat(), lng: e.latLng.lng() }));
+    $("#pickCancel").onclick = () => done(null);
+  });
+}
+
+Edit.attach({
+  getDays: () => TRIP_DATA.days.map((d, i) => ({ id: d.id ?? String(i), label: d.label, date: d.date })),
+  reload: reloadTrip,
+  mapPick,
+  focusPlace
+});
 
 /* ---------- 목록 접기 / 펼치기 ---------- */
 function setPanelCollapsed(collapsed, persist = true) {
@@ -1569,9 +1679,22 @@ $("#clearKey").onclick = () => {
 
 /* ---------- 공통 셸 (로그인 · 드로어 · 하단바) ---------- */
 Shell.on("map", () => setPanelCollapsed(!document.body.classList.contains("panel-collapsed")));
+Shell.on("edit", () => Edit.setEditMode(true));
 
-Shell.init({ page: "trip", title: TRIP_DATA.title }).then(shell => {
+Shell.init({ page: "trip", title: TRIP_DATA.title }).then(async shell => {
   if (shell.blocked) return;               // 로그인 화면이 떠 있으면 지도를 부르지 않는다
+
+  /* 서버가 있으면 서버 일정으로 갈아끼우고, 없으면 마지막 캐시,
+     그것도 없으면 이 파일에 박혀 있는 기본 일정을 그대로 쓴다. */
+  if (API.isOnline() && API.state.user) {
+    try { await loadTripFromServer(); }
+    catch { loadTripFromCache(); }
+  } else {
+    loadTripFromCache();
+  }
+  renderHeader(); renderTabs(); renderLegend(); renderList();
+  renderProgress(); renderNow();
+  if (!applyHash()) setHash(null);
 
   // 우선순위: gmaps-key.local.js → localStorage → 키 입력 화면
   let savedKey = window.__GMAPS_KEY || null;
