@@ -1,14 +1,15 @@
 services:
+  # ── 정적 페이지 (일정·가계부) + /api 리버스 프록시 ─────────────────────
   tokyo-trip:
     build: .
     image: tokyo-trip:latest
     container_name: tokyo-trip
     restart: unless-stopped
     networks: [tokyo-net]
+    depends_on: [api]
     expose:
       - "80"
 
-    # ── 포트 직접 노출 ────────────────────────────────────────────────────
     # Cloudflare 터널을 붙인 뒤에는 이 두 줄을 지워도 됩니다.
     # (터널만 쓰면 서버에 포트를 하나도 열 필요가 없습니다)
     ports:
@@ -29,6 +30,30 @@ services:
       retries: 3
       start_period: 5s
 
+  # ── API 서버 (로그인·장소·가계부·정산) ─────────────────────────────────
+  api:
+    build: ./server
+    image: tokyo-trip-api:latest
+    container_name: tokyo-trip-api
+    restart: unless-stopped
+    networks: [tokyo-net]
+    expose:
+      - "8787"
+    env_file:
+      - .env
+    environment:
+      # 터널/nginx 뒤에서 HTTPS 로 서비스되므로 세션 쿠키에 Secure 를 붙입니다.
+      SECURE_COOKIE: "1"
+    volumes:
+      # SQLite 파일이 여기 남습니다. 백업은 이 볼륨만 챙기면 됩니다.
+      - api-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:8787/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
   # ── Cloudflare 터널 ───────────────────────────────────────────────────
   # 기본으로는 안 뜹니다. 켜려면:  docker compose --profile tunnel up -d
   # .env 에 TUNNEL_TOKEN 을 넣어야 합니다 (.env.example 참고)
@@ -43,3 +68,6 @@ services:
 
 networks:
   tokyo-net:
+
+volumes:
+  api-data:

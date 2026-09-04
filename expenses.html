@@ -12,6 +12,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="shell.css">
+<script src="api.js"></script>
+<script src="shell.js"></script>
 <style>
 :root{
   --bg:#f2f4f6; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e5e8eb;
@@ -158,6 +161,10 @@ h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px}
 <div class="wrap">
   <header class="top">
     <div class="top-in">
+      <button class="icon-square" data-shell-menu aria-label="메뉴 열기">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
       <a class="back" href="index.html">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>
         일정
@@ -386,6 +393,9 @@ function renderList() {
   el.querySelectorAll(".item-del").forEach(b => b.onclick = () => {
     items.splice(Number(b.dataset.idx), 1);
     save(); renderAll();
+
+/* ---------- 공통 셸 ---------- */
+Shell.init({ page: "expenses", title: "도쿄 3박 4일" });
   });
 }
 

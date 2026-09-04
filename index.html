@@ -13,6 +13,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="shell.css">
+<script src="api.js"></script>
+<script src="shell.js"></script>
 <title>도쿄 3박 4일 · 10.08 – 10.11</title>
 <style>
 /* ============================================================
@@ -85,7 +88,10 @@ a{color:inherit}
 
 /* ---------- Header ---------- */
 .head{flex:0 0 auto;padding:22px 20px 0;background:var(--surface)}
-.head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.head-top .icon-btn{margin-top:-2px}
+/* 모바일에서는 상단 앱바의 햄버거를 쓰므로 헤더 안 햄버거는 감춘다 */
+@media (max-width:860px){ .head-top [data-shell-menu]{display:none} }
 .brand{min-width:0}
 .brand h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.5px;line-height:1.3}
 .brand p{margin:2px 0 0;font-size:13px;color:var(--text-3);font-variant-numeric:tabular-nums}
@@ -383,6 +389,14 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
 </head>
 <body>
 
+<header class="appbar">
+  <button class="icon-square" data-shell-menu aria-label="메뉴 열기">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <h2>일정</h2>
+</header>
+
 <div class="app">
   <!-- ============ Sidebar ============ -->
   <aside class="panel">
@@ -392,6 +406,10 @@ body.gate-open.panel-collapsed .panel{opacity:1;pointer-events:auto;overflow:vis
           <h1 id="tripTitle">도쿄 3박 4일</h1>
           <p id="tripDates">—</p>
         </div>
+        <button class="icon-btn" data-shell-menu title="메뉴" aria-label="메뉴 열기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
         <button class="icon-btn" id="themeBtn" title="라이트/다크 전환" aria-label="라이트/다크 전환">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
@@ -1549,14 +1567,21 @@ $("#clearKey").onclick = () => {
   gateError("저장된 키를 삭제했습니다.");
 };
 
-// 우선순위: gmaps-key.local.js → localStorage → 키 입력 화면
-let savedKey = window.__GMAPS_KEY || null;
-if (savedKey) {
-  loadMaps(savedKey);                       // 로컬 키 파일은 입력창에 노출하거나 저장하지 않음
-} else {
-  try { savedKey = localStorage.getItem(KEY_STORE); } catch {}
-  if (savedKey) { $("#keyInput").value = savedKey; loadMaps(savedKey); }
-}
+/* ---------- 공통 셸 (로그인 · 드로어 · 하단바) ---------- */
+Shell.on("map", () => setPanelCollapsed(!document.body.classList.contains("panel-collapsed")));
+
+Shell.init({ page: "trip", title: TRIP_DATA.title }).then(shell => {
+  if (shell.blocked) return;               // 로그인 화면이 떠 있으면 지도를 부르지 않는다
+
+  // 우선순위: gmaps-key.local.js → localStorage → 키 입력 화면
+  let savedKey = window.__GMAPS_KEY || null;
+  if (savedKey) {
+    loadMaps(savedKey);                    // 로컬 키 파일은 입력창에 노출하거나 저장하지 않음
+  } else {
+    try { savedKey = localStorage.getItem(KEY_STORE); } catch {}
+    if (savedKey) { $("#keyInput").value = savedKey; loadMaps(savedKey); }
+  }
+});
 </script>
 </body>
 </html>

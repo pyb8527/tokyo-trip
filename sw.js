@@ -11,13 +11,16 @@
 
    일정을 고쳐 배포할 때 CACHE 뒤 숫자만 올리면 옛 캐시가 정리됩니다.
    ========================================================================== */
-const CACHE = "tokyo-trip-v1";
+const CACHE = "tokyo-trip-v2";
 
 const SHELL = [
   "./",
   "index.html",
   "expenses.html",
   "manifest.webmanifest",
+  "shell.css",
+  "shell.js",
+  "api.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-180.png",
@@ -47,6 +50,11 @@ self.addEventListener("fetch", e => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;   // 구글 지도 등은 통과
+
+  /* API 는 절대 캐시하지 않는다.
+     /api/auth/me 같은 응답이 캐시되면 로그아웃 상태가 계속 되돌아와서
+     로그인 자체가 되지 않는다. 항상 네트워크로 보낸다. */
+  if (url.pathname.startsWith("/api/")) return;
 
   const isHTML = req.mode === "navigate" ||
                  (req.headers.get("accept") || "").includes("text/html");
