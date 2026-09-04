@@ -247,11 +247,12 @@ a.chip{text-decoration:none}
   background:var(--surface);box-shadow:var(--shadow);
 }
 .legend button{
-  display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;color:var(--text-2);
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--text-2);
   white-space:nowrap;transition:color .14s;
 }
 .legend button:hover{color:var(--text)}
 .legend i{width:6px;height:6px;border-radius:99px;flex:0 0 auto}
+.legend em{font-style:normal;color:var(--text-3);font-variant-numeric:tabular-nums}
 
 /* ---------- bottom sheet ---------- */
 .sheet{
@@ -497,7 +498,7 @@ const TRIP_DATA = {
   title: "도쿄 3박 4일",
   days: [
     {
-      label: "Day 1", iso: "2026-10-08", date: "10.08 (목)", theme: "도착 · 도쿄역 · 긴자",
+      label: "Day 1", short: "도쿄역·긴자", iso: "2026-10-08", date: "10.08 (목)", theme: "도착 · 도쿄역 · 긴자",
       color: "#ff6b5b", budget: "1인 약 ¥14,000",
       flight: { from:"인천 ICN", to:"나리타 NRT", dep:"13:20", arr:"15:50" },
       places: [
@@ -558,7 +559,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 2", iso: "2026-10-09", date: "10.09 (금)", theme: "우에노 · 아사쿠사 · 이케부쿠로 · 신주쿠",
+      label: "Day 2", short: "우에노·아사쿠사", iso: "2026-10-09", date: "10.09 (금)", theme: "우에노 · 아사쿠사 · 이케부쿠로 · 신주쿠",
       color: "#f5a524", budget: "1인 약 ¥14,000",
       places: [
         { name:"우에노역 스타벅스", en:"Starbucks Ueno", lat:35.7079, lng:139.7766,
@@ -628,7 +629,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 3", iso: "2026-10-10", date: "10.10 (토)", theme: "시부야 코어 (+ 하라주쿠 · 오모테산도)",
+      label: "Day 3", short: "시부야", iso: "2026-10-10", date: "10.10 (토)", theme: "시부야 코어 (+ 하라주쿠 · 오모테산도)",
       color: "#8b5cf6", budget: "1인 약 ¥14,000~18,000",
       places: [
         { name:"메이지 진구", en:"Meiji Jingu", lat:35.6764, lng:139.6993,
@@ -693,7 +694,7 @@ const TRIP_DATA = {
     },
 
     {
-      label: "Day 4", iso: "2026-10-11", date: "10.11 (일)", theme: "새벽 이동 → 09:10 출국",
+      label: "Day 4", short: "출국", iso: "2026-10-11", date: "10.11 (일)", theme: "새벽 이동 → 09:10 출국",
       color: "#14b8a6", budget: "1인 약 ¥3,500",
       flight: { from:"나리타 NRT", to:"인천 ICN", dep:"09:10", arr:"11:45" },
       places: [
@@ -903,7 +904,9 @@ function renderLegend() {
   const lg = $("#legend");
   lg.innerHTML = "";
   TRIP_DATA.days.forEach((d, i) => {
-    const b = el("button", null, `<i style="background:${d.color}"></i>${esc(d.label)} · ${esc(d.theme.split(" · ")[0])}`);
+    const b = el("button", null,
+      `<i style="background:${d.color}"></i><em>${esc(d.label.replace("Day ", "D"))}</em>${esc(d.short || d.theme)}`);
+    b.title = `${d.label} · ${d.date} — ${d.theme}`;
     b.onclick = () => setDay(i);
     lg.appendChild(b);
   });
